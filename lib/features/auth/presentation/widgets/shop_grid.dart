@@ -21,17 +21,22 @@ class ShopGrid extends StatelessWidget {
             Expanded(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.asset(
+                child: Image.network(
                   'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e',
                   fit: BoxFit.cover,
                 ),
               ),
             ),
             const SizedBox(height: 8),
-            const Text('Lorem ipsum',
-                maxLines: 1, overflow: TextOverflow.ellipsis),
-            const Text('\$72.00',
-                style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text(
+              'Lorem ipsum',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const Text(
+              '\$72.00',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ],
         );
       },

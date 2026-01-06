@@ -1,4 +1,7 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+
+import '../../../../core/navigation/app_routes.dart';
 
 class SectionHeader extends StatelessWidget {
   final String title;
@@ -22,7 +25,7 @@ class SectionHeader extends StatelessWidget {
         const Spacer(),
         TextButton(
           onPressed: () {
-            Navigator.pushNamed(context, '/flash-sale');
+            context.router.push(const FlashSaleRoute());
           },
           child: const Text('See all'),
         ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_skeleton/service/chat_message.dart';
-import 'package:flutter_skeleton/service/chat_service.dart';
+import 'package:flutter_skeleton/core/service/chat_message.dart';
+import 'package:flutter_skeleton/core/service/chat_service.dart';
 
 class ChatController extends ChangeNotifier {
   final TextEditingController textController = TextEditingController();

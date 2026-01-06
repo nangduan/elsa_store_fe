@@ -22,7 +22,7 @@ class ProductList extends StatelessWidget {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(16),
-                      child: Image.asset(
+                      child: Image.network(
                         'https://images.unsplash.com/photo-1523275335684-37898b6baf30',
                         height: 140,
                         width: 140,
@@ -71,9 +71,7 @@ class ProductList extends StatelessWidget {
                   children: const [
                     Text(
                       '\$72.00',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     SizedBox(width: 6),
                     Text(

@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
 
-
 class StoryCard extends StatelessWidget {
   final String imageUrl;
   final bool isLive;
 
-  const StoryCard({
-    super.key,
-    required this.imageUrl,
-    this.isLive = false,
-  });
+  const StoryCard({super.key, required this.imageUrl, this.isLive = false});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +12,7 @@ class StoryCard extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(16),
-          child: Image.asset(
+          child: Image.network(
             imageUrl,
             width: 120,
             height: 180,
@@ -29,8 +24,7 @@ class StoryCard extends StatelessWidget {
             top: 8,
             left: 8,
             child: Container(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: Colors.green,
                 borderRadius: BorderRadius.circular(12),
@@ -43,11 +37,7 @@ class StoryCard extends StatelessWidget {
           ),
         const Positioned.fill(
           child: Center(
-            child: Icon(
-              Icons.play_circle_fill,
-              color: Colors.white,
-              size: 40,
-            ),
+            child: Icon(Icons.play_circle_fill, color: Colors.white, size: 40),
           ),
         ),
       ],

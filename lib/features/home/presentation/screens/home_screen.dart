@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../controllers/home_controller.dart';
 import '../widgets/product_card.dart';
+import 'package:auto_route/auto_route.dart';
 
+@RoutePage()
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
