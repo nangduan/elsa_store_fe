@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../controllers/home_controller.dart';
-import '../widgets/product_card.dart';
 import 'package:auto_route/auto_route.dart';
 
 @RoutePage()
@@ -11,9 +8,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-      ),
+      appBar: AppBar(title: const Text('Home')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -24,10 +19,7 @@ class HomeScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Center(
-              child: Text(
-                'Banner / Promotion',
-                style: TextStyle(fontSize: 18),
-              ),
+              child: Text('Banner / Promotion', style: TextStyle(fontSize: 18)),
             ),
           ),
 
@@ -68,7 +60,7 @@ class HomeScreen extends StatelessWidget {
 
           ...List.generate(
             5,
-                (i) => ListTile(
+            (i) => ListTile(
               leading: const Icon(Icons.shopping_bag),
               title: Text('Product ${i + 1}'),
               subtitle: const Text('\$72.00'),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../auth/presentation/widgets/order_chip.dart';
-import '../auth/presentation/widgets/story_card.dart';
+import '../widgets/order_chip.dart';
+import '../widgets/story_card.dart';
 import 'package:auto_route/auto_route.dart';
 
 @RoutePage()

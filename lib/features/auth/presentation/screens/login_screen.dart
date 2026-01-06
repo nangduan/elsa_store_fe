@@ -5,8 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injector.dart';
 import '../../../../core/navigation/app_routes.dart';
 import '../../domain/usecases/login_use_case.dart';
-import '../cubit/login_cubit.dart';
-import '../widgets/login_form.dart';
+import '../cubit/login/login_cubit.dart';
+import '../../../widgets/login_form.dart';
 
 @RoutePage()
 class LoginScreen extends StatelessWidget {
@@ -18,7 +18,7 @@ class LoginScreen extends StatelessWidget {
       create: (_) => LoginCubit(getIt<LoginUseCase>()),
       child: BlocListener<LoginCubit, LoginState>(
         listener: (context, state) {
-          if (state.status == LoginStatus.success) {
+          if (state.status.isSuccess) {
             context.router.replace(const ReadyCardRoute());
           }
         },

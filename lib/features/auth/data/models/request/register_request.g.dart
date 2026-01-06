@@ -10,12 +10,16 @@ RegisterRequest _$RegisterRequestFromJson(Map<String, dynamic> json) =>
     RegisterRequest(
       username: json['username'] as String,
       password: json['password'] as String,
-      role: json['role'] as String,
+      email: json['email'] as String,
+      phone: json['phone'] as String,
+      fullName: json['fullName'] as String,
     );
 
 Map<String, dynamic> _$RegisterRequestToJson(RegisterRequest instance) =>
     <String, dynamic>{
       'username': instance.username,
       'password': instance.password,
-      'role': instance.role,
+      'email': instance.email,
+      'phone': instance.phone,
+      'fullName': instance.fullName,
     };

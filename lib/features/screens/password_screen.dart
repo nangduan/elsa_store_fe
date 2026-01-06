@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../auth/presentation/controllers/login_controller.dart';
-import '../auth/presentation/widgets/password_dots.dart';
+import '../widgets/password_dots.dart';
 import '../../core/navigation/app_routes.dart';
 
 @RoutePage()

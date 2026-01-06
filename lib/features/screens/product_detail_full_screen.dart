@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_skeleton/features/screens/variant_bottom_sheet.dart';
-import '../auth/presentation/widgets/spec_item.dart';
+import '../widgets/spec_item.dart';
 import 'package:auto_route/auto_route.dart';
 
 @RoutePage()

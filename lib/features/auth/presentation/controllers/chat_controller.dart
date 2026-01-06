@@ -22,7 +22,12 @@ class ChatController extends ChangeNotifier {
       final reply = await ChatService.send(text);
       messages.add(ChatMessage(text: reply, isUser: false));
     } catch (e) {
-      messages.add(ChatMessage(text: 'Lỗi khi gửi tin nhắn: ${e.toString()}', isUser: false));
+      messages.add(
+        ChatMessage(
+          text: 'Lỗi khi gửi tin nhắn: ${e.toString()}',
+          isUser: false,
+        ),
+      );
     } finally {
       isSending = false;
       notifyListeners();

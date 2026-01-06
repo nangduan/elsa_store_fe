@@ -31,10 +31,7 @@ class StartScreen extends StatelessWidget {
 
             const Text(
               'Elsa',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 8),
@@ -51,7 +48,7 @@ class StartScreen extends StatelessWidget {
               width: double.infinity,
               height: 48,
               child: ElevatedButton(
-                onPressed: () => context.router.push(const RegisterRoute()),
+                onPressed: () => context.router.push(RegisterRoute()),
                 child: const Text("Let's get started"),
               ),
             ),

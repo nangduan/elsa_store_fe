@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../widgets/custom_button.dart';
-import '../../../widgets/custom_textfield.dart';
-import '../../data/models/request/login_request.dart';
-import '../cubit/login_cubit.dart';
+import 'custom_button.dart';
+import 'custom_textfield.dart';
+import '../auth/data/models/request/login_request.dart';
+import '../auth/presentation/cubit/login/login_cubit.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});

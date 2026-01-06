@@ -6,12 +6,16 @@ part 'register_request.g.dart';
 class RegisterRequest {
   final String username;
   final String password;
-  final String role;
+  final String email;
+  final String phone;
+  final String fullName;
 
   RegisterRequest({
     required this.username,
     required this.password,
-    required this.role,
+    required this.email,
+    required this.phone,
+    required this.fullName,
   });
 
   factory RegisterRequest.fromJson(Map<String, dynamic> json) =>

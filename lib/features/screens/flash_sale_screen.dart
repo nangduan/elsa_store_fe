@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../auth/presentation/widgets/section_header.dart';
-import '../auth/presentation/widgets/product_list.dart';
+import '../widgets/section_header.dart';
+import '../widgets/product_list.dart';
 import 'package:auto_route/auto_route.dart';
 
 @RoutePage()

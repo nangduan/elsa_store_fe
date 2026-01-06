@@ -478,18 +478,46 @@ class RecognizingRoute extends PageRouteInfo<void> {
 
 /// generated route for
 /// [RegisterScreen]
-class RegisterRoute extends PageRouteInfo<void> {
-  const RegisterRoute({List<PageRouteInfo>? children})
-    : super(RegisterRoute.name, initialChildren: children);
+class RegisterRoute extends PageRouteInfo<RegisterRouteArgs> {
+  RegisterRoute({Key? key, List<PageRouteInfo>? children})
+    : super(
+        RegisterRoute.name,
+        args: RegisterRouteArgs(key: key),
+        initialChildren: children,
+      );
 
   static const String name = 'RegisterRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const RegisterScreen();
+      final args = data.argsAs<RegisterRouteArgs>(
+        orElse: () => const RegisterRouteArgs(),
+      );
+      return RegisterScreen(key: args.key);
     },
   );
+}
+
+class RegisterRouteArgs {
+  const RegisterRouteArgs({this.key});
+
+  final Key? key;
+
+  @override
+  String toString() {
+    return 'RegisterRouteArgs{key: $key}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! RegisterRouteArgs) return false;
+    return key == other.key;
+  }
+
+  @override
+  int get hashCode => key.hashCode;
 }
 
 /// generated route for

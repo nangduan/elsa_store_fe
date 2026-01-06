@@ -24,7 +24,7 @@ import '../../features/screens/profile_screen.dart';
 import '../../features/screens/ready_card_screen.dart';
 import '../../features/screens/recently_viewed_screen.dart';
 import '../../features/screens/recognizing_screen.dart';
-import '../../features/screens/register_screen.dart';
+import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/screens/review_screen.dart';
 import '../../features/screens/search_result_screen.dart';
 import '../../features/screens/search_screen.dart';

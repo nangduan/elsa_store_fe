@@ -17,6 +17,6 @@ abstract class AuthApiService {
   @POST('/auth/logout')
   Future<ApiResponse> logout();
 
-  @POST('/accounts')
+  @POST('/users')
   Future<ApiResponse> register(@Body() RegisterRequest body);
 }

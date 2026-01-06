@@ -1,10 +1,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../../../../core/errors/app_exception.dart';
-import '../../data/models/request/login_request.dart';
-import '../../domain/entity/auth.dart';
-import '../../domain/usecases/login_use_case.dart';
+import '../../../../../../core/errors/app_exception.dart';
+import '../../../data/models/request/login_request.dart';
+import '../../../domain/entity/auth.dart';
+import '../../../domain/usecases/login_use_case.dart';
 
 part 'login_state.dart';
 part 'login_cubit.freezed.dart';

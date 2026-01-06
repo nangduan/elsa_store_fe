@@ -83,7 +83,7 @@ class _AuthApiService implements AuthApiService {
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/accounts',
+            '/users',
             queryParameters: queryParameters,
             data: _data,
           )
