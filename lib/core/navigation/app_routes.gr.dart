@@ -476,6 +476,114 @@ class ProductDetailRouteArgs {
 }
 
 /// generated route for
+/// [ProductManagementScreen]
+class ProductManagementRoute extends PageRouteInfo<void> {
+  const ProductManagementRoute({List<PageRouteInfo>? children})
+    : super(ProductManagementRoute.name, initialChildren: children);
+
+  static const String name = 'ProductManagementRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const ProductManagementScreen();
+    },
+  );
+}
+
+/// generated route for
+/// [ProductVariantManagementScreen]
+class ProductVariantManagementRoute
+    extends PageRouteInfo<ProductVariantManagementRouteArgs> {
+  ProductVariantManagementRoute({
+    Key? key,
+    required int productId,
+    String? productName,
+    String? description,
+    double? basePrice,
+    String? categoryName,
+    List<PageRouteInfo>? children,
+  }) : super(
+         ProductVariantManagementRoute.name,
+         args: ProductVariantManagementRouteArgs(
+           key: key,
+           productId: productId,
+           productName: productName,
+           description: description,
+           basePrice: basePrice,
+           categoryName: categoryName,
+         ),
+         initialChildren: children,
+       );
+
+  static const String name = 'ProductVariantManagementRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<ProductVariantManagementRouteArgs>();
+      return ProductVariantManagementScreen(
+        key: args.key,
+        productId: args.productId,
+        productName: args.productName,
+        description: args.description,
+        basePrice: args.basePrice,
+        categoryName: args.categoryName,
+      );
+    },
+  );
+}
+
+class ProductVariantManagementRouteArgs {
+  const ProductVariantManagementRouteArgs({
+    this.key,
+    required this.productId,
+    this.productName,
+    this.description,
+    this.basePrice,
+    this.categoryName,
+  });
+
+  final Key? key;
+
+  final int productId;
+
+  final String? productName;
+
+  final String? description;
+
+  final double? basePrice;
+
+  final String? categoryName;
+
+  @override
+  String toString() {
+    return 'ProductVariantManagementRouteArgs{key: $key, productId: $productId, productName: $productName, description: $description, basePrice: $basePrice, categoryName: $categoryName}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! ProductVariantManagementRouteArgs) return false;
+    return key == other.key &&
+        productId == other.productId &&
+        productName == other.productName &&
+        description == other.description &&
+        basePrice == other.basePrice &&
+        categoryName == other.categoryName;
+  }
+
+  @override
+  int get hashCode =>
+      key.hashCode ^
+      productId.hashCode ^
+      productName.hashCode ^
+      description.hashCode ^
+      basePrice.hashCode ^
+      categoryName.hashCode;
+}
+
+/// generated route for
 /// [ProfileScreen]
 class ProfileRoute extends PageRouteInfo<void> {
   const ProfileRoute({List<PageRouteInfo>? children})
@@ -487,6 +595,22 @@ class ProfileRoute extends PageRouteInfo<void> {
     name,
     builder: (data) {
       return const ProfileScreen();
+    },
+  );
+}
+
+/// generated route for
+/// [PromotionManagementScreen]
+class PromotionManagementRoute extends PageRouteInfo<void> {
+  const PromotionManagementRoute({List<PageRouteInfo>? children})
+    : super(PromotionManagementRoute.name, initialChildren: children);
+
+  static const String name = 'PromotionManagementRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const PromotionManagementScreen();
     },
   );
 }

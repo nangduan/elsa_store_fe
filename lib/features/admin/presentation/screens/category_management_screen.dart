@@ -15,66 +15,110 @@ class CategoryManagementScreen extends StatelessWidget {
     return BlocProvider(
       create: (_) => CategoryCubit(getIt(), getIt(), getIt(), getIt())..load(),
       child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios_new,
-              color: Colors.black,
-              size: 20,
-            ),
-            onPressed: () => context.router.pop(),
-          ),
-          title: const Text(
-            'CATEGORIES',
-            style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
-            ),
-          ),
-          actions: [
-            BlocBuilder<CategoryCubit, CategoryState>(
-              builder: (context, state) {
-                return IconButton(
-                  onPressed: () => _showCategoryDialog(
-                    context,
-                    categories: state.categories,
-                  ),
-                  icon: const Icon(
-                    Icons.add_box_rounded,
-                    color: Colors.black,
-                    size: 28,
-                  ),
-                );
-              },
-            ),
-            const SizedBox(width: 8),
-          ],
-        ),
-        body: BlocBuilder<CategoryCubit, CategoryState>(
+        backgroundColor: const Color(0xFFF8F9FA), // Màu nền đồng bộ
+        body: BlocConsumer<CategoryCubit, CategoryState>(
+          listener: (context, state) {
+            // Add listener logic if needed
+          },
           builder: (context, state) {
-            if (state.status.isLoading) {
-              return const Center(
-                child: CircularProgressIndicator(color: Colors.black),
-              );
-            }
-
-            if (state.categories.isEmpty) {
-              return _buildEmptyState();
-            }
-
-            return ListView.builder(
-              padding: const EdgeInsets.all(20),
-              itemCount: state.categories.length,
-              itemBuilder: (context, index) {
-                final item = state.categories[index];
-                return _buildCategoryCard(context, item, state.categories);
-              },
+            return CustomScrollView(
+              slivers: [
+                _buildAppBar(context, state.categories),
+                _buildSearchBar(), // Giữ search bar cho đồng bộ
+                if (state.status.isLoading)
+                  const SliverFillRemaining(
+                    child: Center(
+                      child: CircularProgressIndicator(color: Colors.black),
+                    ),
+                  )
+                else if (state.categories.isEmpty)
+                  SliverFillRemaining(child: _buildEmptyState())
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) => _buildCategoryCard(
+                          context,
+                          state.categories[index],
+                          state.categories,
+                        ),
+                        childCount: state.categories.length,
+                      ),
+                    ),
+                  ),
+              ],
             );
           },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAppBar(BuildContext context, List<CategoryResponse> categories) {
+    return SliverAppBar(
+      expandedHeight: 120.0,
+      floating: true,
+      pinned: true,
+      elevation: 0,
+      backgroundColor: Colors.white,
+      leading: IconButton(
+        icon: const Icon(
+          Icons.arrow_back_ios_new,
+          color: Colors.black,
+          size: 20,
+        ),
+        onPressed: () => context.router.pop(),
+      ),
+      flexibleSpace: const FlexibleSpaceBar(
+        titlePadding: EdgeInsetsDirectional.only(start: 56, bottom: 16),
+        title: Text(
+          'CATEGORIES',
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.w800,
+            fontSize: 16,
+            letterSpacing: 1.5,
+          ),
+        ),
+      ),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 16),
+          child: IconButton(
+            onPressed: () =>
+                _showCategoryDialog(context, categories: categories),
+            icon: const Icon(Icons.add_circle, color: Colors.black, size: 32),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+        child: TextField(
+          decoration: InputDecoration(
+            hintText: 'Search categories...',
+            hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+            prefixIcon: const Icon(Icons.search_rounded, color: Colors.black54),
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(vertical: 0),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: Colors.grey.shade100),
+            ),
+          ),
         ),
       ),
     );
@@ -89,99 +133,135 @@ class CategoryManagementScreen extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: isSubCategory ? Colors.grey.shade50 : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade100),
-        boxShadow: isSubCategory
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.02),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-      ),
-      child: Row(
-        children: [
-          // Icon đại diện cho Category
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: isSubCategory ? Colors.white : Colors.black,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              isSubCategory
-                  ? Icons.subdirectory_arrow_right_rounded
-                  : Icons.category_rounded,
-              color: isSubCategory ? Colors.black : Colors.white,
-              size: 20,
-            ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
-          const SizedBox(width: 16),
-
-          // Thông tin Category
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.name ?? '-',
-                  style: TextStyle(
-                    fontWeight: isSubCategory
-                        ? FontWeight.w500
-                        : FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                if (!isSubCategory) const SizedBox(height: 4),
-                if (!isSubCategory)
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isSubCategory ? Colors.grey.shade100 : Colors.black,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(
+                isSubCategory
+                    ? Icons.subdirectory_arrow_right_rounded
+                    : Icons.category_rounded,
+                color: isSubCategory ? Colors.black87 : Colors.white,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    'Root Category',
-                    style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                    item.name ?? '-',
+                    style: TextStyle(
+                      fontWeight: isSubCategory
+                          ? FontWeight.w600
+                          : FontWeight.w900,
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
                   ),
-                if (isSubCategory)
-                  Container(
-                    margin: const EdgeInsets.only(top: 4),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      'Parent: ${item.parentName ?? 'N/A'}',
-                      style: const TextStyle(
-                        color: Colors.blue,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
+                  const SizedBox(height: 4),
+                  if (isSubCategory)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        'Parent: ${item.parentName ?? 'Unknown'}',
+                        style: const TextStyle(
+                          color: Colors.blue,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    )
+                  else
+                    Text(
+                      'Root Category',
+                      style: TextStyle(
+                        color: Colors.grey.shade400,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
+                ],
+              ),
+            ),
+            Row(
+              children: [
+                _buildCircleAction(
+                  Icons.edit_outlined,
+                  Colors.blueGrey,
+                  () => _showCategoryDialog(
+                    context,
+                    categories: allCategories,
+                    item: item,
                   ),
+                ),
+                const SizedBox(width: 8),
+                _buildCircleAction(
+                  Icons.delete_outline_rounded,
+                  Colors.redAccent,
+                  () => _confirmDelete(context, item),
+                ),
               ],
             ),
-          ),
+          ],
+        ),
+      ),
+    );
+  }
 
-          // Actions
-          IconButton(
-            icon: const Icon(Icons.edit_note_rounded, color: Colors.blueGrey),
-            onPressed: () => _showCategoryDialog(
-              context,
-              categories: allCategories,
-              item: item,
+  Widget _buildCircleAction(IconData icon, Color color, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, size: 18, color: color),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.category_outlined, size: 80, color: Colors.grey.shade200),
+          const SizedBox(height: 16),
+          Text(
+            'No categories found',
+            style: TextStyle(
+              color: Colors.grey.shade400,
+              fontWeight: FontWeight.w500,
             ),
-          ),
-          IconButton(
-            icon: const Icon(
-              Icons.delete_sweep_outlined,
-              color: Colors.redAccent,
-            ),
-            onPressed: () => _confirmDelete(context, item),
           ),
         ],
       ),
@@ -199,16 +279,18 @@ class CategoryManagementScreen extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setState) => Padding(
+        builder: (context, setState) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+          ),
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(dialogContext).viewInsets.bottom,
             left: 24,
             right: 24,
-            top: 24,
+            top: 32,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -217,38 +299,24 @@ class CategoryManagementScreen extends StatelessWidget {
               Text(
                 item == null ? 'New Category' : 'Edit Category',
                 style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
               const SizedBox(height: 24),
-
-              // Tên Category
               TextField(
                 controller: nameController,
-                decoration: InputDecoration(
-                  labelText: 'Category Name',
-                  filled: true,
-                  fillColor: Colors.grey.shade50,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
+                decoration: _inputDecoration(
+                  'Category Name',
+                  Icons.drive_file_rename_outline,
                 ),
               ),
-              const SizedBox(height: 16),
-
-              // Chọn Parent Category
+              const SizedBox(height: 20),
               DropdownButtonFormField<int?>(
                 value: parentId,
-                decoration: InputDecoration(
-                  labelText: 'Parent Category (Optional)',
-                  filled: true,
-                  fillColor: Colors.grey.shade50,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
+                decoration: _inputDecoration(
+                  'Parent Category (Optional)',
+                  Icons.account_tree_outlined,
                 ),
                 items: [
                   const DropdownMenuItem<int?>(
@@ -256,9 +324,7 @@ class CategoryManagementScreen extends StatelessWidget {
                     child: Text('No Parent (Root)'),
                   ),
                   ...categories
-                      .where(
-                        (c) => c.id != item?.id,
-                      ) // Không cho phép chọn chính mình làm cha
+                      .where((c) => c.id != item?.id)
                       .map(
                         (c) => DropdownMenuItem<int?>(
                           value: c.id,
@@ -268,17 +334,17 @@ class CategoryManagementScreen extends StatelessWidget {
                 ],
                 onChanged: (val) => setState(() => parentId = val),
               ),
-
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
-                height: 54,
+                height: 60,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(20),
                     ),
+                    elevation: 0,
                   ),
                   onPressed: () {
                     final request = CategoryRequest(
@@ -301,7 +367,7 @@ class CategoryManagementScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 40),
             ],
           ),
         ),
@@ -309,19 +375,15 @@ class CategoryManagementScreen extends StatelessWidget {
     );
   }
 
-  // Các Widget phụ trợ (EmptyState, ConfirmDelete...) giống màn hình Supplier
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.category_outlined, size: 64, color: Colors.grey.shade200),
-          const SizedBox(height: 16),
-          Text(
-            'No categories found',
-            style: TextStyle(color: Colors.grey.shade400),
-          ),
-        ],
+  InputDecoration _inputDecoration(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon, size: 20),
+      filled: true,
+      fillColor: Colors.grey.shade50,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
       ),
     );
   }
@@ -330,10 +392,9 @@ class CategoryManagementScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Category?'),
-        content: Text(
-          'This will remove "${item.name}". Make sure no products are linked to it.',
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Text('Confirm Delete'),
+        content: Text('Remove "${item.name}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),

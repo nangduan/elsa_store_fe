@@ -2,6 +2,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 import '../../features/admin/presentation/screens/category_management_screen.dart';
+import '../../features/admin/presentation/screens/product_management_screen.dart';
+import '../../features/admin/presentation/screens/product_variant_management_screen.dart';
+import '../../features/admin/presentation/screens/promotion_management_screen.dart';
 import '../../features/admin/presentation/screens/supplier_management_screen.dart';
 import '../../features/home/data/models/response/product_response.dart';
 import '../../features/home/presentation/screens/cart_empty_screen.dart';
@@ -58,6 +61,18 @@ class AppRoutes extends RootStackRouter {
     AutoRoute(
       page: SupplierManagementRoute.page,
       path: '/${SupplierManagementRoute.name}',
+    ),
+    AutoRoute(
+      page: ProductManagementRoute.page,
+      path: '/${ProductManagementRoute.name}',
+    ),
+    AutoRoute(
+      page: ProductVariantManagementRoute.page,
+      path: '/${ProductVariantManagementRoute.name}',
+    ),
+    AutoRoute(
+      page: PromotionManagementRoute.page,
+      path: '/${PromotionManagementRoute.name}',
     ),
     AutoRoute(page: RegisterRoute.page, path: '/${RegisterRoute.name}'),
     AutoRoute(page: LoginRoute.page, path: '/${LoginRoute.name}'),

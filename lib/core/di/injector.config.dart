@@ -15,34 +15,82 @@ import 'package:flutter_skeleton/core/api/dio_client.dart' as _i520;
 import 'package:flutter_skeleton/core/di/network_module.dart' as _i261;
 import 'package:flutter_skeleton/features/admin/data/datasource/remote/category_api_service.dart'
     as _i299;
+import 'package:flutter_skeleton/features/admin/data/datasource/remote/product_api_service.dart'
+    as _i888;
+import 'package:flutter_skeleton/features/admin/data/datasource/remote/product_variant_api_service.dart'
+    as _i91;
+import 'package:flutter_skeleton/features/admin/data/datasource/remote/promotion_api_service.dart'
+    as _i367;
 import 'package:flutter_skeleton/features/admin/data/datasource/remote/supplier_api_service.dart'
     as _i792;
 import 'package:flutter_skeleton/features/admin/data/repository/category_repository_impl.dart'
     as _i885;
+import 'package:flutter_skeleton/features/admin/data/repository/product_repository_impl.dart'
+    as _i316;
+import 'package:flutter_skeleton/features/admin/data/repository/product_variant_repository_impl.dart'
+    as _i828;
+import 'package:flutter_skeleton/features/admin/data/repository/promotion_repository_impl.dart'
+    as _i907;
 import 'package:flutter_skeleton/features/admin/data/repository/supplier_repository_impl.dart'
     as _i210;
 import 'package:flutter_skeleton/features/admin/domain/repositories/category_repository.dart'
     as _i88;
+import 'package:flutter_skeleton/features/admin/domain/repositories/product_repository.dart'
+    as _i195;
+import 'package:flutter_skeleton/features/admin/domain/repositories/product_variant_repository.dart'
+    as _i987;
+import 'package:flutter_skeleton/features/admin/domain/repositories/promotion_repository.dart'
+    as _i1041;
 import 'package:flutter_skeleton/features/admin/domain/repositories/supplier_repository.dart'
     as _i413;
 import 'package:flutter_skeleton/features/admin/domain/usecases/create_category_use_case.dart'
     as _i663;
+import 'package:flutter_skeleton/features/admin/domain/usecases/create_product_use_case.dart'
+    as _i1051;
+import 'package:flutter_skeleton/features/admin/domain/usecases/create_product_variant_use_case.dart'
+    as _i767;
+import 'package:flutter_skeleton/features/admin/domain/usecases/create_promotion_use_case.dart'
+    as _i152;
 import 'package:flutter_skeleton/features/admin/domain/usecases/create_supplier_use_case.dart'
     as _i73;
 import 'package:flutter_skeleton/features/admin/domain/usecases/delete_category_use_case.dart'
     as _i770;
+import 'package:flutter_skeleton/features/admin/domain/usecases/delete_product_use_case.dart'
+    as _i474;
+import 'package:flutter_skeleton/features/admin/domain/usecases/delete_product_variant_use_case.dart'
+    as _i119;
+import 'package:flutter_skeleton/features/admin/domain/usecases/delete_promotion_use_case.dart'
+    as _i721;
 import 'package:flutter_skeleton/features/admin/domain/usecases/delete_supplier_use_case.dart'
     as _i244;
+import 'package:flutter_skeleton/features/admin/domain/usecases/get_admin_product_variants_use_case.dart'
+    as _i726;
 import 'package:flutter_skeleton/features/admin/domain/usecases/get_categories_use_case.dart'
     as _i745;
+import 'package:flutter_skeleton/features/admin/domain/usecases/get_products_use_case.dart'
+    as _i695;
+import 'package:flutter_skeleton/features/admin/domain/usecases/get_promotions_use_case.dart'
+    as _i661;
 import 'package:flutter_skeleton/features/admin/domain/usecases/get_suppliers_use_case.dart'
     as _i990;
 import 'package:flutter_skeleton/features/admin/domain/usecases/update_category_use_case.dart'
     as _i371;
+import 'package:flutter_skeleton/features/admin/domain/usecases/update_product_use_case.dart'
+    as _i973;
+import 'package:flutter_skeleton/features/admin/domain/usecases/update_product_variant_use_case.dart'
+    as _i919;
+import 'package:flutter_skeleton/features/admin/domain/usecases/update_promotion_use_case.dart'
+    as _i222;
 import 'package:flutter_skeleton/features/admin/domain/usecases/update_supplier_use_case.dart'
     as _i1046;
+import 'package:flutter_skeleton/features/admin/presentation/cubit/admin_product_variant_cubit.dart'
+    as _i245;
 import 'package:flutter_skeleton/features/admin/presentation/cubit/category_cubit.dart'
     as _i646;
+import 'package:flutter_skeleton/features/admin/presentation/cubit/product_cubit.dart'
+    as _i318;
+import 'package:flutter_skeleton/features/admin/presentation/cubit/promotion_cubit.dart'
+    as _i245;
 import 'package:flutter_skeleton/features/admin/presentation/cubit/supplier_cubit.dart'
     as _i947;
 import 'package:flutter_skeleton/features/auth/data/datasource/remote/auth_api_service.dart'
@@ -114,6 +162,21 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i299.CategoryApiService>(
       () => networkModule.provideCategoryApiService(gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i888.AdminProductApiService>(
+      () => networkModule.provideAdminProductApiService(gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i91.AdminProductVariantApiService>(
+      () => networkModule.provideAdminProductVariantApiService(gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i367.AdminPromotionApiService>(
+      () => networkModule.provideAdminPromotionApiService(gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i195.ProductRepository>(
+      () => _i316.ProductRepositoryImpl(
+        gh<_i888.AdminProductApiService>(),
+        gh<_i520.DioClient>(),
+      ),
+    );
     gh.lazySingleton<_i275.HomeRepository>(
       () => _i466.HomeRepositoryImpl(
         gh<_i578.HomeApiService>(),
@@ -126,16 +189,60 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i131.GetProductsUseCase>(
       () => _i131.GetProductsUseCase(gh<_i275.HomeRepository>()),
     );
+    gh.lazySingleton<_i987.ProductVariantRepository>(
+      () => _i828.ProductVariantRepositoryImpl(
+        gh<_i91.AdminProductVariantApiService>(),
+        gh<_i520.DioClient>(),
+      ),
+    );
+    gh.lazySingleton<_i1041.PromotionRepository>(
+      () => _i907.PromotionRepositoryImpl(
+        gh<_i367.AdminPromotionApiService>(),
+        gh<_i520.DioClient>(),
+      ),
+    );
     gh.lazySingleton<_i413.SupplierRepository>(
       () => _i210.SupplierRepositoryImpl(
         gh<_i792.SupplierApiService>(),
         gh<_i520.DioClient>(),
       ),
     );
+    gh.factory<_i1051.CreateProductUseCase>(
+      () => _i1051.CreateProductUseCase(gh<_i195.ProductRepository>()),
+    );
+    gh.factory<_i474.DeleteProductUseCase>(
+      () => _i474.DeleteProductUseCase(gh<_i195.ProductRepository>()),
+    );
+    gh.factory<_i695.GetProductsUseCase>(
+      () => _i695.GetProductsUseCase(gh<_i195.ProductRepository>()),
+    );
+    gh.factory<_i973.UpdateProductUseCase>(
+      () => _i973.UpdateProductUseCase(gh<_i195.ProductRepository>()),
+    );
     gh.lazySingleton<_i564.ProductRepository>(
       () => _i511.ProductRepositoryImpl(
         gh<_i1001.ProductApiService>(),
         gh<_i520.DioClient>(),
+      ),
+    );
+    gh.factory<_i767.CreateProductVariantUseCase>(
+      () => _i767.CreateProductVariantUseCase(
+        gh<_i987.ProductVariantRepository>(),
+      ),
+    );
+    gh.factory<_i119.DeleteProductVariantUseCase>(
+      () => _i119.DeleteProductVariantUseCase(
+        gh<_i987.ProductVariantRepository>(),
+      ),
+    );
+    gh.factory<_i726.GetAdminProductVariantsUseCase>(
+      () => _i726.GetAdminProductVariantsUseCase(
+        gh<_i987.ProductVariantRepository>(),
+      ),
+    );
+    gh.factory<_i919.UpdateProductVariantUseCase>(
+      () => _i919.UpdateProductVariantUseCase(
+        gh<_i987.ProductVariantRepository>(),
       ),
     );
     gh.lazySingleton<_i88.CategoryRepository>(
@@ -163,6 +270,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i558.FlutterSecureStorage>(),
       ),
     );
+    gh.factory<_i245.AdminProductVariantCubit>(
+      () => _i245.AdminProductVariantCubit(
+        gh<_i726.GetAdminProductVariantsUseCase>(),
+        gh<_i767.CreateProductVariantUseCase>(),
+        gh<_i919.UpdateProductVariantUseCase>(),
+        gh<_i119.DeleteProductVariantUseCase>(),
+      ),
+    );
     gh.factory<_i233.HomeCubit>(
       () => _i233.HomeCubit(
         gh<_i602.GetCategoriesUseCase>(),
@@ -180,6 +295,14 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i371.UpdateCategoryUseCase>(
       () => _i371.UpdateCategoryUseCase(gh<_i88.CategoryRepository>()),
+    );
+    gh.factory<_i318.ProductCubit>(
+      () => _i318.ProductCubit(
+        gh<_i695.GetProductsUseCase>(),
+        gh<_i1051.CreateProductUseCase>(),
+        gh<_i973.UpdateProductUseCase>(),
+        gh<_i474.DeleteProductUseCase>(),
+      ),
     );
     gh.factory<_i947.SupplierCubit>(
       () => _i947.SupplierCubit(
@@ -206,8 +329,28 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i235.RegisterUseCase>(
       () => _i235.RegisterUseCase(gh<_i518.AuthRepository>()),
     );
+    gh.factory<_i152.CreatePromotionUseCase>(
+      () => _i152.CreatePromotionUseCase(gh<_i1041.PromotionRepository>()),
+    );
+    gh.factory<_i721.DeletePromotionUseCase>(
+      () => _i721.DeletePromotionUseCase(gh<_i1041.PromotionRepository>()),
+    );
+    gh.factory<_i661.GetPromotionsUseCase>(
+      () => _i661.GetPromotionsUseCase(gh<_i1041.PromotionRepository>()),
+    );
+    gh.factory<_i222.UpdatePromotionUseCase>(
+      () => _i222.UpdatePromotionUseCase(gh<_i1041.PromotionRepository>()),
+    );
     gh.factory<_i983.GetProductVariantsUseCase>(
       () => _i983.GetProductVariantsUseCase(gh<_i564.ProductRepository>()),
+    );
+    gh.factory<_i245.PromotionCubit>(
+      () => _i245.PromotionCubit(
+        gh<_i661.GetPromotionsUseCase>(),
+        gh<_i152.CreatePromotionUseCase>(),
+        gh<_i222.UpdatePromotionUseCase>(),
+        gh<_i721.DeletePromotionUseCase>(),
+      ),
     );
     gh.factory<_i363.ProductVariantCubit>(
       () => _i363.ProductVariantCubit(gh<_i983.GetProductVariantsUseCase>()),

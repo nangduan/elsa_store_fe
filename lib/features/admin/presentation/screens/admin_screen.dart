@@ -177,10 +177,10 @@ class AdminScreen extends StatelessWidget {
           // Điều hướng đến màn quản lý category cũ của bạn
         }),
         _navItem(context, 'Products', Icons.inventory_2_outlined, () {
-          // context.router.push(const AdminProductRoute());
+          context.router.push(const ProductManagementRoute());
         }),
         _navItem(context, 'Promotions', Icons.confirmation_number_outlined, () {
-          // context.router.push(const AdminPromotionRoute());
+          context.router.push(const PromotionManagementRoute());
         }),
       ],
     );

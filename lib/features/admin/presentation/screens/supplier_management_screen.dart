@@ -13,84 +13,117 @@ class SupplierManagementScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => SupplierCubit(getIt(), getIt(), getIt(), getIt())..load(),
+      create: (context) =>
+          SupplierCubit(getIt(), getIt(), getIt(), getIt())..load(),
       child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios_new,
-              color: Colors.black,
-              size: 20,
-            ),
-            onPressed: () => context.router.pop(),
-          ),
-          title: const Text(
-            'SUPPLIERS',
-            style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
-            ),
-          ),
-          actions: [
-            IconButton(
-              onPressed: () => _showSupplierDialog(context),
-              icon: const Icon(
-                Icons.add_circle_outline_rounded,
-                color: Colors.black,
-                size: 28,
-              ),
-            ),
-            const SizedBox(width: 8),
-          ],
-        ),
-        body: Column(
-          children: [
-            // Thanh tìm kiếm nhanh
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search suppliers...',
-                  prefixIcon: const Icon(Icons.search, size: 20),
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
+        backgroundColor: const Color(0xFFF8F9FA), // Màu nền đồng bộ
+        body: BlocConsumer<SupplierCubit, SupplierState>(
+          listener: (context, state) {
+            if (state.status.isFailure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.errorMessage ?? 'Operation failed'),
+                  backgroundColor: Colors.redAccent,
+                  behavior: SnackBarBehavior.floating,
                 ),
-              ),
-            ),
-
-            Expanded(
-              child: BlocBuilder<SupplierCubit, SupplierState>(
-                builder: (context, state) {
-                  if (state.status.isLoading) {
-                    return const Center(
+              );
+            }
+          },
+          builder: (context, state) {
+            return CustomScrollView(
+              slivers: [
+                _buildAppBar(context),
+                _buildSearchBar(),
+                if (state.status.isLoading)
+                  const SliverFillRemaining(
+                    child: Center(
                       child: CircularProgressIndicator(color: Colors.black),
-                    );
-                  }
+                    ),
+                  )
+                else if (state.suppliers.isEmpty)
+                  SliverFillRemaining(child: _buildEmptyState())
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) =>
+                            _buildSupplierCard(context, state.suppliers[index]),
+                        childCount: state.suppliers.length,
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
 
-                  if (state.suppliers.isEmpty) {
-                    return _buildEmptyState();
-                  }
+  Widget _buildAppBar(BuildContext context) {
+    return SliverAppBar(
+      expandedHeight: 120.0,
+      floating: true,
+      pinned: true,
+      elevation: 0,
+      backgroundColor: Colors.white,
+      leading: IconButton(
+        icon: const Icon(
+          Icons.arrow_back_ios_new,
+          color: Colors.black,
+          size: 20,
+        ),
+        onPressed: () => context.router.pop(),
+      ),
+      flexibleSpace: const FlexibleSpaceBar(
+        titlePadding: EdgeInsetsDirectional.only(start: 56, bottom: 16),
+        title: Text(
+          'SUPPLIERS',
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.w800,
+            fontSize: 16,
+            letterSpacing: 1.5,
+          ),
+        ),
+      ),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 16),
+          child: IconButton(
+            onPressed: () => _showSupplierDialog(context),
+            icon: const Icon(Icons.add_circle, color: Colors.black, size: 32),
+          ),
+        ),
+      ],
+    );
+  }
 
-                  return ListView.builder(
-                    padding: const EdgeInsets.all(20),
-                    itemCount: state.suppliers.length,
-                    itemBuilder: (context, index) {
-                      final item = state.suppliers[index];
-                      return _buildSupplierCard(context, item);
-                    },
-                  );
-                },
-              ),
+  Widget _buildSearchBar() {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+        child: TextField(
+          decoration: InputDecoration(
+            hintText: 'Search suppliers...',
+            hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+            prefixIcon: const Icon(Icons.search_rounded, color: Colors.black54),
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(vertical: 0),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
             ),
-          ],
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: Colors.grey.shade100),
+            ),
+          ),
         ),
       ),
     );
@@ -99,61 +132,89 @@ class SupplierManagementScreen extends StatelessWidget {
   Widget _buildSupplierCard(BuildContext context, SupplierResponse item) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade100),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                item.name?.toUpperCase() ?? '-',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.storefront_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          item.name ?? '-',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 16,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(
+                Row(
+                  children: [
+                    _buildCircleAction(
                       Icons.edit_outlined,
-                      size: 20,
-                      color: Colors.blueGrey,
+                      Colors.blueGrey,
+                      () => _showSupplierDialog(context, item: item),
                     ),
-                    onPressed: () => _showSupplierDialog(context, item: item),
-                  ),
-                  IconButton(
-                    icon: const Icon(
+                    const SizedBox(width: 8),
+                    _buildCircleAction(
                       Icons.delete_outline_rounded,
-                      size: 20,
-                      color: Colors.redAccent,
+                      Colors.redAccent,
+                      () => _confirmDelete(context, item),
                     ),
-                    onPressed: () => _confirmDelete(context, item),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const Divider(height: 24),
-          _buildInfoRow(Icons.phone_android_outlined, item.phone ?? '-'),
-          const SizedBox(height: 8),
-          _buildInfoRow(Icons.email_outlined, item.email ?? '-'),
-          const SizedBox(height: 8),
-          _buildInfoRow(Icons.location_on_outlined, item.address ?? '-'),
-        ],
+                  ],
+                ),
+              ],
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Divider(height: 1, thickness: 0.5),
+            ),
+            _buildInfoRow(Icons.phone_iphone_rounded, item.phone ?? 'No phone'),
+            const SizedBox(height: 10),
+            _buildInfoRow(
+              Icons.alternate_email_rounded,
+              item.email ?? 'No email',
+            ),
+            const SizedBox(height: 10),
+            _buildInfoRow(
+              Icons.location_on_outlined,
+              item.address ?? 'No address',
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -161,17 +222,36 @@ class SupplierManagementScreen extends StatelessWidget {
   Widget _buildInfoRow(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: Colors.grey),
-        const SizedBox(width: 8),
+        Icon(icon, size: 16, color: Colors.grey.shade400),
+        const SizedBox(width: 10),
         Expanded(
           child: Text(
             text,
-            style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
+            style: TextStyle(
+              color: Colors.grey.shade700,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildCircleAction(IconData icon, Color color, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, size: 18, color: color),
+      ),
     );
   }
 
@@ -182,13 +262,16 @@ class SupplierManagementScreen extends StatelessWidget {
         children: [
           Icon(
             Icons.inventory_2_outlined,
-            size: 64,
-            color: Colors.grey.shade300,
+            size: 80,
+            color: Colors.grey.shade200,
           ),
           const SizedBox(height: 16),
           Text(
             'No suppliers found',
-            style: TextStyle(color: Colors.grey.shade500),
+            style: TextStyle(
+              color: Colors.grey.shade400,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
@@ -205,15 +288,17 @@ class SupplierManagementScreen extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (dialogContext) => Padding(
+      backgroundColor: Colors.transparent,
+      builder: (dialogContext) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+        ),
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(dialogContext).viewInsets.bottom,
           left: 24,
           right: 24,
-          top: 24,
+          top: 32,
         ),
         child: SingleChildScrollView(
           child: Column(
@@ -221,35 +306,47 @@ class SupplierManagementScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                item == null ? 'Add New Supplier' : 'Update Supplier',
+                item == null ? 'New Supplier' : 'Update Supplier',
                 style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
-              const SizedBox(height: 20),
-              _buildTextField(nameController, 'Company Name'),
-              _buildTextField(
+              const SizedBox(height: 24),
+              _buildModernField(
+                nameController,
+                'Company Name',
+                Icons.business_rounded,
+              ),
+              _buildModernField(
                 phoneController,
                 'Phone Number',
+                Icons.phone_rounded,
                 keyboardType: TextInputType.phone,
               ),
-              _buildTextField(
+              _buildModernField(
                 emailController,
                 'Email Address',
+                Icons.email_rounded,
                 keyboardType: TextInputType.emailAddress,
               ),
-              _buildTextField(addressController, 'Office Address', maxLines: 2),
-              const SizedBox(height: 24),
+              _buildModernField(
+                addressController,
+                'Office Address',
+                Icons.map_rounded,
+                maxLines: 2,
+              ),
+              const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
-                height: 54,
+                height: 60,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(20),
                     ),
+                    elevation: 0,
                   ),
                   onPressed: () {
                     final request = SupplierRequest(
@@ -274,7 +371,7 @@ class SupplierManagementScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 40),
             ],
           ),
         ),
@@ -282,25 +379,26 @@ class SupplierManagementScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTextField(
+  Widget _buildModernField(
     TextEditingController controller,
-    String label, {
+    String label,
+    IconData icon, {
     TextInputType? keyboardType,
     int maxLines = 1,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 20),
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
         maxLines: maxLines,
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+          prefixIcon: Icon(icon, size: 20),
           filled: true,
           fillColor: Colors.grey.shade50,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide.none,
           ),
         ),
@@ -311,18 +409,19 @@ class SupplierManagementScreen extends StatelessWidget {
   void _confirmDelete(BuildContext context, SupplierResponse item) {
     showDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text('Confirm Delete'),
         content: Text('Are you sure you want to remove ${item.name}?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
+            onPressed: () => Navigator.pop(ctx),
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
               context.read<SupplierCubit>().remove(item.id!);
-              Navigator.pop(dialogContext);
+              Navigator.pop(ctx);
             },
             child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
