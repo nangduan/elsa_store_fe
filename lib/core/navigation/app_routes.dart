@@ -1,8 +1,11 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
-import '../../features/screens/cart_empty_screen.dart';
-import '../../features/screens/cart_screen.dart';
+import '../../features/admin/presentation/screens/category_management_screen.dart';
+import '../../features/admin/presentation/screens/supplier_management_screen.dart';
+import '../../features/home/data/models/response/product_response.dart';
+import '../../features/home/presentation/screens/cart_empty_screen.dart';
+import '../../features/home/presentation/screens/cart_screen.dart';
 import '../../features/screens/category_filter_screen.dart';
 import '../../features/screens/chat_screen.dart';
 import '../../features/screens/flash_sale_screen.dart';
@@ -20,21 +23,22 @@ import '../../features/screens/password_screen.dart';
 import '../../features/screens/payment_screen.dart';
 import '../../features/screens/product_detail_full_screen.dart';
 import '../../features/screens/product_detail_screen.dart';
-import '../../features/screens/profile_screen.dart';
+import '../../features/home/presentation/screens/profile_screen.dart';
 import '../../features/screens/ready_card_screen.dart';
 import '../../features/screens/recently_viewed_screen.dart';
 import '../../features/screens/recognizing_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/screens/review_screen.dart';
 import '../../features/screens/search_result_screen.dart';
-import '../../features/screens/search_screen.dart';
-import '../../features/screens/shop_screen.dart';
+import '../../features/home/presentation/screens/search_screen.dart';
+import '../../features/home/presentation/screens/shop_screen.dart';
 import '../../features/start/presentation/screen/start_screen.dart';
 import '../../features/screens/story_screen.dart';
 import '../../features/screens/wishlist_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
-import '../../features/widgets/main_bottom_nav.dart';
+import '../../features/home/presentation/screens/main_bottom_nav.dart';
+import '../../features/admin/presentation/screens/admin_screen.dart';
 
 part 'app_routes.gr.dart';
 
@@ -46,6 +50,14 @@ class AppRoutes extends RootStackRouter {
       page: StartRoute.page,
       path: '/${StartRoute.name}',
       initial: true,
+    ),
+    AutoRoute(
+      page: CategoryManagementRoute.page,
+      path: '/${CategoryManagementRoute.name}',
+    ),
+    AutoRoute(
+      page: SupplierManagementRoute.page,
+      path: '/${SupplierManagementRoute.name}',
     ),
     AutoRoute(page: RegisterRoute.page, path: '/${RegisterRoute.name}'),
     AutoRoute(page: LoginRoute.page, path: '/${LoginRoute.name}'),
@@ -62,7 +74,6 @@ class AppRoutes extends RootStackRouter {
       page: NewPasswordRoute.page,
       path: '/${NewPasswordRoute.name}-password',
     ),
-    AutoRoute(page: ReadyCardRoute.page, path: '/${ReadyCardRoute.name}'),
     AutoRoute(
       page: MainBottomNavRoute.page,
       path: '/${MainBottomNavRoute.name}',
@@ -118,5 +129,6 @@ class AppRoutes extends RootStackRouter {
     AutoRoute(page: HelloCardRoute.page, path: '/${HelloCardRoute.name}-card'),
     AutoRoute(page: ChatRoute.page, path: '/${ChatRoute.name}'),
     AutoRoute(page: HomeRoute.page, path: '/${HomeRoute.name}'),
+    AutoRoute(page: AdminRoute.page, path: '/${AdminRoute.name}'),
   ];
 }

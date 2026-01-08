@@ -1,16 +1,18 @@
+import 'user_response.dart';
+
 class LoginResponse {
   bool? authenticated;
   String? accessToken;
   String? refreshToken;
   String? role;
-  String? accountId;
+  User? user;
 
   LoginResponse({
     this.authenticated,
     this.accessToken,
     this.refreshToken,
     this.role,
-    this.accountId,
+    this.user,
   });
 
   LoginResponse.fromJson(Map<String, dynamic> json) {
@@ -18,7 +20,7 @@ class LoginResponse {
     accessToken = json['accessToken'];
     refreshToken = json['refreshToken'];
     role = json['role'];
-    accountId = json['accountId'];
+    user = json['user'] != null ? User.fromJson(json['user']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -27,7 +29,9 @@ class LoginResponse {
     data['accessToken'] = accessToken;
     data['refreshToken'] = refreshToken;
     data['role'] = role;
-    data['accountId'] = accountId;
+    if (user != null) {
+      data['user'] = user!.toJson();
+    }
     return data;
   }
 }

@@ -1,6 +1,1 @@
-enum UserRole {
-  customer,
-  hotel,
-  empty,
-  unknown,
-}
+enum UserRole { customer, hotel, empty, unknown }

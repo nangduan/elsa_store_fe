@@ -42,7 +42,7 @@ class AuthRepositoryImpl implements AuthRepository {
         accessToken: loginResp.accessToken,
         refreshToken: loginResp.refreshToken,
         role: loginResp.role,
-        accountId: loginResp.accountId,
+        user: loginResp.user,
       );
     } on DioException catch (e) {
       throw dioClient.handleDioError(e);

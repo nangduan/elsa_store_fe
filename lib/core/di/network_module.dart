@@ -3,6 +3,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../features/auth/data/datasource/remote/auth_api_service.dart';
+import '../../features/home/data/datasource/remote/home_api_service.dart';
+import '../../features/product/data/datasource/remote/product_api_service.dart';
+import '../../features/admin/data/datasource/remote/category_api_service.dart';
+import '../../features/admin/data/datasource/remote/supplier_api_service.dart';
 import '../api/app_config.dart';
 import '../api/auth_interceptor.dart';
 import '../api/dio_client.dart';
@@ -46,4 +50,18 @@ abstract class NetworkModule {
 
   @lazySingleton
   AuthApiService provideAuthApiService(Dio dio) => AuthApiService(dio);
+
+  @lazySingleton
+  HomeApiService provideHomeApiService(Dio dio) => HomeApiService(dio);
+
+  @lazySingleton
+  ProductApiService provideProductApiService(Dio dio) => ProductApiService(dio);
+
+  @lazySingleton
+  SupplierApiService provideSupplierApiService(Dio dio) =>
+      SupplierApiService(dio);
+
+  @lazySingleton
+  CategoryApiService provideCategoryApiService(Dio dio) =>
+      CategoryApiService(dio);
 }

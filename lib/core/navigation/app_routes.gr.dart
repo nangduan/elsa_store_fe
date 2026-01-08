@@ -11,6 +11,22 @@
 part of 'app_routes.dart';
 
 /// generated route for
+/// [AdminScreen]
+class AdminRoute extends PageRouteInfo<void> {
+  const AdminRoute({List<PageRouteInfo>? children})
+    : super(AdminRoute.name, initialChildren: children);
+
+  static const String name = 'AdminRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const AdminScreen();
+    },
+  );
+}
+
+/// generated route for
 /// [CartEmptyScreen]
 class CartEmptyRoute extends PageRouteInfo<CartEmptyRouteArgs> {
   CartEmptyRoute({
@@ -87,6 +103,22 @@ class CategoryFilterRoute extends PageRouteInfo<void> {
     name,
     builder: (data) {
       return const CategoryFilterScreen();
+    },
+  );
+}
+
+/// generated route for
+/// [CategoryManagementScreen]
+class CategoryManagementRoute extends PageRouteInfo<void> {
+  const CategoryManagementRoute({List<PageRouteInfo>? children})
+    : super(CategoryManagementRoute.name, initialChildren: children);
+
+  static const String name = 'CategoryManagementRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const CategoryManagementScreen();
     },
   );
 }
@@ -349,18 +381,49 @@ class PaymentRoute extends PageRouteInfo<void> {
 
 /// generated route for
 /// [ProductDetailFullScreen]
-class ProductDetailFullRoute extends PageRouteInfo<void> {
-  const ProductDetailFullRoute({List<PageRouteInfo>? children})
-    : super(ProductDetailFullRoute.name, initialChildren: children);
+class ProductDetailFullRoute extends PageRouteInfo<ProductDetailFullRouteArgs> {
+  ProductDetailFullRoute({
+    Key? key,
+    required ProductResponse product,
+    List<PageRouteInfo>? children,
+  }) : super(
+         ProductDetailFullRoute.name,
+         args: ProductDetailFullRouteArgs(key: key, product: product),
+         initialChildren: children,
+       );
 
   static const String name = 'ProductDetailFullRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const ProductDetailFullScreen();
+      final args = data.argsAs<ProductDetailFullRouteArgs>();
+      return ProductDetailFullScreen(key: args.key, product: args.product);
     },
   );
+}
+
+class ProductDetailFullRouteArgs {
+  const ProductDetailFullRouteArgs({this.key, required this.product});
+
+  final Key? key;
+
+  final ProductResponse product;
+
+  @override
+  String toString() {
+    return 'ProductDetailFullRouteArgs{key: $key, product: $product}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! ProductDetailFullRouteArgs) return false;
+    return key == other.key && product == other.product;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ product.hashCode;
 }
 
 /// generated route for
@@ -478,46 +541,18 @@ class RecognizingRoute extends PageRouteInfo<void> {
 
 /// generated route for
 /// [RegisterScreen]
-class RegisterRoute extends PageRouteInfo<RegisterRouteArgs> {
-  RegisterRoute({Key? key, List<PageRouteInfo>? children})
-    : super(
-        RegisterRoute.name,
-        args: RegisterRouteArgs(key: key),
-        initialChildren: children,
-      );
+class RegisterRoute extends PageRouteInfo<void> {
+  const RegisterRoute({List<PageRouteInfo>? children})
+    : super(RegisterRoute.name, initialChildren: children);
 
   static const String name = 'RegisterRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<RegisterRouteArgs>(
-        orElse: () => const RegisterRouteArgs(),
-      );
-      return RegisterScreen(key: args.key);
+      return const RegisterScreen();
     },
   );
-}
-
-class RegisterRouteArgs {
-  const RegisterRouteArgs({this.key});
-
-  final Key? key;
-
-  @override
-  String toString() {
-    return 'RegisterRouteArgs{key: $key}';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! RegisterRouteArgs) return false;
-    return key == other.key;
-  }
-
-  @override
-  int get hashCode => key.hashCode;
 }
 
 /// generated route for
@@ -628,6 +663,22 @@ class StoryRoute extends PageRouteInfo<void> {
     name,
     builder: (data) {
       return const StoryScreen();
+    },
+  );
+}
+
+/// generated route for
+/// [SupplierManagementScreen]
+class SupplierManagementRoute extends PageRouteInfo<void> {
+  const SupplierManagementRoute({List<PageRouteInfo>? children})
+    : super(SupplierManagementRoute.name, initialChildren: children);
+
+  static const String name = 'SupplierManagementRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const SupplierManagementScreen();
     },
   );
 }
