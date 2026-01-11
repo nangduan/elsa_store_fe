@@ -1,20 +1,41 @@
 import 'package:flutter/material.dart';
-import 'config/app_router.dart';
-import 'core/widgets/main_bottom_nav.dart';
 
-void main() {
-  runApp(const MyApp());
+import 'core/config/light_theme.dart';
+import 'core/config_setup.dart';
+import 'core/constants/constant.dart';
+
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import 'core/di/injector.dart';
+import 'core/navigation/app_routes.dart';
+
+Future<void> main() async {
+  await configSetup();
+
+  // check if access token exists to decide initial route
+  final storage = getIt<FlutterSecureStorage>();
+  final token = await storage.read(key: Constants.accessToken);
+
+  runApp(
+    BookingHotelManagerApp(
+      initialAuthenticated: (token != null && token.isNotEmpty),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class BookingHotelManagerApp extends StatelessWidget {
+  final bool initialAuthenticated;
+
+  const BookingHotelManagerApp({super.key, this.initialAuthenticated = false});
 
   @override
   Widget build(BuildContext context) {
+    final router = AppRoutes();
     return MaterialApp.router(
-      routerConfig: appRouter,
       debugShowCheckedModeBanner: false,
+      title: 'Hotel Manager',
+      theme: AppTheme.lightTheme,
+      routerConfig: router.config(),
     );
   }
 }
-
