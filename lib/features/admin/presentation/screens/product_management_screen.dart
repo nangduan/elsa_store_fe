@@ -1,7 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_skeleton/core/constants/format.dart';
 
+import '../../../../core/api/app_config.dart';
 import '../../../../core/navigation/app_routes.dart';
 import '../../../../core/di/injector.dart';
 import '../../data/models/request/product_request.dart';
@@ -44,7 +46,11 @@ class ProductManagementScreen extends StatelessWidget {
           builder: (context, state) {
             return CustomScrollView(
               slivers: [
-                _buildAppBar(context),
+                BlocBuilder<CategoryCubit, CategoryState>(
+                  builder: (context, state) {
+                    return _buildAppBar(context);
+                  },
+                ),
                 _buildSearchBar(context),
                 if (state.status.isLoading)
                   const SliverFillRemaining(
@@ -230,6 +236,8 @@ class ProductManagementScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 12),
+                  _buildProductImage(item.imageUrl),
+                  const SizedBox(height: 12),
                   Text(
                     item.name ?? '-',
                     style: const TextStyle(
@@ -262,7 +270,7 @@ class ProductManagementScreen extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '\$${item.basePrice?.toStringAsFixed(0)}',
+                            Format.formatCurrency(item.basePrice),
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
@@ -299,6 +307,67 @@ class ProductManagementScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildProductImage(String? imageUrl) {
+    final resolved = _resolveImageUrl(imageUrl);
+    if (resolved == null) {
+      return Container(
+        height: 140,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.image_not_supported_outlined,
+            color: Colors.grey,
+            size: 36,
+          ),
+        ),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Image.network(
+        resolved,
+        height: 140,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) {
+          return Container(
+            height: 140,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Center(
+              child: Icon(
+                Icons.image_not_supported_outlined,
+                color: Colors.grey,
+                size: 36,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  String? _resolveImageUrl(String? path) {
+    if (path == null || path.isEmpty) {
+      return null;
+    }
+
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+
+    final baseUrl = "${AppConfig().baseURL}$path";
+    return baseUrl;
+  }
+
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -322,8 +391,6 @@ class ProductManagementScreen extends StatelessWidget {
     );
   }
 
-  // --- Logic Helpers (Giữ nguyên logic của bạn nhưng bọc trong UI mới) ---
-
   void _showProductDialog(
     BuildContext context, {
     required List<CategoryResponse> categories,
@@ -337,7 +404,16 @@ class ProductManagementScreen extends StatelessWidget {
     final basePriceController = TextEditingController(
       text: item?.basePrice?.toStringAsFixed(0) ?? '',
     );
-    int? selectedCategoryId = _matchCategoryId(categories, item?.categoryName);
+    final availableCategories = categories
+        .where((c) => c.parentId != null)
+        .toList();
+    final selectableCategories = availableCategories.isEmpty
+        ? categories
+        : availableCategories;
+    int? selectedCategoryId = _matchCategoryId(
+      selectableCategories,
+      item?.categoryName,
+    );
 
     showModalBottomSheet(
       context: context,
@@ -390,7 +466,7 @@ class ProductManagementScreen extends StatelessWidget {
                   'Category',
                   Icons.category_outlined,
                 ),
-                items: categories
+                items: selectableCategories
                     .map(
                       (c) => DropdownMenuItem(
                         value: c.id,

@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/constants/format.dart';
 import '../../../../core/di/injector.dart';
 import '../../data/models/request/product_variant_request.dart';
 import '../../../product/data/models/response/product_variant_response.dart';
@@ -28,94 +29,117 @@ class ProductVariantManagementScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<AdminProductVariantCubit>()..load(productId),
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios_new,
-              color: Colors.black,
-              size: 20,
-            ),
-            onPressed: () => context.router.pop(),
-          ),
-          title: const Text(
-            'DETAILS',
-            style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
-            ),
-          ),
-          actions: [
-            IconButton(
-              onPressed: () => _showVariantDialog(context),
-              icon: const Icon(
-                Icons.add_box_rounded,
-                color: Colors.black,
-                size: 28,
+      child: BlocConsumer<AdminProductVariantCubit, AdminProductVariantState>(
+        listener: (context, state) {
+          if (state.status.isFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.errorMessage ?? 'Operation failed'),
+                backgroundColor: Colors.redAccent,
+                behavior: SnackBarBehavior.floating,
               ),
-            ),
-            const SizedBox(width: 8),
-          ],
-        ),
-        body: BlocBuilder<AdminProductVariantCubit, AdminProductVariantState>(
-          builder: (context, state) {
-            return Column(
-              children: [
-                _buildHeaderCard(),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
+            );
+          }
+        },
+        builder: (context, state) {
+          return Scaffold(
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+              backgroundColor: Colors.white,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(
+                  Icons.arrow_back_ios_new,
+                  color: Colors.black,
+                  size: 20,
+                ),
+                onPressed: () => context.router.pop(),
+              ),
+              title: const Text(
+                'DETAILS',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                ),
+              ),
+              actions: [
+                IconButton(
+                  onPressed: () => _showVariantDialog(context),
+                  icon: const Icon(
+                    Icons.add_box_rounded,
+                    color: Colors.black,
+                    size: 28,
                   ),
-                  child: Row(
-                    children: [
-                      const Text(
-                        'Variants',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Text(
-                          state.variants.length.toString(),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
+                ),
+                const SizedBox(width: 8),
+              ],
+            ),
+            body:
+                BlocBuilder<AdminProductVariantCubit, AdminProductVariantState>(
+                  builder: (context, state) {
+                    return Column(
+                      children: [
+                        _buildHeaderCard(),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 16,
+                          ),
+                          child: Row(
+                            children: [
+                              const Text(
+                                'Variants',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade100,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Text(
+                                  state.variants.length.toString(),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: state.status.isLoading
-                      ? const Center(
-                          child: CircularProgressIndicator(color: Colors.black),
-                        )
-                      : state.variants.isEmpty
-                      ? _buildEmptyState()
-                      : ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          itemCount: state.variants.length,
-                          itemBuilder: (context, index) =>
-                              _buildVariantCard(context, state.variants[index]),
+                        Expanded(
+                          child: state.status.isLoading
+                              ? const Center(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.black,
+                                  ),
+                                )
+                              : state.variants.isEmpty
+                              ? _buildEmptyState()
+                              : ListView.builder(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                  ),
+                                  itemCount: state.variants.length,
+                                  itemBuilder: (context, index) =>
+                                      _buildVariantCard(
+                                        context,
+                                        state.variants[index],
+                                      ),
+                                ),
                         ),
+                      ],
+                    );
+                  },
                 ),
-              ],
-            );
-          },
-        ),
+          );
+        },
       ),
     );
   }
@@ -176,7 +200,7 @@ class ProductVariantManagementScreen extends StatelessWidget {
               const Icon(Icons.sell_outlined, color: Colors.amber, size: 16),
               const SizedBox(width: 8),
               Text(
-                'Start from \$${basePrice?.toStringAsFixed(0)}',
+                'Start from ${Format.formatCurrency(basePrice)}',
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

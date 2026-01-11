@@ -18,7 +18,7 @@ class CategoryManagementScreen extends StatelessWidget {
         backgroundColor: const Color(0xFFF8F9FA), // Màu nền đồng bộ
         body: BlocConsumer<CategoryCubit, CategoryState>(
           listener: (context, state) {
-            // Add listener logic if needed
+            // TODO: Add listener logic if needed
           },
           builder: (context, state) {
             return CustomScrollView(
@@ -273,6 +273,7 @@ class CategoryManagementScreen extends StatelessWidget {
     required List<CategoryResponse> categories,
     CategoryResponse? item,
   }) {
+    final categoryCubit = context.read<CategoryCubit>();
     final nameController = TextEditingController(text: item?.name ?? '');
     int? parentId = item?.parentId;
 
@@ -324,7 +325,7 @@ class CategoryManagementScreen extends StatelessWidget {
                     child: Text('No Parent (Root)'),
                   ),
                   ...categories
-                      .where((c) => c.id != item?.id)
+                      .where((c) => c.parentId == null && c.id != item?.id)
                       .map(
                         (c) => DropdownMenuItem<int?>(
                           value: c.id,
@@ -352,9 +353,9 @@ class CategoryManagementScreen extends StatelessWidget {
                       parentId: parentId,
                     );
                     if (item?.id != null) {
-                      context.read<CategoryCubit>().update(item!.id!, request);
+                      categoryCubit.update(item!.id!, request);
                     } else {
-                      context.read<CategoryCubit>().create(request);
+                      categoryCubit.create(request);
                     }
                     Navigator.pop(dialogContext);
                   },
