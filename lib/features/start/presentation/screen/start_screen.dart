@@ -90,7 +90,7 @@ class _StartScreenState extends State<StartScreen> {
             const SizedBox(height: 8),
 
             Text(
-              'FASHION STORE',
+              'CỬA HÀNG THỜI TRANG',
               style: TextStyle(
                 color: Colors.grey.shade500,
                 letterSpacing: 2,

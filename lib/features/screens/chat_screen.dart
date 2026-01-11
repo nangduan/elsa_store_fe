@@ -47,7 +47,7 @@ class _ChatViewState extends State<_ChatView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Elsa Assistant')),
+      appBar: AppBar(title: const Text('Trợ lý Elsa')),
       body: Consumer<ChatController>(
         builder: (context, controller, _) {
           // Scroll to bottom after frame so new messages are visible

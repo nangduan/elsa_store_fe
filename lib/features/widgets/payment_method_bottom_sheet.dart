@@ -11,19 +11,19 @@ class PaymentMethodBottomSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           const Text(
-            'Payment Methods',
+            'Phương thức thanh toán',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
 
-          _methodTile(Icons.credit_card, 'Master Card'),
+          _methodTile(Icons.credit_card, 'Thẻ Master'),
           _methodTile(Icons.credit_card, 'Visa'),
-          _methodTile(Icons.account_balance_wallet, 'Wallet'),
+          _methodTile(Icons.account_balance_wallet, 'Ví'),
 
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Confirm'),
+            child: const Text('Xác nhận'),
           ),
         ],
       ),

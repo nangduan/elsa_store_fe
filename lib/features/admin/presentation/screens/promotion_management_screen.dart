@@ -22,7 +22,7 @@ class PromotionManagementScreen extends StatelessWidget {
             if (state.status.isFailure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state.errorMessage ?? 'Operation failed'),
+                  content: Text(state.errorMessage ?? 'Thao tác thất bại'),
                   backgroundColor: Colors.redAccent,
                   behavior: SnackBarBehavior.floating,
                 ),
@@ -305,7 +305,7 @@ class PromotionManagementScreen extends StatelessWidget {
                   children: [
                     _miniInfo(
                       Icons.confirmation_number_outlined,
-                      'Code: ${item.couponCode ?? '-'}',
+                      'Mã: ${item.couponCode ?? '-'}',
                     ),
                     const SizedBox(height: 6),
                     _miniInfo(
@@ -347,7 +347,7 @@ class PromotionManagementScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        isActive ? 'Active' : 'Inactive',
+        isActive ? 'Hoạt động' : 'Không hoạt động',
         style: TextStyle(
           color: isActive ? Colors.green : Colors.grey,
           fontSize: 10,
@@ -401,7 +401,7 @@ class PromotionManagementScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'No promotions found',
+            'Không có khuyến mãi',
             style: TextStyle(
               color: Colors.grey.shade400,
               fontWeight: FontWeight.w500,
@@ -461,7 +461,7 @@ class PromotionManagementScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                item == null ? 'New Promotion' : 'Edit Promotion',
+                item == null ? 'Khuyến mãi mới' : 'Chỉnh sửa khuyến mãi',
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w900,
@@ -470,12 +470,12 @@ class PromotionManagementScreen extends StatelessWidget {
               const SizedBox(height: 24),
               _buildModernField(
                 nameController,
-                'Promotion Name',
+                'Tên khuyến mãi',
                 Icons.campaign_rounded,
               ),
               _buildModernField(
                 descriptionController,
-                'Description',
+                'Mô tả',
                 Icons.description_rounded,
                 maxLines: 2,
               ),
@@ -510,7 +510,7 @@ class PromotionManagementScreen extends StatelessWidget {
                   Expanded(
                     child: _buildModernField(
                       startDateController,
-                      'Start Date',
+                      'Ngày bắt đầu',
                       Icons.calendar_today_rounded,
                     ),
                   ),
@@ -518,7 +518,7 @@ class PromotionManagementScreen extends StatelessWidget {
                   Expanded(
                     child: _buildModernField(
                       endDateController,
-                      'End Date',
+                      'Ngày kết thúc',
                       Icons.event_rounded,
                     ),
                   ),
@@ -583,7 +583,7 @@ class PromotionManagementScreen extends StatelessWidget {
                     }
                   },
                   child: const Text(
-                    'SAVE PROMOTION',
+                    'LƯU KHUYẾN MÃI',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -635,19 +635,19 @@ class PromotionManagementScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text('Delete Promotion?'),
-        content: Text('Remove "${item.name}" from active promotions?'),
+        title: const Text('Xóa khuyến mãi?'),
+        content: Text('Xóa "${item.name}" khỏi khuyến mãi?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: const Text('Hủy'),
           ),
           TextButton(
             onPressed: () {
               context.read<PromotionCubit>().remove(item.id!);
               Navigator.pop(ctx);
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Xóa', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

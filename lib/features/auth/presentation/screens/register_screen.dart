@@ -137,21 +137,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                       TextFieldWidget(
                         controller: _emailController,
-                        hint: 'Email Address',
+                        hint: 'Địa chỉ email',
                         icon: Icons.email_outlined,
                       ),
                       const SizedBox(height: 16),
 
                       TextFieldWidget(
                         controller: _phoneController,
-                        hint: 'Phone Number',
+                        hint: 'Số điện thoại',
                         icon: Icons.phone_android_outlined,
                       ),
                       const SizedBox(height: 16),
 
                       TextFieldWidget(
                         controller: _passwordController,
-                        hint: 'Password',
+                        hint: 'Mật khẩu',
                         icon: Icons.lock_outline,
                         isObscure: !_isPasswordVisible,
                         suffixIcon: IconButton(
@@ -226,7 +226,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              "Already have an account?",
+                              "Đã có tài khoản?",
                               style: TextStyle(color: Colors.grey.shade600),
                             ),
                             TextButton(
@@ -234,7 +234,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 context.router.push(LoginRoute());
                               },
                               child: const Text(
-                                'Login',
+                                'Đăng nhập',
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontWeight: FontWeight.bold,

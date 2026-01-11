@@ -27,7 +27,7 @@ class LiveScreen extends StatelessWidget {
                 children: [
                   const CircleAvatar(
                     backgroundColor: Colors.red,
-                    child: Text('LIVE',
+                    child: Text('TRỰC TIẾP',
                         style: TextStyle(color: Colors.white, fontSize: 12)),
                   ),
                   const Spacer(),
@@ -75,7 +75,7 @@ class LiveScreen extends StatelessWidget {
                   ),
                   ElevatedButton(
                     onPressed: () {},
-                    child: const Text('Shop'),
+                    child: const Text('Cửa hàng'),
                   ),
                 ],
               ),

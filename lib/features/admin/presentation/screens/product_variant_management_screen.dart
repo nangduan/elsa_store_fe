@@ -34,7 +34,7 @@ class ProductVariantManagementScreen extends StatelessWidget {
           if (state.status.isFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.errorMessage ?? 'Operation failed'),
+                content: Text(state.errorMessage ?? 'Thao tác thất bại'),
                 backgroundColor: Colors.redAccent,
                 behavior: SnackBarBehavior.floating,
               ),
@@ -56,7 +56,7 @@ class ProductVariantManagementScreen extends StatelessWidget {
                 onPressed: () => context.router.pop(),
               ),
               title: const Text(
-                'DETAILS',
+                'CHI TIẾT',
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
@@ -89,7 +89,7 @@ class ProductVariantManagementScreen extends StatelessWidget {
                           child: Row(
                             children: [
                               const Text(
-                                'Variants',
+                                'Biến thể',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w900,
@@ -168,7 +168,7 @@ class ProductVariantManagementScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            categoryName?.toUpperCase() ?? 'CATALOG',
+            categoryName?.toUpperCase() ?? 'DANH MỤC',
             style: TextStyle(
               color: Colors.white.withOpacity(0.5),
               fontSize: 10,
@@ -200,7 +200,7 @@ class ProductVariantManagementScreen extends StatelessWidget {
               const Icon(Icons.sell_outlined, color: Colors.amber, size: 16),
               const SizedBox(width: 8),
               Text(
-                'Start from ${Format.formatCurrency(basePrice)}',
+                'Từ ${Format.formatCurrency(basePrice)}',
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -249,7 +249,7 @@ class ProductVariantManagementScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.sku ?? 'N/A',
+                  item.sku ?? 'Không có',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -258,10 +258,10 @@ class ProductVariantManagementScreen extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    _badge(item.color ?? 'No Color', Colors.blueGrey.shade700),
+                    _badge(item.color ?? 'Không Màu', Colors.blueGrey.shade700),
                     const SizedBox(width: 6),
                     _badge(
-                      isActive ? 'Active' : 'Inactive',
+                      isActive ? 'Hoạt Động' : 'Không hoạt động',
                       isActive ? Colors.green : Colors.redAccent,
                     ),
                   ],
@@ -273,7 +273,7 @@ class ProductVariantManagementScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '\$${item.price?.toStringAsFixed(0)}',
+                Format.formatCurrency(item.price),
                 style: const TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: 18,
@@ -323,7 +323,7 @@ class ProductVariantManagementScreen extends StatelessWidget {
   Widget _buildEmptyState() {
     return Center(
       child: Text(
-        'No variants found',
+        'Không có biến thể',
         style: TextStyle(color: Colors.grey.shade400),
       ),
     );
@@ -366,26 +366,26 @@ class ProductVariantManagementScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                'Variant Details',
+                'Chi tiết biến thể',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 24),
-              _buildField(skuController, 'SKU Code'),
+              _buildField(skuController, 'Mã SKU'),
               Row(
                 children: [
-                  Expanded(child: _buildField(colorController, 'Color')),
+                  Expanded(child: _buildField(colorController, 'Màu sắc')),
                   const SizedBox(width: 12),
-                  Expanded(child: _buildField(sizeController, 'Size')),
+                  Expanded(child: _buildField(sizeController, 'Kích cỡ')),
                 ],
               ),
               _buildField(
                 priceController,
-                'Price',
+                'Giá',
                 keyboardType: TextInputType.number,
               ),
               _buildField(
                 statusController,
-                'Status (1 Active/0 Inactive)',
+                'Trạng thái (1 Hoạt động/0 Không hoạt động)',
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 24),
@@ -415,7 +415,7 @@ class ProductVariantManagementScreen extends StatelessWidget {
                     Navigator.pop(ctx);
                   },
                   child: const Text(
-                    'SAVE VARIANT',
+                    'LƯU BIẾN THỂ',
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
@@ -455,18 +455,18 @@ class ProductVariantManagementScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Variant?'),
+        title: const Text('Xóa biến thể?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: const Text('Hủy'),
           ),
           TextButton(
             onPressed: () {
               context.read<AdminProductVariantCubit>().remove(item.id!);
               Navigator.pop(ctx);
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Xóa', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

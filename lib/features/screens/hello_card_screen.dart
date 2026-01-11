@@ -39,7 +39,7 @@ class HelloCardScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         Text(
-                          'Hello',
+                          'Xin chào',
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,

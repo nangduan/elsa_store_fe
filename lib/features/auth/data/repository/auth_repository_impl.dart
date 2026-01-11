@@ -36,6 +36,12 @@ class AuthRepositoryImpl implements AuthRepository {
         value: loginResp.refreshToken,
       );
       await secureStorage.write(key: Constants.role, value: loginResp.role);
+      if (loginResp.user?.id != null) {
+        await secureStorage.write(
+          key: Constants.userId,
+          value: loginResp.user!.id.toString(),
+        );
+      }
 
       return AuthResponse(
         authenticated: loginResp.authenticated,
@@ -50,11 +56,13 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> logout() async {
+  Future<void> logout({void Function()? onSuccess}) async {
     try {
       await apiService.logout();
       await secureStorage.delete(key: Constants.accessToken);
       await secureStorage.delete(key: Constants.refreshToken);
+      await secureStorage.delete(key: Constants.userId);
+      onSuccess?.call();
     } on DioException catch (e) {
       throw dioClient.handleDioError(e);
     }

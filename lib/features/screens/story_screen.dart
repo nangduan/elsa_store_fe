@@ -65,7 +65,7 @@ class StoryScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Text('Shop'),
+                  const Text('Cửa hàng'),
                 ],
               ),
             ),

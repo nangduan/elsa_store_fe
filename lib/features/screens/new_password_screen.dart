@@ -23,7 +23,7 @@ class NewPasswordScreen extends StatelessWidget {
             const SizedBox(height: 16),
 
             const Text(
-              'Setup New Password',
+              'Thiết lập mật khẩu mới',
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
 
@@ -39,7 +39,7 @@ class NewPasswordScreen extends StatelessWidget {
             TextField(
               obscureText: true,
               decoration: InputDecoration(
-                hintText: 'New Password',
+                hintText: 'Mật khẩu mới',
                 filled: true,
                 fillColor: Colors.grey.shade100,
                 border: OutlineInputBorder(
@@ -54,7 +54,7 @@ class NewPasswordScreen extends StatelessWidget {
             TextField(
               obscureText: true,
               decoration: InputDecoration(
-                hintText: 'Repeat Password',
+                hintText: 'Nhập lại mật khẩu',
                 filled: true,
                 fillColor: Colors.grey.shade100,
                 border: OutlineInputBorder(
@@ -71,7 +71,7 @@ class NewPasswordScreen extends StatelessWidget {
               height: 48,
               child: ElevatedButton(
                 onPressed: () {},
-                child: const Text('Save'),
+                child: const Text('Lưu'),
               ),
             ),
 
@@ -79,7 +79,7 @@ class NewPasswordScreen extends StatelessWidget {
 
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: const Text('Hủy'),
             ),
           ],
         ),

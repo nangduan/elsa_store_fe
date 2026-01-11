@@ -40,7 +40,7 @@ class PasswordScreen extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 8),
-                  const Text('Type your password'),
+                  const Text('Nhập mật khẩu'),
 
                   const SizedBox(height: 24),
 
@@ -64,7 +64,7 @@ class PasswordScreen extends StatelessWidget {
                     onPressed: () {
                       context.router.push(const PasswordRecoveryRoute());
                     },
-                    child: const Text('Forgot your password?'),
+                    child: const Text('Quên mật khẩu?'),
                   ),
                 ],
               );

@@ -13,7 +13,7 @@ class FilterBottomSheet extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Text('Filter',
+                const Text('Bộ lọc',
                     style:
                     TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const Spacer(),
@@ -25,7 +25,7 @@ class FilterBottomSheet extends StatelessWidget {
             ),
 
             const SizedBox(height: 16),
-            const Text('Size'),
+            const Text('Kích cỡ'),
             const SizedBox(height: 8),
 
             Wrap(
@@ -39,7 +39,7 @@ class FilterBottomSheet extends StatelessWidget {
             ),
 
             const SizedBox(height: 24),
-            const Text('Color'),
+            const Text('Màu sắc'),
             const SizedBox(height: 8),
 
             Wrap(
@@ -62,7 +62,7 @@ class FilterBottomSheet extends StatelessWidget {
             ),
 
             const SizedBox(height: 24),
-            const Text('Price'),
+            const Text('Giá'),
 
             RangeSlider(
               values: const RangeValues(10, 150),
@@ -77,13 +77,13 @@ class FilterBottomSheet extends StatelessWidget {
               children: [
                 OutlinedButton(
                   onPressed: () {},
-                  child: const Text('Clear'),
+                  child: const Text('Xóa'),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Apply'),
+                    child: const Text('Áp dụng'),
                   ),
                 ),
               ],

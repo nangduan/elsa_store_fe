@@ -10,7 +10,7 @@ class CartEmptyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Cart')),
+      appBar: AppBar(title: const Text('Giỏ hàng')),
       body: Column(
         children: [
           const SizedBox(height: 48),
@@ -23,7 +23,7 @@ class CartEmptyScreen extends StatelessWidget {
           ),
 
           const SizedBox(height: 12),
-          const Text('Your cart is empty'),
+          const Text('Giỏ hàng của bạn trống'),
 
           const SizedBox(height: 32),
 
@@ -32,11 +32,11 @@ class CartEmptyScreen extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  fromWishlist ? 'From Your Wishlist' : 'Most Popular',
+                  fromWishlist ? 'Từ danh sách yêu thích' : 'Phổ biến nhất',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
-                TextButton(onPressed: () {}, child: const Text('See All')),
+                TextButton(onPressed: () {}, child: const Text('Xem tất cả')),
               ],
             ),
           ),
@@ -54,7 +54,7 @@ class CartEmptyScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: const [
-                Text('Total'),
+                Text('Tổng'),
                 Spacer(),
                 Text('\$0.00',
                     style:
@@ -67,7 +67,7 @@ class CartEmptyScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: ElevatedButton(
               onPressed: () {},
-              child: const Text('Checkout'),
+              child: const Text('Thanh toán'),
             ),
           ),
         ],
@@ -95,14 +95,14 @@ class _SuggestItem extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Lorem ipsum'),
+              Text('Nội dung mẫu'),
               Text('\$17.00'),
             ],
           ),
         ),
         ElevatedButton(
           onPressed: () {},
-          child: const Text('Add'),
+          child: const Text('Thẻm'),
         ),
       ],
     );

@@ -8,17 +8,17 @@ class RecentlyViewedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Recently viewed')),
+      appBar: AppBar(title: const Text('Đã xem gần đây')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text('Today', style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text('Hôm nay', style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
           _grid(),
 
           const SizedBox(height: 24),
           const Text(
-            'Yesterday',
+            'Hôm qua',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
@@ -53,7 +53,7 @@ class RecentlyViewedScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            const Text('Lorem ipsum'),
+            const Text('Nội dung mẫu'),
             const Text(
               '\$17.00',
               style: TextStyle(fontWeight: FontWeight.bold),

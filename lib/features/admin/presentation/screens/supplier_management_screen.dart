@@ -22,7 +22,7 @@ class SupplierManagementScreen extends StatelessWidget {
             if (state.status.isFailure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state.errorMessage ?? 'Operation failed'),
+                  content: Text(state.errorMessage ?? 'Thao tác thất bại'),
                   backgroundColor: Colors.redAccent,
                   behavior: SnackBarBehavior.floating,
                 ),
@@ -82,7 +82,7 @@ class SupplierManagementScreen extends StatelessWidget {
       flexibleSpace: const FlexibleSpaceBar(
         titlePadding: EdgeInsetsDirectional.only(start: 56, bottom: 16),
         title: Text(
-          'SUPPLIERS',
+          'NHÀ CUNG CẤP',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.w800,
@@ -267,7 +267,7 @@ class SupplierManagementScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'No suppliers found',
+            'Không có nhà cung cấp',
             style: TextStyle(
               color: Colors.grey.shade400,
               fontWeight: FontWeight.w500,
@@ -306,7 +306,7 @@ class SupplierManagementScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                item == null ? 'New Supplier' : 'Update Supplier',
+                item == null ? 'Nhà cung cấp mới' : 'Cập nhật nhà cung cấp',
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w900,
@@ -315,24 +315,24 @@ class SupplierManagementScreen extends StatelessWidget {
               const SizedBox(height: 24),
               _buildModernField(
                 nameController,
-                'Company Name',
+                'Tên công ty',
                 Icons.business_rounded,
               ),
               _buildModernField(
                 phoneController,
-                'Phone Number',
+                'Số điện thoại',
                 Icons.phone_rounded,
                 keyboardType: TextInputType.phone,
               ),
               _buildModernField(
                 emailController,
-                'Email Address',
+                'Địa chỉ email',
                 Icons.email_rounded,
                 keyboardType: TextInputType.emailAddress,
               ),
               _buildModernField(
                 addressController,
-                'Office Address',
+                'Địa chỉ văn phòng',
                 Icons.map_rounded,
                 maxLines: 2,
               ),
@@ -363,7 +363,7 @@ class SupplierManagementScreen extends StatelessWidget {
                     Navigator.pop(dialogContext);
                   },
                   child: const Text(
-                    'SAVE SUPPLIER',
+                    'LƯU NHÀ CUNG CẤP',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -411,19 +411,19 @@ class SupplierManagementScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text('Confirm Delete'),
-        content: Text('Are you sure you want to remove ${item.name}?'),
+        title: const Text('Xác nhận xóa'),
+        content: Text('Bạn có chắc chắn muốn xóa ${item.name}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: const Text('Hủy'),
           ),
           TextButton(
             onPressed: () {
               context.read<SupplierCubit>().remove(item.id!);
               Navigator.pop(ctx);
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Xóa', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

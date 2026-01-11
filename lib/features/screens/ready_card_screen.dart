@@ -49,7 +49,7 @@ class ReadyCardScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         Text(
-                          'Ready?',
+                          'Sẵn sàng?',
                           style: TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.bold,
@@ -75,7 +75,7 @@ class ReadyCardScreen extends StatelessWidget {
                         onPressed: () {
                           context.router.replace(const MainBottomNavRoute());
                         },
-                        child: const Text('Continue'),
+                        child: const Text('Tiếp tục'),
                       ),
                     ),
                   ),

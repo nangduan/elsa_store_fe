@@ -3,10 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_skeleton/core/constants/format.dart';
 import 'package:flutter_skeleton/features/product/data/models/response/product_variant_response.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../product/data/models/response/product_detail_response.dart';
 
 import '../../core/api/app_config.dart';
+import '../../core/constants/constant.dart';
 import '../../core/di/injector.dart';
+import '../../core/errors/app_exception.dart';
+import '../cart/domain/repositories/cart_repository.dart';
 import '../home/data/models/response/product_response.dart';
 import '../product/presentation/cubit/product_detail_cubit.dart';
 
@@ -30,6 +34,7 @@ class _ProductDetailFullScreenState extends State<ProductDetailFullScreen> {
 
   late ProductDetailCubit _cubit;
   late PageController _pageController;
+  bool _isAdding = false;
 
   // Cache danh sách ảnh để không bị load lại liên tục
   List<String> _cachedImages = [];
@@ -103,7 +108,7 @@ class _ProductDetailFullScreenState extends State<ProductDetailFullScreen> {
                 widget.product.basePrice ??
                 0;
 
-            final name = detail?.name ?? widget.product.name ?? 'Product Name';
+            final name = detail?.name ?? widget.product.name ?? 'Tên sản phẩm';
             final description =
                 detail?.description ??
                 widget.product.description ??
@@ -199,7 +204,7 @@ class _ProductDetailFullScreenState extends State<ProductDetailFullScreen> {
                             const SizedBox(height: 24),
 
                             // Variations Section
-                            _buildSectionTitle('Variations'),
+                            _buildSectionTitle('Biến thể'),
                             const SizedBox(height: 12),
                             _buildVariationsList(
                               state.product?.productVariants ?? [],
@@ -208,7 +213,7 @@ class _ProductDetailFullScreenState extends State<ProductDetailFullScreen> {
                             const SizedBox(height: 24),
 
                             // Description Section
-                            _buildSectionTitle('Description'),
+                            _buildSectionTitle('Mô tả'),
                             const SizedBox(height: 8),
                             Text(
                               description,
@@ -225,7 +230,7 @@ class _ProductDetailFullScreenState extends State<ProductDetailFullScreen> {
                             const SizedBox(height: 12),
                             _buildDetailRow(
                               'SKU',
-                              _selectedVariant?.sku ?? 'N/A',
+                              _selectedVariant?.sku ?? 'Không có',
                             ),
                             _buildDetailRow('Condition', 'New in Box'),
 
@@ -319,7 +324,7 @@ class _ProductDetailFullScreenState extends State<ProductDetailFullScreen> {
   }
 
   Widget _buildVariationsList(List<ProductVariantResponse> variants) {
-    if (variants.isEmpty) return const Text("No options available");
+    if (variants.isEmpty) return const Text("Không có tùy chọn");
 
     // [FIX 1] Tăng height từ 100 lên 110 để tránh lỗi overflow
     return SizedBox(
@@ -497,16 +502,15 @@ class _ProductDetailFullScreenState extends State<ProductDetailFullScreen> {
                   if (_selectedVariant == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Please select a variation (Color/Size)'),
+                        content: Text('Vui lòng chọn biến thể (Màu/Kích cỡ)'),
                       ),
                     );
                     return;
                   }
-                  // TODO: Handle Add to Cart logic
-                  print("Add to cart: ${_selectedVariant?.id}");
+                  _addToCart();
                 },
                 child: const Text(
-                  'ADD TO CART',
+                  'THÊM VÀO GIỎ',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1,
@@ -521,6 +525,43 @@ class _ProductDetailFullScreenState extends State<ProductDetailFullScreen> {
   }
 
   // --- HELPERS ---
+
+  Future<void> _addToCart() async {
+    if (_isAdding || _selectedVariant?.id == null) return;
+
+    setState(() => _isAdding = true);
+    try {
+      final storage = getIt<FlutterSecureStorage>();
+      final userIdRaw = await storage.read(key: Constants.userId);
+      final userId = int.tryParse(userIdRaw ?? '');
+      if (userId == null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Thiếu thông tin người dùng')),
+        );
+        return;
+      }
+
+      await getIt<CartRepository>().addItem(
+        userId,
+        _selectedVariant!.id!,
+        1,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Đã thêm vào giỏ hàng')),
+      );
+    } on AppException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message)),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isAdding = false);
+      }
+    }
+  }
 
   String? _resolveImageUrl(String? path) {
     if (path == null || path.isEmpty) return null;

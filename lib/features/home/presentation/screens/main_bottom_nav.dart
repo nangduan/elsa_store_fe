@@ -54,26 +54,26 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
             BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),
               activeIcon: Icon(Icons.home),
-              label: 'Home',
+              label: 'Trang chủ',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.grid_view_outlined),
               activeIcon: Icon(Icons.grid_view_rounded),
-              label: 'Shop',
+              label: 'Cửa hàng',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.search_rounded),
-              label: 'Search',
+              label: 'Tìm kiếm',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.shopping_bag_outlined),
               activeIcon: Icon(Icons.shopping_bag),
-              label: 'Cart',
+              label: 'Giỏ hàng',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline),
               activeIcon: Icon(Icons.person),
-              label: 'Profile',
+              label: 'Tài khoản',
             ),
           ],
         ),

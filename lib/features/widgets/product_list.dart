@@ -59,7 +59,7 @@ class ProductList extends StatelessWidget {
                 const SizedBox(height: 8),
 
                 const Text(
-                  'Lorem ipsum',
+                  'Nội dung mẫu',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

@@ -36,7 +36,7 @@ class ProductManagementScreen extends StatelessWidget {
             if (state.status.isFailure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state.errorMessage ?? 'Operation failed'),
+                  content: Text(state.errorMessage ?? 'Thao tác thất bại'),
                   backgroundColor: Colors.redAccent,
                   behavior: SnackBarBehavior.floating,
                 ),
@@ -100,7 +100,7 @@ class ProductManagementScreen extends StatelessWidget {
       flexibleSpace: const FlexibleSpaceBar(
         titlePadding: EdgeInsetsDirectional.only(start: 56, bottom: 16),
         title: Text(
-          'PRODUCTS',
+          'SẢN PHẨM',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.w800,
@@ -130,7 +130,7 @@ class ProductManagementScreen extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
         child: TextField(
           decoration: InputDecoration(
-            hintText: 'Search inventory...',
+            hintText: 'Tìm kiếm hàng tồn...',
             hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
             prefixIcon: const Icon(Icons.search_rounded, color: Colors.black54),
             filled: true,
@@ -247,7 +247,7 @@ class ProductManagementScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    item.description ?? 'No description provided',
+                    item.description ?? 'Chưa có mô tả',
                     style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -263,7 +263,7 @@ class ProductManagementScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Base Price',
+                            'Giá gốc',
                             style: TextStyle(
                               color: Colors.grey.shade400,
                               fontSize: 11,
@@ -380,7 +380,7 @@ class ProductManagementScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Inventory is empty',
+            'Kho hàng trống',
             style: TextStyle(
               color: Colors.grey.shade400,
               fontWeight: FontWeight.w500,
@@ -436,7 +436,7 @@ class ProductManagementScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                item == null ? 'New Product' : 'Edit Product',
+                item == null ? 'Sản phẩm mới' : 'Chỉnh sửa sản phẩm',
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w900,
@@ -445,25 +445,25 @@ class ProductManagementScreen extends StatelessWidget {
               const SizedBox(height: 24),
               _buildModernField(
                 nameController,
-                'Product Name',
+                'Tên sản phẩm',
                 Icons.drive_file_rename_outline,
               ),
               _buildModernField(
                 descriptionController,
-                'Description',
+                'Mô tả',
                 Icons.description_outlined,
                 maxLines: 3,
               ),
               _buildModernField(
                 basePriceController,
-                'Base Price',
+                'Giá gốc',
                 Icons.payments_outlined,
                 keyboardType: TextInputType.number,
               ),
               DropdownButtonFormField<int>(
                 value: selectedCategoryId,
                 decoration: _fieldDecoration(
-                  'Category',
+                  'Danh mục',
                   Icons.category_outlined,
                 ),
                 items: selectableCategories
@@ -508,7 +508,7 @@ class ProductManagementScreen extends StatelessWidget {
                     }
                   },
                   child: const Text(
-                    'SAVE PRODUCT',
+                    'LƯU SẢN PHẨM',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -572,19 +572,19 @@ class ProductManagementScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text('Confirm Delete'),
-        content: Text('Remove "${item.name}" from catalog?'),
+        title: const Text('Xác nhận xóa'),
+        content: Text('Xóa "${item.name}" khỏi danh mục?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: const Text('Hủy'),
           ),
           TextButton(
             onPressed: () {
               context.read<ProductCubit>().remove(item.id!);
               Navigator.pop(ctx);
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Xóa', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

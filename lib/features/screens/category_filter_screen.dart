@@ -17,7 +17,7 @@ class CategoryFilterScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('All Categories')),
+      appBar: AppBar(title: const Text('Tất cả danh mục')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: categories

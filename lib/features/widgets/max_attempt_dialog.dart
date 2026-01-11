@@ -25,7 +25,7 @@ void showMaxAttemptDialog(BuildContext context) {
                 backgroundColor: Colors.black,
               ),
               onPressed: () => Navigator.pop(context),
-              child: const Text('Okay'),
+              child: const Text('Đồng ý'),
             ),
           ),
         ],

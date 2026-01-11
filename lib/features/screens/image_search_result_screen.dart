@@ -9,7 +9,7 @@ class ImageSearchResultScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Image Search'),
+        title: const Text('Tìm kiếm hình ảnh'),
         actions: [
           IconButton(
             icon: const Icon(Icons.close),

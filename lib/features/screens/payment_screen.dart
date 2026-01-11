@@ -9,12 +9,12 @@ class PaymentScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Payment')),
+      appBar: AppBar(title: const Text('Thanh toán')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           const _InfoTile(
-            title: 'Shipping Address',
+            title: 'Địa chỉ giao hàng',
             subtitle: '26 Dong Da, Ward 2, District 2\nHo Chi Minh City',
           ),
 
@@ -49,7 +49,7 @@ class PaymentScreen extends StatelessWidget {
           const _ItemRow(),
 
           const SizedBox(height: 16),
-          const Text('Shipping Options',
+          const Text('Tùy chọn giao hàng',
               style: TextStyle(fontWeight: FontWeight.bold)),
 
           const RadioListTile(
@@ -57,7 +57,7 @@ class PaymentScreen extends StatelessWidget {
             groupValue: true,
             onChanged: null,
             title: Text('Standard (5–7 days)'),
-            subtitle: Text('FREE'),
+            subtitle: Text('MIỄN PHÍ'),
           ),
 
           const RadioListTile(
@@ -69,18 +69,18 @@ class PaymentScreen extends StatelessWidget {
           ),
 
           const SizedBox(height: 16),
-          const Text('Payment Method',
+          const Text('Phương thức thanh toán',
               style: TextStyle(fontWeight: FontWeight.bold)),
 
           const ListTile(
             leading: Icon(Icons.credit_card),
-            title: Text('Card'),
+            title: Text('Thẻ'),
           ),
 
           const SizedBox(height: 24),
           Row(
             children: const [
-              Text('Total',
+              Text('Tổng',
                   style: TextStyle(fontWeight: FontWeight.bold)),
               Spacer(),
               Text('\$34.00',
@@ -92,7 +92,7 @@ class PaymentScreen extends StatelessWidget {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {},
-            child: const Text('Pay'),
+            child: const Text('Thanh toán'),
           ),
         ],
       ),
@@ -123,7 +123,7 @@ class _ItemRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: const CircleAvatar(),
-      title: const Text('Lorem ipsum'),
+      title: const Text('Nội dung mẫu'),
       trailing: const Text('\$17.00'),
     );
   }

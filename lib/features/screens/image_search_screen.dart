@@ -36,7 +36,7 @@ class ImageSearchScreen extends StatelessWidget {
                   child: const Icon(Icons.camera_alt),
                 ),
                 const SizedBox(height: 12),
-                const Text('Camera', style: TextStyle(color: Colors.white)),
+                const Text('Máy ảnh', style: TextStyle(color: Colors.white)),
               ],
             ),
           ),

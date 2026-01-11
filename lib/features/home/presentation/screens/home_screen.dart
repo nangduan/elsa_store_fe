@@ -24,7 +24,7 @@ class HomeScreen extends StatelessWidget {
           centerTitle: false,
           automaticallyImplyLeading: false, // Bỏ nút Back
           title: const Text(
-            'FASHION STORE',
+            'CỬA HÀNG THỜI TRANG',
             style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.w900,
@@ -52,7 +52,7 @@ class HomeScreen extends StatelessWidget {
 
             if (state.status == HomeStatus.failure) {
               return Center(
-                child: Text(state.errorMessage ?? 'Failed to load data'),
+                child: Text(state.errorMessage ?? 'Tải dữ liệu thất bại'),
               );
             }
 
@@ -94,11 +94,11 @@ class HomeScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'New Collection',
+                            'Bộ sưu tập mới',
                             style: TextStyle(color: Colors.white, fontSize: 14),
                           ),
                           Text(
-                            'SALE UP TO 50%',
+                            'GIẢM GIÁ ĐẾN 50%',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 24,
@@ -111,7 +111,7 @@ class HomeScreen extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 30),
-                  _buildSectionTitle('Categories'),
+                  _buildSectionTitle('Danh mục'),
                   const SizedBox(height: 16),
 
                   // Category List
@@ -146,7 +146,7 @@ class HomeScreen extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 30),
-                  _buildSectionTitle('New Arrivals'),
+                  _buildSectionTitle('Hàng mới'),
                   const SizedBox(height: 16),
 
                   // Product Grid (Thay thế ListTile cũ)
@@ -277,7 +277,7 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         Text(
-          'See all',
+          'Xem tất cả',
           style: TextStyle(
             color: Colors.grey.shade500,
             fontWeight: FontWeight.w600,

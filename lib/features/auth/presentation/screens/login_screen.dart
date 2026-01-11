@@ -97,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       TextFieldWidget(
                         controller: _passwordController,
-                        hint: 'Password',
+                        hint: 'Mật khẩu',
                         icon: Icons.lock_outline,
                         isObscure: !_isPasswordVisible,
                         suffixIcon: IconButton(
@@ -120,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: TextButton(
                           onPressed: () {}, // Thêm logic quên mật khẩu nếu cần
                           child: Text(
-                            'Forgot Password?',
+                            'Quên mật khẩu?',
                             style: TextStyle(color: Colors.grey.shade600),
                           ),
                         ),
@@ -179,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              "Don't have an account?",
+                              "Chưa có tài khoản?",
                               style: TextStyle(color: Colors.grey.shade600),
                             ),
                             TextButton(
@@ -202,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: () =>
                               context.router.replace(const StartRoute()),
                           child: Text(
-                            'Cancel',
+                            'Hủy',
                             style: TextStyle(color: Colors.grey.shade400),
                           ),
                         ),

@@ -76,7 +76,7 @@ class CategoryManagementScreen extends StatelessWidget {
       flexibleSpace: const FlexibleSpaceBar(
         titlePadding: EdgeInsetsDirectional.only(start: 56, bottom: 16),
         title: Text(
-          'CATEGORIES',
+          'DANH MỤC',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.w800,
@@ -104,7 +104,7 @@ class CategoryManagementScreen extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
         child: TextField(
           decoration: InputDecoration(
-            hintText: 'Search categories...',
+            hintText: 'Tìm kiếm danh mục...',
             hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
             prefixIcon: const Icon(Icons.search_rounded, color: Colors.black54),
             filled: true,
@@ -189,7 +189,7 @@ class CategoryManagementScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        'Parent: ${item.parentName ?? 'Unknown'}',
+                        'Danh mục gốc: ${item.parentName ?? 'Không rõ'}',
                         style: const TextStyle(
                           color: Colors.blue,
                           fontSize: 11,
@@ -199,7 +199,7 @@ class CategoryManagementScreen extends StatelessWidget {
                     )
                   else
                     Text(
-                      'Root Category',
+                      'Danh mục gốc',
                       style: TextStyle(
                         color: Colors.grey.shade400,
                         fontSize: 12,
@@ -257,7 +257,7 @@ class CategoryManagementScreen extends StatelessWidget {
           Icon(Icons.category_outlined, size: 80, color: Colors.grey.shade200),
           const SizedBox(height: 16),
           Text(
-            'No categories found',
+            'Không tìm thấy danh mục',
             style: TextStyle(
               color: Colors.grey.shade400,
               fontWeight: FontWeight.w500,
@@ -298,7 +298,7 @@ class CategoryManagementScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                item == null ? 'New Category' : 'Edit Category',
+                item == null ? 'Danh mục mới' : 'Chỉnh sửa danh mục',
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w900,
@@ -308,7 +308,7 @@ class CategoryManagementScreen extends StatelessWidget {
               TextField(
                 controller: nameController,
                 decoration: _inputDecoration(
-                  'Category Name',
+                  'Tên danh mục',
                   Icons.drive_file_rename_outline,
                 ),
               ),
@@ -316,13 +316,13 @@ class CategoryManagementScreen extends StatelessWidget {
               DropdownButtonFormField<int?>(
                 value: parentId,
                 decoration: _inputDecoration(
-                  'Parent Category (Optional)',
+                  'Danh mục cha (Tùy chọn)',
                   Icons.account_tree_outlined,
                 ),
                 items: [
                   const DropdownMenuItem<int?>(
                     value: null,
-                    child: Text('No Parent (Root)'),
+                    child: Text('Danh mục cha (Gốc)'),
                   ),
                   ...categories
                       .where((c) => c.parentId == null && c.id != item?.id)
@@ -360,7 +360,7 @@ class CategoryManagementScreen extends StatelessWidget {
                     Navigator.pop(dialogContext);
                   },
                   child: const Text(
-                    'SAVE CATEGORY',
+                    'LƯU DANH MỤC',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -394,19 +394,19 @@ class CategoryManagementScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text('Confirm Delete'),
-        content: Text('Remove "${item.name}"?'),
+        title: const Text('Xác nhận xóa'),
+        content: Text('Xóa "${item.name}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: const Text('Hủy'),
           ),
           TextButton(
             onPressed: () {
               context.read<CategoryCubit>().remove(item.id!);
               Navigator.pop(ctx);
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Xóa', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

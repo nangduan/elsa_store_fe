@@ -10,7 +10,7 @@ class WishlistScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Wishlist')),
+      appBar: AppBar(title: const Text('Danh sách yêu thích')),
       body: isEmpty
           ? Center(
               child: Column(
@@ -18,7 +18,7 @@ class WishlistScreen extends StatelessWidget {
                 children: const [
                   Icon(Icons.favorite_border, size: 64),
                   SizedBox(height: 12),
-                  Text('Your wishlist is empty'),
+                  Text('Danh sách yêu thích trống'),
                 ],
               ),
             )
@@ -53,7 +53,7 @@ class _WishlistItem extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Lorem ipsum'),
+              Text('Nội dung mẫu'),
               Text('\$32.00', style: TextStyle(fontWeight: FontWeight.bold)),
             ],
           ),

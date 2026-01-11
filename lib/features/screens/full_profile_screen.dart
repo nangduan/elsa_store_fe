@@ -71,7 +71,7 @@ class FullProfileScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Announcement',
+                        Text('Thông báo',
                             style: TextStyle(fontWeight: FontWeight.bold)),
                         SizedBox(height: 4),
                         Text(
@@ -91,7 +91,7 @@ class FullProfileScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            const Text('Recently viewed',
+            const Text('Đã xem gần đây',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
 
             const SizedBox(height: 12),
@@ -113,7 +113,7 @@ class FullProfileScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            const Text('My Orders',
+            const Text('Đơn hàng của tôi',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
 
             const SizedBox(height: 12),
@@ -128,7 +128,7 @@ class FullProfileScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            const Text('Stories',
+            const Text('Câu chuyện',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
 
             const SizedBox(height: 12),

@@ -52,7 +52,7 @@ class ImageRecognizedScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  ElevatedButton(onPressed: () {}, child: const Text('Shop')),
+                  ElevatedButton(onPressed: () {}, child: const Text('Cửa hàng')),
                 ],
               ),
             ),

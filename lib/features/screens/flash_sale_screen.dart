@@ -88,7 +88,7 @@ class FlashSaleScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            const SectionHeader(title: 'Most Popular'),
+            const SectionHeader(title: 'Phổ biến nhất'),
             const ProductList(),
           ],
         ),

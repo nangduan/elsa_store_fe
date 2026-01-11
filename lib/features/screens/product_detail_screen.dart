@@ -84,7 +84,7 @@ class ProductDetailScreen extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 16),
-                    const Text('Variations'),
+                    const Text('Biến thể'),
 
                     const SizedBox(height: 8),
                     Row(
@@ -116,14 +116,14 @@ class ProductDetailScreen extends StatelessWidget {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {},
-                      child: const Text('Add to cart'),
+                      child: const Text('Thêm vào giỏ'),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {},
-                      child: const Text('Buy now'),
+                      child: const Text('Mua ngay'),
                     ),
                   ),
                 ],

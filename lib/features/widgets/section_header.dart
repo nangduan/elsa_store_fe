@@ -27,7 +27,7 @@ class SectionHeader extends StatelessWidget {
           onPressed: () {
             context.router.push(const FlashSaleRoute());
           },
-          child: const Text('See all'),
+          child: const Text('Xem tất cả'),
         ),
       ],
     );

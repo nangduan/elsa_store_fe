@@ -8,7 +8,7 @@ class SearchResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Shop')),
+      appBar: AppBar(title: const Text('Cửa hàng')),
       body: GridView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: 8,
@@ -32,7 +32,7 @@ class SearchResultScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              const Text('Lorem ipsum'),
+              const Text('Nội dung mẫu'),
               const Text(
                 '\$17.00',
                 style: TextStyle(fontWeight: FontWeight.bold),

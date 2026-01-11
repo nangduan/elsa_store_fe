@@ -105,6 +105,22 @@ import 'package:flutter_skeleton/features/auth/domain/usecases/logout_use_case.d
     as _i381;
 import 'package:flutter_skeleton/features/auth/domain/usecases/register_use_case.dart'
     as _i235;
+import 'package:flutter_skeleton/features/cart/data/datasource/remote/cart_api_service.dart'
+    as _i998;
+import 'package:flutter_skeleton/features/cart/data/repository/cart_repository_impl.dart'
+    as _i992;
+import 'package:flutter_skeleton/features/cart/domain/repositories/cart_repository.dart'
+    as _i207;
+import 'package:flutter_skeleton/features/cart/domain/usecases/add_cart_item_use_case.dart'
+    as _i423;
+import 'package:flutter_skeleton/features/cart/domain/usecases/delete_cart_item_use_case.dart'
+    as _i273;
+import 'package:flutter_skeleton/features/cart/domain/usecases/get_cart_use_case.dart'
+    as _i1052;
+import 'package:flutter_skeleton/features/cart/domain/usecases/update_cart_item_quantity_use_case.dart'
+    as _i1002;
+import 'package:flutter_skeleton/features/cart/presentation/cubit/cart_cubit.dart'
+    as _i307;
 import 'package:flutter_skeleton/features/home/data/datasource/remote/home_api_service.dart'
     as _i578;
 import 'package:flutter_skeleton/features/home/data/repository/home_repository_impl.dart'
@@ -123,14 +139,14 @@ import 'package:flutter_skeleton/features/product/data/repository/product_reposi
     as _i511;
 import 'package:flutter_skeleton/features/product/domain/repositories/product_repository.dart'
     as _i564;
+import 'package:flutter_skeleton/features/product/domain/usecases/get_product_detail_use_case.dart'
+    as _i481;
 import 'package:flutter_skeleton/features/product/domain/usecases/get_product_variants_use_case.dart'
     as _i983;
-import 'package:flutter_skeleton/features/product/domain/usecases/get_product_detail_use_case.dart'
-    as _i412;
+import 'package:flutter_skeleton/features/product/presentation/cubit/product_detail_cubit.dart'
+    as _i701;
 import 'package:flutter_skeleton/features/product/presentation/cubit/product_variant_cubit.dart'
     as _i363;
-import 'package:flutter_skeleton/features/product/presentation/cubit/product_detail_cubit.dart'
-    as _i271;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
@@ -156,6 +172,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i578.HomeApiService>(
       () => networkModule.provideHomeApiService(gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i998.CartApiService>(
+      () => networkModule.provideCartApiService(gh<_i361.Dio>()),
     );
     gh.lazySingleton<_i1001.ProductApiService>(
       () => networkModule.provideProductApiService(gh<_i361.Dio>()),
@@ -187,6 +206,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i520.DioClient>(),
       ),
     );
+    gh.lazySingleton<_i207.CartRepository>(
+      () => _i992.CartRepositoryImpl(
+        gh<_i998.CartApiService>(),
+        gh<_i520.DioClient>(),
+      ),
+    );
     gh.factory<_i602.GetCategoriesUseCase>(
       () => _i602.GetCategoriesUseCase(gh<_i275.HomeRepository>()),
     );
@@ -204,6 +229,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i367.AdminPromotionApiService>(),
         gh<_i520.DioClient>(),
       ),
+    );
+    gh.factory<_i423.AddCartItemUseCase>(
+      () => _i423.AddCartItemUseCase(gh<_i207.CartRepository>()),
+    );
+    gh.factory<_i273.DeleteCartItemUseCase>(
+      () => _i273.DeleteCartItemUseCase(gh<_i207.CartRepository>()),
+    );
+    gh.factory<_i1052.GetCartUseCase>(
+      () => _i1052.GetCartUseCase(gh<_i207.CartRepository>()),
+    );
+    gh.factory<_i1002.UpdateCartItemQuantityUseCase>(
+      () => _i1002.UpdateCartItemQuantityUseCase(gh<_i207.CartRepository>()),
     );
     gh.lazySingleton<_i413.SupplierRepository>(
       () => _i210.SupplierRepositoryImpl(
@@ -333,6 +370,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i235.RegisterUseCase>(
       () => _i235.RegisterUseCase(gh<_i518.AuthRepository>()),
     );
+    gh.factory<_i307.CartCubit>(
+      () => _i307.CartCubit(
+        gh<_i1052.GetCartUseCase>(),
+        gh<_i423.AddCartItemUseCase>(),
+        gh<_i1002.UpdateCartItemQuantityUseCase>(),
+        gh<_i273.DeleteCartItemUseCase>(),
+        gh<_i558.FlutterSecureStorage>(),
+      ),
+    );
     gh.factory<_i152.CreatePromotionUseCase>(
       () => _i152.CreatePromotionUseCase(gh<_i1041.PromotionRepository>()),
     );
@@ -348,8 +394,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i983.GetProductVariantsUseCase>(
       () => _i983.GetProductVariantsUseCase(gh<_i564.ProductRepository>()),
     );
-    gh.factory<_i412.GetProductDetailUseCase>(
-      () => _i412.GetProductDetailUseCase(gh<_i564.ProductRepository>()),
+    gh.factory<_i481.GetProductDetailUseCase>(
+      () => _i481.GetProductDetailUseCase(gh<_i564.ProductRepository>()),
     );
     gh.factory<_i245.PromotionCubit>(
       () => _i245.PromotionCubit(
@@ -359,11 +405,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i721.DeletePromotionUseCase>(),
       ),
     );
+    gh.factory<_i701.ProductDetailCubit>(
+      () => _i701.ProductDetailCubit(gh<_i481.GetProductDetailUseCase>()),
+    );
     gh.factory<_i363.ProductVariantCubit>(
       () => _i363.ProductVariantCubit(gh<_i983.GetProductVariantsUseCase>()),
-    );
-    gh.factory<_i271.ProductDetailCubit>(
-      () => _i271.ProductDetailCubit(gh<_i412.GetProductDetailUseCase>()),
     );
     return this;
   }

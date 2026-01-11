@@ -12,20 +12,20 @@ class EditAddressBottomSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Shipping Address',
+              'Địa chỉ giao hàng',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
 
-            const TextField(decoration: InputDecoration(labelText: 'Country')),
-            const TextField(decoration: InputDecoration(labelText: 'Address')),
-            const TextField(decoration: InputDecoration(labelText: 'City')),
-            const TextField(decoration: InputDecoration(labelText: 'Postcode')),
+            const TextField(decoration: InputDecoration(labelText: 'Quốc gia')),
+            const TextField(decoration: InputDecoration(labelText: 'Địa chỉ')),
+            const TextField(decoration: InputDecoration(labelText: 'Thành phố')),
+            const TextField(decoration: InputDecoration(labelText: 'Mã bưu chính')),
 
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Save Changes'),
+              child: const Text('Lưu thay ??i'),
             ),
           ],
         ),

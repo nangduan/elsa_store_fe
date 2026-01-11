@@ -50,7 +50,7 @@ class _LoginFormState extends State<LoginForm> {
               CustomTextField(label: 'Email', controller: emailController),
               const SizedBox(height: 16),
               CustomTextField(
-                label: 'Password',
+                label: 'Mật khẩu',
                 controller: passwordController,
                 obscureText: true,
               ),
@@ -63,7 +63,7 @@ class _LoginFormState extends State<LoginForm> {
                 ),
               const SizedBox(height: 16),
               CustomButton(
-                text: 'Login',
+                text: 'Đăng nhập',
                 onPressed: () {
                   if (!_formKey.currentState!.validate()) {
                     return;

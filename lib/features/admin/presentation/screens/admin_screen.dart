@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_skeleton/core/di/injector.dart';
 import 'package:flutter_skeleton/core/navigation/app_routes.dart';
+import 'package:flutter_skeleton/features/auth/domain/repositories/auth_repository.dart';
 
 @RoutePage()
 class AdminScreen extends StatelessWidget {
@@ -15,7 +17,7 @@ class AdminScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: false,
         title: const Text(
-          'ADMIN PANEL',
+          'Quản lý cửa hàng',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.w900,
@@ -23,10 +25,20 @@ class AdminScreen extends StatelessWidget {
           ),
         ),
         actions: [
+          // Nút Settings (Giữ nguyên)
           IconButton(
             icon: const Icon(Icons.settings_outlined, color: Colors.black),
-            onPressed: () {},
+            onPressed: () {
+              // TODO: Navigate to Settings
+            },
           ),
+          // --- [NEW] NÚT LOGOUT ---
+          IconButton(
+            tooltip: 'Đăng xuất',
+            icon: const Icon(Icons.logout, color: Colors.red),
+            onPressed: () => _showLogoutDialog(context),
+          ),
+          const SizedBox(width: 8),
         ],
       ),
       body: SingleChildScrollView(
@@ -34,9 +46,8 @@ class AdminScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. CHỈ SỐ (STATS)
             const Text(
-              "Overview",
+              "Tổng quan",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
@@ -44,9 +55,8 @@ class AdminScreen extends StatelessWidget {
 
             const SizedBox(height: 32),
 
-            // 2. BIỂU ĐỒ DOANH THU (CHART PLACEHOLDER)
             const Text(
-              "Revenue Analytics",
+              "Phân tích doanh thu",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
@@ -54,9 +64,8 @@ class AdminScreen extends StatelessWidget {
 
             const SizedBox(height: 32),
 
-            // 3. NAVIGATION DASHBOARD
             const Text(
-              "Management",
+              "Quản lý",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
@@ -69,7 +78,41 @@ class AdminScreen extends StatelessWidget {
     );
   }
 
-  // Widget hiển thị các thẻ chỉ số
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Đăng xuất"),
+        content: const Text(
+          "Bạn có chắc chắn muốn đăng xuất khỏi Admin Panel?",
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), // Đóng dialog
+            child: const Text("Hủy", style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () {
+              getIt<AuthRepository>()
+                  .logout(
+                    onSuccess: () =>
+                        context.router.replaceAll([const LoginRoute()]),
+                  )
+                  .onError((error, stackTrace) {
+                    Navigator.pop(context);
+                  });
+            },
+            child: const Text(
+              "Đồng ý",
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildStatsGrid() {
     return GridView.count(
       shrinkWrap: true,
@@ -79,10 +122,15 @@ class AdminScreen extends StatelessWidget {
       mainAxisSpacing: 15,
       childAspectRatio: 1.5,
       children: [
-        _statCard('Monthly Sales', '1,284', Icons.calendar_month, Colors.blue),
-        _statCard('Weekly Sales', '312', Icons.view_week, Colors.orange),
-        _statCard('Processing', '45', Icons.autorenew, Colors.purple),
-        _statCard('Completed', '2,100', Icons.check_circle, Colors.green),
+        _statCard(
+          'Doanh số hàng tháng',
+          '1,284',
+          Icons.calendar_month,
+          Colors.blue,
+        ),
+        _statCard('Doanh số hàng tuần', '312', Icons.view_week, Colors.orange),
+        _statCard('Đang xử lý', '45', Icons.autorenew, Colors.purple),
+        _statCard('Đã hoàn thành', '2,100', Icons.check_circle, Colors.green),
       ],
     );
   }
@@ -138,7 +186,7 @@ class AdminScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                "Weekly Revenue",
+                "Doanh thu hàng tuần",
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
               Text(
@@ -151,8 +199,8 @@ class AdminScreen extends StatelessWidget {
             ],
           ),
           const Spacer(),
-          // Ở đây bạn có thể dùng package fl_chart, tạm thời để placeholder:
-          const Center(child: Text("Chart visualization goes here")),
+          // dùng package fl_chart
+          const Center(child: Text("Hiện chưa có doanh thu nào")),
           const Spacer(),
         ],
       ),
@@ -168,18 +216,16 @@ class AdminScreen extends StatelessWidget {
       crossAxisSpacing: 15,
       mainAxisSpacing: 15,
       children: [
-        _navItem(context, 'Suppliers', Icons.local_shipping_outlined, () {
+        _navItem(context, 'Nhà cung cấp', Icons.local_shipping_outlined, () {
           context.router.push(const SupplierManagementRoute());
-          // Điều hướng đến màn quản lý supplier cũ của bạn
         }),
-        _navItem(context, 'Categories', Icons.category_outlined, () {
+        _navItem(context, 'Danh mục', Icons.category_outlined, () {
           context.router.push(const CategoryManagementRoute());
-          // Điều hướng đến màn quản lý category cũ của bạn
         }),
-        _navItem(context, 'Products', Icons.inventory_2_outlined, () {
+        _navItem(context, 'Sản phẩm', Icons.inventory_2_outlined, () {
           context.router.push(const ProductManagementRoute());
         }),
-        _navItem(context, 'Promotions', Icons.confirmation_number_outlined, () {
+        _navItem(context, 'Khuyến mãi', Icons.confirmation_number_outlined, () {
           context.router.push(const PromotionManagementRoute());
         }),
       ],

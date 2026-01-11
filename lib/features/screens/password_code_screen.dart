@@ -25,7 +25,7 @@ class PasswordCodeScreen extends StatelessWidget {
             const SizedBox(height: 16),
 
             const Text(
-              'Password Recovery',
+              'Khôi phục mật khẩu',
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
 
@@ -69,7 +69,7 @@ class PasswordCodeScreen extends StatelessWidget {
                 onPressed: () {
                   context.router.push(const NewPasswordRoute());
                 },
-                child: const Text('Send Again'),
+                child: const Text('Gửi lại'),
               ),
             ),
 
@@ -77,7 +77,7 @@ class PasswordCodeScreen extends StatelessWidget {
 
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: const Text('Hủy'),
             ),
           ],
         ),

@@ -25,7 +25,7 @@ class PasswordRecoveryScreen extends StatelessWidget {
             const SizedBox(height: 16),
 
             const Text(
-              'Password Recovery',
+              'Khôi phục mật khẩu',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -35,7 +35,7 @@ class PasswordRecoveryScreen extends StatelessWidget {
             const SizedBox(height: 8),
 
             const Text(
-              'How would you like to restore your password?',
+              'Bạn muốn khôi phục mật khẩu bằng cách nào?',
               textAlign: TextAlign.center,
             ),
 
@@ -61,7 +61,7 @@ class PasswordRecoveryScreen extends StatelessWidget {
               height: 48,
               child: ElevatedButton(
                 onPressed: () {},
-                child: const Text('Next'),
+                child: const Text('Tiếp'),
               ),
             ),
 
@@ -69,7 +69,7 @@ class PasswordRecoveryScreen extends StatelessWidget {
 
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: const Text('Hủy'),
             ),
           ],
         ),

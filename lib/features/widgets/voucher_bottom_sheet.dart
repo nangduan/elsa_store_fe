@@ -10,19 +10,19 @@ class VoucherBottomSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('Active Vouchers',
+          const Text('Voucher đang hoạt động',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
 
           const SizedBox(height: 16),
 
           _VoucherItem(
-            title: 'First Purchase',
-            subtitle: '5% off your next order',
+            title: 'Lần mua đầu',
+            subtitle: 'Giảm 5% cho đơn tiếp theo',
           ),
 
           _VoucherItem(
-            title: 'Gift from Customer Care',
-            subtitle: '15% off your next purchase',
+            title: 'Quà từ CSKH',
+            subtitle: 'Giảm 15% cho lần mua tiếp theo',
           ),
         ],
       ),
@@ -44,7 +44,7 @@ class _VoucherItem extends StatelessWidget {
         subtitle: Text(subtitle),
         trailing: ElevatedButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Apply'),
+          child: const Text('Áp dụng'),
         ),
       ),
     );

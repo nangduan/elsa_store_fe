@@ -14,7 +14,7 @@ class SearchScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Search'),
+        title: const Text('Tìm kiếm'),
         actions: [
           IconButton(
             icon: const Icon(Icons.camera_alt_outlined),
@@ -42,7 +42,7 @@ class SearchScreen extends StatelessWidget {
           ),
 
           const SizedBox(height: 24),
-          const Text('Search history',
+          const Text('Lịch sử tìm kiếm',
               style: TextStyle(fontWeight: FontWeight.bold)),
 
           Wrap(
@@ -51,7 +51,7 @@ class SearchScreen extends StatelessWidget {
           ),
 
           const SizedBox(height: 24),
-          const Text('Recommendations',
+          const Text('Gợi ý',
               style: TextStyle(fontWeight: FontWeight.bold)),
 
           Wrap(

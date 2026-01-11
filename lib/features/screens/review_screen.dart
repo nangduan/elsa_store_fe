@@ -8,7 +8,7 @@ class ReviewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Reviews')),
+      appBar: AppBar(title: const Text('Đánh giá')),
       body: ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: 5,

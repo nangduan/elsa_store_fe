@@ -24,7 +24,7 @@ class ShopScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Shop',
+                      'Cửa hàng',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -48,7 +48,7 @@ class ShopScreen extends StatelessWidget {
                   const SizedBox(height: 32),
 
                   // Categories Section
-                  const SectionHeader(title: 'Categories'),
+                  const SectionHeader(title: 'Danh mục'),
                   const SizedBox(height: 16),
                   const CategoryGrid(),
 
@@ -58,7 +58,7 @@ class ShopScreen extends StatelessWidget {
                   _buildProductSection('Top Products'),
                   _buildProductSection('New Items'),
                   _buildProductSection('Flash Sale'),
-                  _buildProductSection('Most Popular'),
+                  _buildProductSection('Phổ biến nhất'),
                   _buildProductSection('Just For You'),
 
                   const SizedBox(height: 40), // Khoảng trống cuối trang

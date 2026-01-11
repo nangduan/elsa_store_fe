@@ -30,7 +30,7 @@ class StoryCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Text(
-                'Live',
+                'Trực tiếp',
                 style: TextStyle(color: Colors.white, fontSize: 12),
               ),
             ),

@@ -18,7 +18,7 @@ class VariantBottomSheet extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          const Text('Color Options'),
+          const Text('Tùy chọn màu'),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -32,7 +32,7 @@ class VariantBottomSheet extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          const Text('Size'),
+          const Text('Kích cỡ'),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -43,7 +43,7 @@ class VariantBottomSheet extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          const Text('Quantity'),
+          const Text('Số lượng'),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -66,14 +66,14 @@ class VariantBottomSheet extends StatelessWidget {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {},
-                  child: const Text('Add to cart'),
+                  child: const Text('Thêm vào giỏ'),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {},
-                  child: const Text('Buy now'),
+                  child: const Text('Mua ngay'),
                 ),
               ),
             ],
