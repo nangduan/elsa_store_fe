@@ -1,118 +1,450 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_skeleton/core/constants/format.dart';
+import 'package:flutter_skeleton/features/product/data/models/response/product_variant_response.dart';
+import '../product/data/models/response/product_detail_response.dart';
 
-import '../home/data/models/response/product_response.dart';
-import '../product/presentation/cubit/product_variant_cubit.dart';
+import '../../core/api/app_config.dart';
 import '../../core/di/injector.dart';
+import '../home/data/models/response/product_response.dart';
+import '../product/presentation/cubit/product_detail_cubit.dart';
 
 @RoutePage()
-class ProductDetailFullScreen extends StatelessWidget {
+class ProductDetailFullScreen extends StatefulWidget {
   const ProductDetailFullScreen({super.key, required this.product});
 
   final ProductResponse product;
 
   @override
+  State<ProductDetailFullScreen> createState() =>
+      _ProductDetailFullScreenState();
+}
+
+class _ProductDetailFullScreenState extends State<ProductDetailFullScreen> {
+  // State
+  int _currentImageIndex = 0;
+
+  // Dùng dynamic hoặc đúng Type Variant của bạn. Ở đây tôi dùng ProductVariant từ Detail Response
+  ProductVariantResponse? _selectedVariant;
+
+  late ProductDetailCubit _cubit;
+  late PageController _pageController;
+
+  // Cache danh sách ảnh để không bị load lại liên tục
+  List<String> _cachedImages = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _cubit = getIt<ProductDetailCubit>()..load(widget.product.id);
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  // Hàm tổng hợp tất cả ảnh (Ảnh chính + Ảnh variant) vào một list duy nhất
+  void _updateCachedImages(ProductDetailResponse? detail) {
+    if (_cachedImages.isNotEmpty) {
+      return;
+    }
+
+    List<String> images = [];
+
+    // 1. Thêm ảnh từ API detail
+    if (detail?.images != null && detail!.images.isNotEmpty) {
+      images.addAll(detail.images);
+    } else if (detail?.imageUrl != null) {
+      images.add(detail!.imageUrl!);
+    } else if (widget.product.imageUrl != null) {
+      images.add(widget.product.imageUrl!);
+    }
+
+    // 2. Thêm ảnh từ các variant (nếu ảnh đó chưa có trong list)
+    if (detail?.productVariants != null) {
+      for (var variant in detail!.productVariants) {
+        if (variant.imageUrl != null && !images.contains(variant.imageUrl)) {
+          images.add(variant.imageUrl!);
+        }
+      }
+    }
+
+    _cachedImages = images.toSet().toList(); // Loại bỏ trùng lặp
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<ProductVariantCubit>()..load(product.id),
+    return BlocProvider.value(
+      value: _cubit,
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              expandedHeight: 450,
-              pinned: true,
-              leading: IconButton(
-                icon: const CircleAvatar(
-                  backgroundColor: Colors.white,
-                  child: Icon(
-                    Icons.arrow_back_ios_new,
-                    size: 18,
-                    color: Colors.black,
-                  ),
-                ),
-                onPressed: () => context.router.pop(),
-              ),
-              flexibleSpace: FlexibleSpaceBar(
-                background: Image.network(
-                  'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e',
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          product.categoryName?.toUpperCase() ?? 'FASHION',
-                          style: TextStyle(
-                            color: Colors.grey.shade500,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
-                            fontSize: 12,
+        body: BlocBuilder<ProductDetailCubit, ProductDetailState>(
+          builder: (context, state) {
+            if (state.status == ProductDetailStatus.initial ||
+                state.status == ProductDetailStatus.loading) {
+              return const Center(
+                child: CircularProgressIndicator(color: Colors.black),
+              );
+            }
+
+            final detail = state.product;
+
+            // Cập nhật danh sách ảnh 1 lần khi có dữ liệu
+            _updateCachedImages(detail);
+
+            // Logic hiển thị giá
+            final displayPrice =
+                _selectedVariant?.price ??
+                detail?.basePrice ??
+                widget.product.basePrice ??
+                0;
+
+            final name = detail?.name ?? widget.product.name ?? 'Product Name';
+            final description =
+                detail?.description ??
+                widget.product.description ??
+                'No description available.';
+            final category =
+                detail?.categoryName ??
+                widget.product.categoryName ??
+                'FASHION';
+
+            return Stack(
+              children: [
+                CustomScrollView(
+                  slivers: [
+                    // 1. HEADER ẢNH (SLIDER)
+                    SliverAppBar(
+                      expandedHeight: MediaQuery.of(context).size.height * 0.4,
+                      pinned: true,
+                      backgroundColor: Colors.white,
+                      leading: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CircleAvatar(
+                          backgroundColor: Colors.white.withOpacity(0.9),
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.arrow_back_ios_new,
+                              size: 18,
+                              color: Colors.black,
+                            ),
+                            onPressed: () => context.router.pop(),
                           ),
                         ),
-                        Text(
-                          '${product.basePrice?.toStringAsFixed(0) ?? '0'} Ž`',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
-                          ),
+                      ),
+                      flexibleSpace: FlexibleSpaceBar(
+                        background: _buildImageGallery(_cachedImages),
+                      ),
+                    ),
+
+                    // 2. BODY INFO
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 24,
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    // Product Name
-                    Text(
-                      product.name ?? 'Product Name',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Category Tag
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                category.toUpperCase(),
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+
+                            // Product Name
+                            Text(
+                              name,
+                              style: const TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w800,
+                                height: 1.2,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+
+                            // Price
+                            Text(
+                              Format.formatCurrency(displayPrice),
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black,
+                              ),
+                            ),
+
+                            const SizedBox(height: 24),
+                            const Divider(height: 1),
+                            const SizedBox(height: 24),
+
+                            // Variations Section
+                            _buildSectionTitle('Variations'),
+                            const SizedBox(height: 12),
+                            _buildVariationsList(
+                              state.product?.productVariants ?? [],
+                            ),
+
+                            const SizedBox(height: 24),
+
+                            // Description Section
+                            _buildSectionTitle('Description'),
+                            const SizedBox(height: 8),
+                            Text(
+                              description,
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                                height: 1.6,
+                                fontSize: 15,
+                              ),
+                            ),
+
+                            const SizedBox(height: 24),
+                            // Details Section
+                            _buildSectionTitle('Details'),
+                            const SizedBox(height: 12),
+                            _buildDetailRow(
+                              'SKU',
+                              _selectedVariant?.sku ?? 'N/A',
+                            ),
+                            _buildDetailRow('Condition', 'New in Box'),
+
+                            // Padding để không bị che bởi button bottom
+                            const SizedBox(height: 100),
+                          ],
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    // Description
-                    Text(
-                      product.description ??
-                          'No description available for this product.',
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        height: 1.5,
-                        fontSize: 15,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    _buildSectionTitle('Variations'),
-                    const SizedBox(height: 12),
-                    _buildVariationsList(),
-                    const SizedBox(height: 32),
-                    _buildSectionTitle('Specifications'),
-                    const SizedBox(height: 12),
-                    _buildSpecItem('Material', 'Cotton 95%'),
-                    _buildSpecItem('Origin', 'Vietnam'),
-                    _buildSpecItem('Style', 'Modern Fit'),
-                    const SizedBox(height: 32),
-                    _buildSectionTitle('Delivery'),
-                    const SizedBox(height: 12),
-                    _buildDeliveryOption('Standard', '5ƒ?"7 days', 'Free'),
-                    _buildDeliveryOption('Express', '1ƒ?"2 days', '30.000 Ž`'),
-                    const SizedBox(
-                      height: 100,
-                    ), // Kho §œng tr ¯`ng cu ¯`i Ž` ¯Ÿ khA'ng b ¯< Ž`A" b ¯Yi bottom bar
                   ],
                 ),
+
+                // 3. BOTTOM BUTTON
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: _buildBottomAction(context),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  // --- WIDGET COMPONENTS ---
+
+  Widget _buildImageGallery(List<String> images) {
+    if (images.isEmpty) {
+      return Container(
+        color: Colors.grey.shade100,
+        child: const Center(
+          child: Icon(
+            Icons.image_not_supported_outlined,
+            size: 50,
+            color: Colors.grey,
+          ),
+        ),
+      );
+    }
+
+    return Stack(
+      alignment: Alignment.bottomCenter,
+      children: [
+        PageView.builder(
+          controller: _pageController,
+          itemCount: images.length,
+          onPageChanged: (index) {
+            setState(() {
+              _currentImageIndex = index;
+            });
+          },
+          itemBuilder: (context, index) {
+            final imgUrl = _resolveImageUrl(images[index]);
+            if (imgUrl == null) return const SizedBox();
+            return Image.network(
+              imgUrl,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => const Center(
+                child: Icon(Icons.broken_image, color: Colors.grey),
+              ),
+            );
+          },
+        ),
+        // Dots Indicator
+        if (images.length > 1)
+          Positioned(
+            bottom: 20,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: images.asMap().entries.map((entry) {
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  width: _currentImageIndex == entry.key ? 20 : 8.0,
+                  height: 8.0,
+                  margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    color: _currentImageIndex == entry.key
+                        ? Colors.black
+                        : Colors.grey.withOpacity(0.5),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildVariationsList(List<ProductVariantResponse> variants) {
+    if (variants.isEmpty) return const Text("No options available");
+
+    // [FIX 1] Tăng height từ 100 lên 110 để tránh lỗi overflow
+    return SizedBox(
+      height: 110,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: variants.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        itemBuilder: (_, i) {
+          final variant = variants[i];
+          final isSelected = _selectedVariant?.id == variant.id;
+          final imgUrl = _resolveImageUrl(variant.imageUrl);
+
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                // Logic chọn/bỏ chọn
+                if (isSelected) {
+                  _selectedVariant = null;
+                } else {
+                  _selectedVariant = variant;
+
+                  // Tìm ảnh tương ứng và scroll tới đó
+                  if (variant.imageUrl != null) {
+                    final index = _cachedImages.indexOf(variant.imageUrl!);
+                    if (index != -1) {
+                      _pageController.animateToPage(
+                        index,
+                        duration: const Duration(milliseconds: 500),
+                        curve: Curves.easeInOut,
+                      );
+                    }
+                  }
+                }
+              });
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 75,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isSelected ? Colors.black : Colors.grey.shade200,
+                  width: isSelected ? 2 : 1,
+                ),
+                color: isSelected ? Colors.white : Colors.grey.shade50,
+              ),
+              child: Column(
+                children: [
+                  // Ảnh thumbnail
+                  Expanded(
+                    flex: 5, // [FIX 2] Tăng flex cho ảnh
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(10),
+                      ),
+                      child: imgUrl != null
+                          ? Image.network(
+                              imgUrl,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              errorBuilder: (_, __, ___) =>
+                                  Container(color: Colors.grey.shade200),
+                            )
+                          : Container(
+                              color: Colors.grey.shade200,
+                              child: const Icon(
+                                Icons.inventory_2_outlined,
+                                size: 20,
+                              ),
+                            ),
+                    ),
+                  ),
+                  // Thông tin Text
+                  Expanded(
+                    flex: 4, // [FIX 3] Dành nhiều không gian hơn cho Text
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 2,
+                        vertical: 2, // [FIX 4] Giảm padding vertical
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            variant.size ?? '',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: isSelected ? Colors.black : Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            variant.color ?? '',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey.shade600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-        bottomSheet: _buildBottomAction(context),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: TextStyle(color: Colors.grey.shade500)),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
+        ],
       ),
     );
   }
@@ -124,124 +456,12 @@ class ProductDetailFullScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSpecItem(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(title, style: TextStyle(color: Colors.grey.shade500)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildVariationsList() {
-    return BlocBuilder<ProductVariantCubit, ProductVariantState>(
-      builder: (context, state) {
-        if (state.status.isLoading) {
-          return const SizedBox(
-            height: 80,
-            child: Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        if (state.status.isFailure) {
-          return SizedBox(
-            height: 80,
-            child: Center(
-              child: Text(state.errorMessage ?? 'Failed to load variants'),
-            ),
-          );
-        }
-
-        if (state.variants.isEmpty) {
-          return const SizedBox(
-            height: 80,
-            child: Center(child: Text('No variants available')),
-          );
-        }
-
-        return SizedBox(
-          height: 80,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: state.variants.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (_, i) {
-              final variant = state.variants[i];
-              final color = variant.color ?? '-';
-              final size = variant.size ?? '-';
-              return Container(
-                width: 120,
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: Colors.grey.shade100,
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '$color / $size',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      variant.price != null ? '${variant.price} Ž`' : '-',
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildDeliveryOption(String title, String time, String price) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade100),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.local_shipping_outlined, size: 20),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-              Text(
-                time,
-                style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
-              ),
-            ],
-          ),
-          const Spacer(),
-          Text(price, style: const TextStyle(fontWeight: FontWeight.bold)),
-        ],
-      ),
-    );
-  }
-
   Widget _buildBottomAction(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 30),
       decoration: BoxDecoration(
         color: Colors.white,
+        border: Border(top: BorderSide(color: Colors.grey.shade100)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -255,7 +475,7 @@ class ProductDetailFullScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(color: Colors.grey.shade300),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(Icons.favorite_border),
@@ -269,11 +489,22 @@ class ProductDetailFullScreen extends StatelessWidget {
                   backgroundColor: Colors.black,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   elevation: 0,
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  if (_selectedVariant == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please select a variation (Color/Size)'),
+                      ),
+                    );
+                    return;
+                  }
+                  // TODO: Handle Add to Cart logic
+                  print("Add to cart: ${_selectedVariant?.id}");
+                },
                 child: const Text(
                   'ADD TO CART',
                   style: TextStyle(
@@ -287,5 +518,13 @@ class ProductDetailFullScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  // --- HELPERS ---
+
+  String? _resolveImageUrl(String? path) {
+    if (path == null || path.isEmpty) return null;
+    if (path.startsWith('http')) return path;
+    return "${AppConfig().baseURL}$path";
   }
 }

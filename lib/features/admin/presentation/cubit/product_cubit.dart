@@ -59,10 +59,12 @@ class ProductCubit extends Cubit<ProductState> {
   Future<void> load() async {
     emit(state.copyWith(status: ProductStatus.loading));
     try {
-      final items = await _getProducts();
+      final items = await _getProducts.call();
       emit(state.copyWith(status: ProductStatus.success, products: items));
     } on AppException catch (e) {
-      emit(state.copyWith(status: ProductStatus.failure, errorMessage: e.message));
+      emit(
+        state.copyWith(status: ProductStatus.failure, errorMessage: e.message),
+      );
     }
   }
 
@@ -72,7 +74,9 @@ class ProductCubit extends Cubit<ProductState> {
       await _createProduct(request);
       await load();
     } on AppException catch (e) {
-      emit(state.copyWith(status: ProductStatus.failure, errorMessage: e.message));
+      emit(
+        state.copyWith(status: ProductStatus.failure, errorMessage: e.message),
+      );
     }
   }
 
@@ -82,7 +86,9 @@ class ProductCubit extends Cubit<ProductState> {
       await _updateProduct(id, request);
       await load();
     } on AppException catch (e) {
-      emit(state.copyWith(status: ProductStatus.failure, errorMessage: e.message));
+      emit(
+        state.copyWith(status: ProductStatus.failure, errorMessage: e.message),
+      );
     }
   }
 
@@ -92,7 +98,9 @@ class ProductCubit extends Cubit<ProductState> {
       await _deleteProduct(id);
       await load();
     } on AppException catch (e) {
-      emit(state.copyWith(status: ProductStatus.failure, errorMessage: e.message));
+      emit(
+        state.copyWith(status: ProductStatus.failure, errorMessage: e.message),
+      );
     }
   }
 }

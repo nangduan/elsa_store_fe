@@ -125,8 +125,12 @@ import 'package:flutter_skeleton/features/product/domain/repositories/product_re
     as _i564;
 import 'package:flutter_skeleton/features/product/domain/usecases/get_product_variants_use_case.dart'
     as _i983;
+import 'package:flutter_skeleton/features/product/domain/usecases/get_product_detail_use_case.dart'
+    as _i412;
 import 'package:flutter_skeleton/features/product/presentation/cubit/product_variant_cubit.dart'
     as _i363;
+import 'package:flutter_skeleton/features/product/presentation/cubit/product_detail_cubit.dart'
+    as _i271;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
@@ -344,6 +348,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i983.GetProductVariantsUseCase>(
       () => _i983.GetProductVariantsUseCase(gh<_i564.ProductRepository>()),
     );
+    gh.factory<_i412.GetProductDetailUseCase>(
+      () => _i412.GetProductDetailUseCase(gh<_i564.ProductRepository>()),
+    );
     gh.factory<_i245.PromotionCubit>(
       () => _i245.PromotionCubit(
         gh<_i661.GetPromotionsUseCase>(),
@@ -354,6 +361,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i363.ProductVariantCubit>(
       () => _i363.ProductVariantCubit(gh<_i983.GetProductVariantsUseCase>()),
+    );
+    gh.factory<_i271.ProductDetailCubit>(
+      () => _i271.ProductDetailCubit(gh<_i412.GetProductDetailUseCase>()),
     );
     return this;
   }

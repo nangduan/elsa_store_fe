@@ -1,8 +1,10 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_skeleton/core/constants/format.dart';
 import 'package:flutter_skeleton/core/navigation/app_routes.dart';
 
+import '../../../../core/api/app_config.dart';
 import '../../../../core/di/injector.dart';
 import '../cubit/home_cubit.dart';
 
@@ -176,13 +178,7 @@ class HomeScreen extends StatelessWidget {
                                   color: Colors.grey.shade100,
                                   borderRadius: BorderRadius.circular(16),
                                 ),
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.shopping_bag_outlined,
-                                    color: Colors.grey,
-                                    size: 40,
-                                  ),
-                                ),
+                                child: _buildProductImage(p.imageUrl),
                               ),
                             ),
                             const SizedBox(height: 10),
@@ -204,7 +200,9 @@ class HomeScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              p.basePrice != null ? '${p.basePrice} đ' : '-',
+                              p.basePrice != null
+                                  ? Format.formatCurrency(p.basePrice)
+                                  : '-',
                               style: const TextStyle(
                                 fontWeight: FontWeight.w800,
                                 fontSize: 15,
@@ -223,6 +221,47 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildProductImage(String? imageUrl) {
+    final resolved = _resolveImageUrl(imageUrl);
+    if (resolved == null) {
+      return const Center(
+        child: Icon(Icons.shopping_bag_outlined, color: Colors.grey, size: 40),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Image.network(
+        resolved,
+        fit: BoxFit.fitWidth,
+        width: double.infinity,
+        height: double.infinity,
+        errorBuilder: (_, __, ___) {
+          return const Center(
+            child: Icon(
+              Icons.shopping_bag_outlined,
+              color: Colors.grey,
+              size: 40,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  String? _resolveImageUrl(String? path) {
+    if (path == null || path.isEmpty) {
+      return null;
+    }
+
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+
+    final baseUrl = "${AppConfig().baseURL}$path";
+    return baseUrl;
   }
 
   Widget _buildSectionTitle(String title) {

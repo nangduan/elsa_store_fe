@@ -1,5 +1,6 @@
 class ProductVariantResponse {
   final int? id;
+  final String? imageUrl;
   final int? productId;
   final String? productName;
   final String? color;
@@ -10,6 +11,7 @@ class ProductVariantResponse {
 
   ProductVariantResponse({
     this.id,
+    this.imageUrl,
     this.productId,
     this.productName,
     this.color,
@@ -22,6 +24,7 @@ class ProductVariantResponse {
   factory ProductVariantResponse.fromJson(Map<String, dynamic> json) {
     return ProductVariantResponse(
       id: json['id'] as int?,
+      imageUrl: json['imageUrl'] as String?,
       productId: json['productId'] as int?,
       productName: json['productName'] as String?,
       color: json['color'] as String?,

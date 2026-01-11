@@ -20,7 +20,6 @@ class _StartScreenState extends State<StartScreen> {
     _navigateToNextScreen();
   }
 
-  // Giả lập việc check đăng nhập hoặc loading dữ liệu ban đầu
   Future<void> _navigateToNextScreen() async {
     await Future.delayed(const Duration(seconds: 3));
 
@@ -37,7 +36,7 @@ class _StartScreenState extends State<StartScreen> {
 
     switch (role) {
       case 'CUSTOMER':
-        // context.router.replace(const CustomerRoute());
+         context.router.replace(const MainBottomNavRoute());
         break;
       case 'ADMIN':
         context.router.replace(const AdminRoute());
@@ -49,11 +48,6 @@ class _StartScreenState extends State<StartScreen> {
         context.router.replace(const LoginRoute());
         break;
     }
-
-    // Ở đây bạn có thể thêm logic check Token:
-    // Nếu có token -> MainBottomNavRoute
-    // Nếu không -> LoginRoute
-    context.router.replace(const LoginRoute());
   }
 
   @override
@@ -107,7 +101,6 @@ class _StartScreenState extends State<StartScreen> {
 
             const Spacer(),
 
-            // Hiệu ứng Loading nhẹ nhàng ở dưới cùng
             const SizedBox(
               width: 40,
               height: 40,
