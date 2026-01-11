@@ -7,6 +7,7 @@ import '../../features/admin/data/datasource/remote/promotion_api_service.dart';
 import '../../features/auth/data/datasource/remote/auth_api_service.dart';
 import '../../features/home/data/datasource/remote/home_api_service.dart';
 import '../../features/cart/data/datasource/remote/cart_api_service.dart';
+import '../../features/orders/data/datasource/remote/order_api_service.dart';
 import '../../features/product/data/datasource/remote/product_api_service.dart';
 import '../../features/admin/data/datasource/remote/category_api_service.dart';
 import '../../features/admin/data/datasource/remote/product_api_service.dart';
@@ -60,6 +61,9 @@ abstract class NetworkModule {
 
   @lazySingleton
   CartApiService provideCartApiService(Dio dio) => CartApiService(dio);
+
+  @lazySingleton
+  OrderApiService provideOrderApiService(Dio dio) => OrderApiService(dio);
 
   @lazySingleton
   ProductApiService provideProductApiService(Dio dio) => ProductApiService(dio);

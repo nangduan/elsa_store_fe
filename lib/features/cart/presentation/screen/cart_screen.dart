@@ -4,6 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/api/app_config.dart';
 import '../../../../core/constants/format.dart';
+import '../../../../core/di/injector.dart';
+import '../../../../core/errors/app_exception.dart';
+import '../../../orders/presentation/cubit/order_cubit.dart';
+import '../../../orders/data/models/request/create_order_item_request.dart';
 import '../../data/models/response/cart_item_response.dart';
 import '../cubit/cart_cubit.dart';
 
@@ -13,106 +17,110 @@ class CartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        title: const Text(
-          'Giỏ hàng',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+    return BlocProvider(
+      create: (_) => getIt<OrderCubit>(),
+      child: Scaffold(
+        backgroundColor: Colors.grey.shade50,
+        appBar: AppBar(
+          title: const Text(
+            'Giỏ hàng',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.white,
+          elevation: 0,
+          foregroundColor: Colors.black,
         ),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0,
-        foregroundColor: Colors.black,
-      ),
-      body: BlocBuilder<CartCubit, CartState>(
-        builder: (context, state) {
-          if (state.status == CartStatus.loading) {
-            return const Center(
-              child: CircularProgressIndicator(color: Colors.black),
-            );
-          }
+        body: BlocBuilder<CartCubit, CartState>(
+          builder: (context, state) {
+            if (state.status == CartStatus.loading) {
+              return const Center(
+                child: CircularProgressIndicator(color: Colors.black),
+              );
+            }
 
-          if (state.status == CartStatus.failure) {
-            final onRetry = () => context.read<CartCubit>().load();
-            return RefreshIndicator(
-              onRefresh: onRetry,
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: [
-                  const SizedBox(height: 120),
-                  _buildErrorState(state.errorMessage, onRetry),
-                ],
-              ),
-            );
-          }
+            if (state.status == CartStatus.failure) {
+              Future<void> onRetry() => context.read<CartCubit>().load();
+              return RefreshIndicator(
+                onRefresh: onRetry,
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    const SizedBox(height: 120),
+                    _buildErrorState(state.errorMessage, onRetry),
+                  ],
+                ),
+              );
+            }
 
-          final items = state.cart?.items ?? const [];
+            final items = state.cart?.items ?? const [];
 
-          if (items.isEmpty) {
-            return RefreshIndicator(
-              onRefresh: () => context.read<CartCubit>().load(),
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: [
-                  const SizedBox(height: 80),
-                  _buildEmptyState(context),
-                ],
-              ),
-            );
-          }
+            if (items.isEmpty) {
+              return RefreshIndicator(
+                onRefresh: () => context.read<CartCubit>().load(),
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    const SizedBox(height: 80),
+                    _buildEmptyState(context),
+                  ],
+                ),
+              );
+            }
 
-          return Column(
-            children: [
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: () => context.read<CartCubit>().load(),
-                  child: ListView.separated(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 16,
-                    ),
-                    itemCount: items.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 16),
-                    itemBuilder: (_, i) {
-                      final item = items[i];
-                      return _CartItemCard(
-                        item: item,
-                        onDecrease: () {
-                          final qty = item.quantity ?? 0;
-                          if (item.id == null) return;
-                          if (qty <= 1) {
-                            _confirmDelete(context, item);
-                          } else {
+            return Column(
+              children: [
+                Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: () => context.read<CartCubit>().load(),
+                    child: ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
+                      itemCount: items.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 16),
+                      itemBuilder: (_, i) {
+                        final item = items[i];
+                        return _CartItemCard(
+                          item: item,
+                          onDecrease: () {
+                            final qty = item.quantity ?? 0;
+                            if (item.id == null) return;
+                            if (qty <= 1) {
+                              _confirmDelete(context, item);
+                            } else {
+                              context.read<CartCubit>().updateItemQuantity(
+                                item.id!,
+                                qty - 1,
+                              );
+                            }
+                          },
+                          onIncrease: () {
+                            final qty = item.quantity ?? 0;
+                            if (item.id == null) return;
                             context.read<CartCubit>().updateItemQuantity(
                               item.id!,
-                              qty - 1,
+                              qty + 1,
                             );
-                          }
-                        },
-                        onIncrease: () {
-                          final qty = item.quantity ?? 0;
-                          if (item.id == null) return;
-                          context.read<CartCubit>().updateItemQuantity(
-                            item.id!,
-                            qty + 1,
-                          );
-                        },
-                        onDelete: () {
-                          if (item.id != null) {
-                            context.read<CartCubit>().deleteItem(item.id!);
-                          }
-                        },
-                      );
-                    },
+                          },
+                          onDelete: () {
+                            if (item.id != null) {
+                              context.read<CartCubit>().deleteItem(item.id!);
+                            }
+                          },
+                          onCheckout: () => _checkoutItem(context, item),
+                        );
+                      },
+                    ),
                   ),
                 ),
-              ),
-              _buildBottomCheckout(context, state.cart?.totalAmount),
-            ],
-          );
-        },
+                _buildBottomCheckout(context, state.cart?.totalAmount, items),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -178,7 +186,45 @@ class CartScreen extends StatelessWidget {
     context.read<CartCubit>().deleteItem(item.id!);
   }
 
-  Widget _buildBottomCheckout(BuildContext context, double? total) {
+  Future<void> _checkoutItem(
+    BuildContext context,
+    CartItemResponse item,
+  ) async {
+    final variantId = item.productVariantId;
+    final quantity = item.quantity;
+    if (variantId == null || quantity == null || quantity <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Dữ liệu sản phẩm không hợp lệ')),
+      );
+      return;
+    }
+
+    try {
+      final order = await context.read<OrderCubit>().createOrderForItem(
+        productVariantId: variantId,
+        quantity: quantity,
+      );
+      if (!context.mounted) return;
+      final code = order?.code;
+      final message = code == null || code.isEmpty
+          ? 'Đặt hàng thành công'
+          : 'Đặt hàng thành công ($code)';
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    } on AppException catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
+
+  Widget _buildBottomCheckout(
+    BuildContext context,
+    double? total,
+    List<CartItemResponse> items,
+  ) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -226,7 +272,7 @@ class CartScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: () {},
+                onPressed: () => _checkoutAll(context, items),
                 child: const Text(
                   'THANH TOÁN',
                   style: TextStyle(
@@ -242,6 +288,49 @@ class CartScreen extends StatelessWidget {
       ),
     );
   }
+
+  Future<void> _checkoutAll(
+    BuildContext context,
+    List<CartItemResponse> items,
+  ) async {
+    final payloadItems = items
+        .where(
+          (item) => item.productVariantId != null && (item.quantity ?? 0) > 0,
+        )
+        .map(
+          (item) => CreateOrderItemRequest(
+            productVariantId: item.productVariantId!,
+            quantity: item.quantity!,
+          ),
+        )
+        .toList();
+
+    if (payloadItems.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Giỏ hàng đang trống')));
+      return;
+    }
+
+    try {
+      final order = await context.read<OrderCubit>().createOrderForItems(
+        payloadItems,
+      );
+      if (!context.mounted) return;
+      final code = order?.code;
+      final message = code == null || code.isEmpty
+          ? 'Đặt hàng thành công'
+          : 'Đặt hàng thành công ($code)';
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    } on AppException catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
 }
 
 class _CartItemCard extends StatelessWidget {
@@ -249,12 +338,14 @@ class _CartItemCard extends StatelessWidget {
   final VoidCallback onDecrease;
   final VoidCallback onIncrease;
   final VoidCallback onDelete;
+  final VoidCallback onCheckout;
 
   const _CartItemCard({
     required this.item,
     required this.onDecrease,
     required this.onIncrease,
     required this.onDelete,
+    required this.onCheckout,
   });
 
   @override
@@ -348,27 +439,53 @@ class _CartItemCard extends StatelessWidget {
                       child: const Icon(
                         Icons.delete_outline_rounded,
                         size: 18,
-                        color: Colors.grey,
+                        color: Colors.redAccent,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Column(
                   children: [
-                    Text(
-                      Format.formatCurrency(item.unitPrice),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                        color: Colors.black,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          Format.formatCurrency(item.unitPrice),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                            color: Colors.black,
+                          ),
+                        ),
+                        _QuantityStepper(
+                          value: item.quantity ?? 0,
+                          onDecrease: onDecrease,
+                          onIncrease: onIncrease,
+                        ),
+                      ],
                     ),
-                    _QuantityStepper(
-                      value: item.quantity ?? 0,
-                      onDecrease: onDecrease,
-                      onIncrease: onIncrease,
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: SizedBox(
+                        height: 32,
+                        child: OutlinedButton(
+                          onPressed: onCheckout,
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.black,
+                            side: BorderSide(color: Colors.grey.shade300),
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text(
+                            'Đặt hàng',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),

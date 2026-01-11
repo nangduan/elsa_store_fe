@@ -5,10 +5,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injector.dart';
 import '../../../cart/presentation/cubit/cart_cubit.dart';
 import '../../../cart/presentation/screen/cart_screen.dart';
+import '../../../orders/presentation/screen/orders_screen.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
 import 'search_screen.dart';
-import 'shop_screen.dart';
 
 @RoutePage()
 class MainBottomNavScreen extends StatefulWidget {
@@ -24,7 +24,7 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
 
   final List<Widget> _screens = const [
     HomeScreen(),
-    ShopScreen(),
+    OrdersScreen(),
     SearchScreen(),
     CartScreen(),
     ProfileScreen(),
@@ -79,9 +79,9 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
                 label: 'Trang chủ',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.grid_view_outlined),
-                activeIcon: Icon(Icons.grid_view_rounded),
-                label: 'Cửa hàng',
+                icon: Icon(Icons.receipt_long_outlined),
+                activeIcon: Icon(Icons.receipt_long),
+                label: 'Đơn hàng',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.search_rounded),
