@@ -8,7 +8,7 @@ import '../../features/admin/presentation/screens/promotion_management_screen.da
 import '../../features/admin/presentation/screens/supplier_management_screen.dart';
 import '../../features/home/data/models/response/product_response.dart';
 import '../../features/home/presentation/screens/cart_empty_screen.dart';
-import '../../features/home/presentation/screens/cart_screen.dart';
+import '../../features/cart/presentation/screen/cart_screen.dart';
 import '../../features/screens/category_filter_screen.dart';
 import '../../features/screens/chat_screen.dart';
 import '../../features/screens/flash_sale_screen.dart';

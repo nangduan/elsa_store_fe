@@ -500,10 +500,11 @@ class ProductManagementScreen extends StatelessWidget {
                         basePrice: price,
                         categoryId: selectedCategoryId!,
                       );
-                      if (item?.id != null)
+                      if (item?.id != null) {
                         productCubit.update(item!.id!, req);
-                      else
+                      } else {
                         productCubit.create(req);
+                      }
                       Navigator.pop(dialogContext);
                     }
                   },

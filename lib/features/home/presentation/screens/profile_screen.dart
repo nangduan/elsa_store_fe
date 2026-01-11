@@ -125,12 +125,6 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   _buildDivider(),
                   _buildProfileItem(
-                    icon: Icons.badge_outlined,
-                    title: 'User ID',
-                    value: '#${user['id']}',
-                  ),
-                  _buildDivider(),
-                  _buildProfileItem(
                     icon: Icons.verified_user_outlined,
                     title: 'Trạng thái',
                     value: (user['enabled'] as bool)

@@ -11,6 +11,7 @@ import '../../core/constants/constant.dart';
 import '../../core/di/injector.dart';
 import '../../core/errors/app_exception.dart';
 import '../cart/domain/repositories/cart_repository.dart';
+import '../cart/presentation/cubit/cart_cubit.dart';
 import '../home/data/models/response/product_response.dart';
 import '../product/presentation/cubit/product_detail_cubit.dart';
 
@@ -542,20 +543,17 @@ class _ProductDetailFullScreenState extends State<ProductDetailFullScreen> {
         return;
       }
 
-      await getIt<CartRepository>().addItem(
-        userId,
-        _selectedVariant!.id!,
-        1,
-      );
+      await getIt<CartRepository>().addItem(userId, _selectedVariant!.id!, 1);
+      await getIt<CartRepository>().getCart(userId);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Đã thêm vào giỏ hàng')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Đã thêm vào giỏ hàng')));
     } on AppException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message)));
     } finally {
       if (mounted) {
         setState(() => _isAdding = false);
