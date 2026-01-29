@@ -2,10 +2,11 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_skeleton/features/auth/data/models/request/login_request.dart';
+import 'dart:ui'; // Cần thiết cho BackdropFilter nếu muốn hiệu ứng kính
 
 import '../../../../core/di/injector.dart';
 import '../../../../core/navigation/app_routes.dart';
-import '../../../widgets/text_field_widget.dart';
+// import '../../../widgets/text_field_widget.dart'; // Tạm thời comment để dùng style mới
 import '../../domain/usecases/login_use_case.dart';
 import '../cubit/login/login_cubit.dart';
 
@@ -22,6 +23,10 @@ class _LoginScreenState extends State<LoginScreen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+
+  // Màu chủ đạo (bạn có thể thay đổi theo brand)
+  final Color _primaryColor = const Color(0xFFE64A19);
+  final Color _accentColor = const Color(0xFF1565C0);
 
   @override
   void dispose() {
@@ -52,98 +57,130 @@ class _LoginScreenState extends State<LoginScreen> {
                   content: Text(state.errorMessage ?? 'Đăng nhập thất bại'),
                   backgroundColor: Colors.redAccent,
                   behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               );
             }
           },
           builder: (context, state) {
-            return SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 50),
-                      const Text(
-                        'Welcome\nBack',
-                        style: TextStyle(
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold,
-                          height: 1.1,
-                          letterSpacing: -1,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Sign in to manage your clothing store.',
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 48),
+            // Sử dụng Stack để tạo các lớp background trang trí
+            return Stack(
+              children: [
+                // 1. Background Decoration (Vòng tròn trang trí)
+                Positioned(
+                  top: -100,
+                  right: -100,
+                  child: Container(
+                    width: 300,
+                    height: 300,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _accentColor.withOpacity(0.1),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 100,
+                  left: -50,
+                  child: Container(
+                    width: 150,
+                    height: 150,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.blueAccent.withOpacity(0.05),
+                    ),
+                  ),
+                ),
 
-                      TextFieldWidget(
-                        controller: _usernameController,
-                        hint: 'Username',
-                        icon: Icons.person_outline,
-                      ),
-                      const SizedBox(height: 16),
-
-                      TextFieldWidget(
-                        controller: _passwordController,
-                        hint: 'Mật khẩu',
-                        icon: Icons.lock_outline,
-                        isObscure: !_isPasswordVisible,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _isPasswordVisible
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                            color: Colors.grey,
-                            size: 20,
-                          ),
-                          onPressed: () => setState(
-                            () => _isPasswordVisible = !_isPasswordVisible,
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () {}, // Thêm logic quên mật khẩu nếu cần
-                          child: Text(
-                            'Quên mật khẩu?',
-                            style: TextStyle(color: Colors.grey.shade600),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // Login Button with Loading status
-                      SizedBox(
-                        width: double.infinity,
-                        height: 56,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                // 2. Main Content
+                SafeArea(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // Header Section
+                            const SizedBox(height: 20),
+                            Icon(Icons.storefront_rounded, size: 60, color: _primaryColor),
+                            const SizedBox(height: 24),
+                            Text(
+                              'ELSA STORE!',
+                              style: TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.w800,
+                                color: _primaryColor,
+                                letterSpacing: -0.5,
+                              ),
+                              textAlign: TextAlign.center,
                             ),
-                            elevation: 0,
-                          ),
-                          onPressed: state.status.isLoading
-                              ? null
-                              : () {
+                            const SizedBox(height: 8),
+                            Text(
+                              'Xin chào, hãy đăng nhập để sử dụng dịch vụ!',
+                              style: TextStyle(
+                                color: Colors.grey.shade500,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 48),
+
+                            // Input Section
+                            _buildModernTextField(
+                              controller: _usernameController,
+                              hint: 'Tên đăng nhập',
+                              icon: Icons.person_rounded,
+                            ),
+                            const SizedBox(height: 20),
+                            _buildModernTextField(
+                              controller: _passwordController,
+                              hint: 'Mật khẩu',
+                              icon: Icons.lock_rounded,
+                              isPassword: true,
+                              isVisible: _isPasswordVisible,
+                              onVisibilityToggle: () {
+                                setState(() {
+                                  _isPasswordVisible = !_isPasswordVisible;
+                                });
+                              },
+                            ),
+
+                            // Forgot Password
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () {},
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.grey.shade600,
+                                ),
+                                child: const Text(
+                                  'Quên mật khẩu?',
+                                  style: TextStyle(fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 24),
+
+                            // Login Button
+                            SizedBox(
+                              height: 58,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: _primaryColor,
+                                  foregroundColor: Colors.white,
+                                  elevation: 5,
+                                  shadowColor: _primaryColor.withOpacity(0.4),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),
+                                ),
+                                onPressed: state.status.isLoading
+                                    ? null
+                                    : () {
                                   if (_formKey.currentState!.validate()) {
                                     context.read<LoginCubit>().login(
                                       LoginRequest(
@@ -153,67 +190,173 @@ class _LoginScreenState extends State<LoginScreen> {
                                     );
                                   }
                                 },
-                          child: state.status.isLoading
-                              ? const SizedBox(
+                                child: state.status.isLoading
+                                    ? const SizedBox(
                                   height: 24,
                                   width: 24,
                                   child: CircularProgressIndicator(
                                     color: Colors.white,
-                                    strokeWidth: 2,
+                                    strokeWidth: 2.5,
                                   ),
                                 )
-                              : const Text(
-                                  'LOGIN',
+                                    : const Text(
+                                  'ĐĂNG NHẬP',
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
-                                    letterSpacing: 1,
+                                    letterSpacing: 1.2,
                                   ),
-                                ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 24),
-                      Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Chưa có tài khoản?",
-                              style: TextStyle(color: Colors.grey.shade600),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                context.router.push(RegisterRoute());
-                              },
-                              child: const Text(
-                                'Register Now',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
+
+                            const SizedBox(height: 40),
+
+                            // Divider with text "Or continue with"
+                            Row(
+                              children: [
+                                Expanded(child: Divider(color: Colors.grey.shade300)),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                  child: Text(
+                                    "hoặc tiếp tục với",
+                                    style: TextStyle(color: Colors.grey.shade400, fontSize: 12),
+                                  ),
+                                ),
+                                Expanded(child: Divider(color: Colors.grey.shade300)),
+                              ],
+                            ),
+
+                            const SizedBox(height: 24),
+
+                            // Social Buttons (Placeholder)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _buildSocialButton(Icons.g_mobiledata, Colors.redAccent),
+                                const SizedBox(width: 20),
+                                _buildSocialButton(Icons.facebook, Colors.blue),
+                                const SizedBox(width: 20),
+                                _buildSocialButton(Icons.apple, Colors.black),
+                              ],
+                            ),
+
+                            const SizedBox(height: 40),
+
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Chưa có tài khoản? ",
+                                  style: TextStyle(color: Colors.grey.shade600),
+                                ),
+                                GestureDetector(
+                                  onTap: () => context.router.push(const RegisterRoute()),
+                                  child: Text(
+                                    'Đăng ký ngay',
+                                    style: TextStyle(
+                                      color: _accentColor,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
                           ],
                         ),
                       ),
-                      Center(
-                        child: TextButton(
-                          onPressed: () =>
-                              context.router.replace(const StartRoute()),
-                          child: Text(
-                            'Hủy',
-                            style: TextStyle(color: Colors.grey.shade400),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
+              ],
             );
           },
         ),
+      ),
+    );
+  }
+
+  // Widget Social Button nhỏ gọn
+  Widget _buildSocialButton(IconData icon, Color color) {
+    return Container(
+      width: 50,
+      height: 50,
+      decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.grey.shade200),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            )
+          ]
+      ),
+      child: IconButton(
+        icon: Icon(icon, color: color),
+        onPressed: () {},
+      ),
+    );
+  }
+
+  // Widget TextField Modern (Thay thế cho TextFieldWidget cũ để đẹp hơn)
+  Widget _buildModernTextField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    bool isPassword = false,
+    bool isVisible = false,
+    VoidCallback? onVisibilityToggle,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100, // Nền xám nhạt
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: controller,
+        obscureText: isPassword && !isVisible,
+        style: const TextStyle(fontWeight: FontWeight.w500),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: TextStyle(color: Colors.grey.shade400),
+          prefixIcon: Icon(icon, color: Colors.grey.shade500),
+          suffixIcon: isPassword
+              ? IconButton(
+            icon: Icon(
+              isVisible ? Icons.visibility_rounded : Icons.visibility_off_rounded,
+              color: Colors.grey.shade500,
+            ),
+            onPressed: onVisibilityToggle,
+          )
+              : null,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none, // Loại bỏ viền mặc định
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Colors.black, width: 1.5), // Viền khi focus
+          ),
+          filled: true,
+          fillColor: Colors.transparent, // Dùng màu của Container
+          contentPadding: const EdgeInsets.symmetric(vertical: 18),
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return '$hint không được để trống';
+          }
+          return null;
+        },
       ),
     );
   }

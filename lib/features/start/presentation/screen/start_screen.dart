@@ -14,6 +14,9 @@ class StartScreen extends StatefulWidget {
 }
 
 class _StartScreenState extends State<StartScreen> {
+  final Color _primaryColor = const Color(0xFFE64A19);
+  final Color _accentColor = const Color(0xFF1565C0);
+
   @override
   void initState() {
     super.initState();
@@ -36,13 +39,13 @@ class _StartScreenState extends State<StartScreen> {
 
     switch (role) {
       case 'CUSTOMER':
-         context.router.replace(const MainBottomNavRoute());
+        context.router.replace(const MainBottomNavRoute());
         break;
       case 'ADMIN':
         context.router.replace(const AdminRoute());
         break;
       case 'STAFF':
-        // context.router.replace(const EmployeeRoute());
+      // context.router.replace(const EmployeeRoute());
         break;
       default:
         context.router.replace(const LoginRoute());
@@ -54,65 +57,115 @@ class _StartScreenState extends State<StartScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SizedBox(
-        width: double.infinity,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Spacer(),
-
-            // Logo Branding - Đồng bộ màu Đen/Trắng
-            Container(
-              padding: const EdgeInsets.all(20),
+      body: Stack(
+        children: [
+          // 1. Background Decoration (Giống hệt Login/Register)
+          // Vòng tròn trên cùng bên phải
+          Positioned(
+            top: -100,
+            right: -100,
+            child: Container(
+              width: 300,
+              height: 300,
               decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: const Icon(
-                Icons.shopping_bag_rounded,
-                size: 60,
-                color: Colors.white,
+                shape: BoxShape.circle,
+                color: _accentColor.withOpacity(0.1),
               ),
             ),
-
-            const SizedBox(height: 24),
-
-            const Text(
-              'ELSA',
-              style: TextStyle(
-                fontSize: 40,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 4,
-                color: Colors.black,
+          ),
+          // Vòng tròn giữa bên trái
+          Positioned(
+            top: 200,
+            left: -50,
+            child: Container(
+              width: 150,
+              height: 150,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.blueAccent.withOpacity(0.05),
               ),
             ),
+          ),
 
-            const SizedBox(height: 8),
+          // 2. Main Content
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Spacer(),
 
-            Text(
-              'CỬA HÀNG THỜI TRANG',
-              style: TextStyle(
-                color: Colors.grey.shade500,
-                letterSpacing: 2,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
+                // Logo được làm mềm mại hơn
+                Container(
+                  padding: const EdgeInsets.all(28),
+                  decoration: BoxDecoration(
+                    color: _primaryColor, // Dùng màu chủ đạo
+                    shape: BoxShape.circle, // Hình tròn thay vì hình vuông bo góc
+                    boxShadow: [
+                      BoxShadow(
+                        color: _primaryColor.withOpacity(0.4),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.shopping_bag_outlined,
+                    size: 64,
+                    color: Colors.white,
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
+                // Tên thương hiệu
+                Text(
+                  'ELSA',
+                  style: TextStyle(
+                    fontSize: 42,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 6,
+                    color: _primaryColor,
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Tagline
+                Text(
+                  'FASHION STORE',
+                  style: TextStyle(
+                    color: Colors.grey.shade400,
+                    letterSpacing: 4,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+
+                const Spacer(),
+
+                // Loading Indicator tinh tế hơn
+                SizedBox(
+                  width: 30,
+                  height: 30,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    valueColor: AlwaysStoppedAnimation<Color>(_primaryColor),
+                    backgroundColor: _primaryColor.withOpacity(0.1),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Version number (Option)
+                Text(
+                  "Version 1.0.0",
+                  style: TextStyle(color: Colors.grey.shade300, fontSize: 12),
+                ),
+                const SizedBox(height: 40),
+              ],
             ),
-
-            const Spacer(),
-
-            const SizedBox(
-              width: 40,
-              height: 40,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.black,
-              ),
-            ),
-
-            const SizedBox(height: 60),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

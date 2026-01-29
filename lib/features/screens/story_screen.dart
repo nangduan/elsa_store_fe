@@ -48,7 +48,7 @@ class StoryScreen extends StatelessWidget {
             bottom: 80,
             left: 24,
             child: Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),

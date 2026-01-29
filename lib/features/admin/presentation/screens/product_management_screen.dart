@@ -16,21 +16,23 @@ import '../cubit/product_cubit.dart';
 class ProductManagementScreen extends StatelessWidget {
   const ProductManagementScreen({super.key});
 
+  // Định nghĩa màu chủ đạo (Ocean Blue & Orange)
+  final Color _primaryBlue = const Color(0xFF1565C0);
+  final Color _primaryOrange = const Color(0xFFE64A19);
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) =>
-              ProductCubit(getIt(), getIt(), getIt(), getIt())..load(),
+          create: (_) => ProductCubit(getIt(), getIt(), getIt(), getIt())..load(),
         ),
         BlocProvider(
-          create: (_) =>
-              CategoryCubit(getIt(), getIt(), getIt(), getIt())..load(),
+          create: (_) => CategoryCubit(getIt(), getIt(), getIt(), getIt())..load(),
         ),
       ],
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F9FA),
+        backgroundColor: Colors.grey.shade50, // Nền xám nhạt hiện đại
         body: BlocConsumer<ProductCubit, ProductState>(
           listener: (context, state) {
             if (state.status.isFailure) {
@@ -39,6 +41,7 @@ class ProductManagementScreen extends StatelessWidget {
                   content: Text(state.errorMessage ?? 'Thao tác thất bại'),
                   backgroundColor: Colors.redAccent,
                   behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
               );
             }
@@ -46,34 +49,34 @@ class ProductManagementScreen extends StatelessWidget {
           builder: (context, state) {
             return CustomScrollView(
               slivers: [
-                BlocBuilder<CategoryCubit, CategoryState>(
-                  builder: (context, state) {
-                    return _buildAppBar(context);
-                  },
-                ),
+                // 1. App Bar (Title nằm cùng hàng)
+                _buildAppBar(context),
+
+                // 2. Search Bar
                 _buildSearchBar(context),
+
+                // 3. Content
                 if (state.status.isLoading)
-                  const SliverFillRemaining(
+                  SliverFillRemaining(
                     child: Center(
-                      child: CircularProgressIndicator(color: Colors.black),
+                      child: CircularProgressIndicator(color: _primaryBlue),
                     ),
                   )
                 else if (state.products.isEmpty)
                   SliverFillRemaining(child: _buildEmptyState())
                 else
                   SliverPadding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate(
-                        (context, index) =>
-                            _buildProductCard(context, state.products[index]),
+                            (context, index) => _buildProductCard(context, state.products[index]),
                         childCount: state.products.length,
                       ),
                     ),
                   ),
+
+                // Padding bottom để tránh cấn nút home ảo
+                const SliverToBoxAdapter(child: SizedBox(height: 40)),
               ],
             );
           },
@@ -84,40 +87,41 @@ class ProductManagementScreen extends StatelessWidget {
 
   Widget _buildAppBar(BuildContext context) {
     return SliverAppBar(
-      expandedHeight: 120.0,
       floating: true,
       pinned: true,
       elevation: 0,
       backgroundColor: Colors.white,
+
+      // Nút Back
       leading: IconButton(
-        icon: const Icon(
-          Icons.arrow_back_ios_new,
-          color: Colors.black,
-          size: 20,
-        ),
+        icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.grey.shade700, size: 22),
         onPressed: () => context.router.pop(),
       ),
-      flexibleSpace: const FlexibleSpaceBar(
-        titlePadding: EdgeInsetsDirectional.only(start: 56, bottom: 16),
-        title: Text(
-          'SẢN PHẨM',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.w800,
-            fontSize: 16,
-            letterSpacing: 1.5,
-          ),
+
+      // Tiêu đề nằm giữa, cùng hàng
+      centerTitle: true,
+      title: Text(
+        'QUẢN LÝ SẢN PHẨM',
+        style: TextStyle(
+          color: _primaryBlue,
+          fontWeight: FontWeight.w900,
+          fontSize: 18,
+          letterSpacing: 1.0,
         ),
       ),
+
+      // Nút Add
       actions: [
         Padding(
           padding: const EdgeInsets.only(right: 16),
           child: IconButton(
+            tooltip: "Thêm sản phẩm",
             onPressed: () {
               final categories = context.read<CategoryCubit>().state.categories;
               _showProductDialog(context, categories: categories);
             },
-            icon: const Icon(Icons.add_circle, color: Colors.black, size: 32),
+            // Màu cam nổi bật cho hành động chính
+            icon: Icon(Icons.add_circle_rounded, color: _primaryOrange, size: 32),
           ),
         ),
       ],
@@ -127,22 +131,31 @@ class ProductManagementScreen extends StatelessWidget {
   Widget _buildSearchBar(BuildContext context) {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-        child: TextField(
-          decoration: InputDecoration(
-            hintText: 'Tìm kiếm hàng tồn...',
-            hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-            prefixIcon: const Icon(Icons.search_rounded, color: Colors.black54),
-            filled: true,
-            fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(vertical: 0),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: Colors.grey.shade100),
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.08),
+                blurRadius: 15,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: TextField(
+            decoration: InputDecoration(
+              hintText: 'Tìm kiếm sản phẩm...',
+              hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+              prefixIcon: Icon(Icons.search_rounded, color: _primaryBlue),
+              filled: true,
+              fillColor: Colors.transparent,
+              contentPadding: const EdgeInsets.symmetric(vertical: 16),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: BorderSide.none,
+              ),
             ),
           ),
         ),
@@ -158,8 +171,8 @@ class ProductManagementScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 24,
+            color: _primaryBlue.withOpacity(0.08), // Shadow màu xanh nhẹ
+            blurRadius: 20,
             offset: const Offset(0, 8),
           ),
         ],
@@ -183,27 +196,26 @@ class ProductManagementScreen extends StatelessWidget {
               }
             },
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Header Card: Category Tag & Actions
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
-                          color: Colors.black,
+                          color: _primaryBlue.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: _primaryBlue.withOpacity(0.2)),
                         ),
                         child: Text(
-                          item.categoryName?.toUpperCase() ?? 'GENERAL',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
+                          item.categoryName?.toUpperCase() ?? 'KHÁC',
+                          style: TextStyle(
+                            color: _primaryBlue,
+                            fontSize: 11,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -211,51 +223,74 @@ class ProductManagementScreen extends StatelessWidget {
                       Row(
                         children: [
                           _buildCircleAction(
-                            Icons.edit_outlined,
+                            Icons.edit_rounded,
                             Colors.blueGrey,
-                            () {
-                              final categories = context
-                                  .read<CategoryCubit>()
-                                  .state
-                                  .categories;
-                              _showProductDialog(
-                                context,
-                                categories: categories,
-                                item: item,
-                              );
+                                () {
+                              final categories = context.read<CategoryCubit>().state.categories;
+                              _showProductDialog(context, categories: categories, item: item);
                             },
                           ),
                           const SizedBox(width: 8),
                           _buildCircleAction(
                             Icons.delete_outline_rounded,
                             Colors.redAccent,
-                            () => _confirmDelete(context, item),
+                                () => _confirmDelete(context, item),
                           ),
                         ],
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  _buildProductImage(item.imageUrl),
-                  const SizedBox(height: 12),
-                  Text(
-                    item.name ?? '-',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 18,
-                    ),
+
+                  const SizedBox(height: 16),
+
+                  // Body Card: Image & Info
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Image
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: SizedBox(
+                          width: 100,
+                          height: 100,
+                          child: _buildProductImage(item.imageUrl),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      // Info
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.name ?? 'Không tên',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 16,
+                                color: Colors.grey.shade800,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              item.description ?? 'Chưa có mô tả chi tiết.',
+                              style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    item.description ?? 'Chưa có mô tả',
-                    style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 16),
                     child: Divider(height: 1, thickness: 0.5),
                   ),
+
+                  // Footer Card: Price & Arrow
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -263,24 +298,30 @@ class ProductManagementScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Giá gốc',
+                            'Giá niêm yết',
                             style: TextStyle(
-                              color: Colors.grey.shade400,
-                              fontSize: 11,
+                                color: Colors.grey.shade400,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500
                             ),
                           ),
                           Text(
                             Format.formatCurrency(item.basePrice),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w900,
                               fontSize: 18,
+                              color: _primaryOrange, // Giá tiền dùng màu Cam nổi bật
                             ),
                           ),
                         ],
                       ),
-                      const Icon(
-                        Icons.arrow_forward_rounded,
-                        color: Colors.black26,
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade50,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey.shade400),
                       ),
                     ],
                   ),
@@ -294,8 +335,9 @@ class ProductManagementScreen extends StatelessWidget {
   }
 
   Widget _buildCircleAction(IconData icon, Color color, VoidCallback onTap) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(50),
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
@@ -309,63 +351,27 @@ class ProductManagementScreen extends StatelessWidget {
 
   Widget _buildProductImage(String? imageUrl) {
     final resolved = _resolveImageUrl(imageUrl);
+    // Logic hiển thị ảnh giữ nguyên, chỉ thay đổi styling container
     if (resolved == null) {
       return Container(
-        height: 140,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: const Center(
-          child: Icon(
-            Icons.image_not_supported_outlined,
-            color: Colors.grey,
-            size: 36,
-          ),
-        ),
+        color: Colors.grey.shade100,
+        child: Icon(Icons.image_outlined, color: Colors.grey.shade300, size: 30),
       );
     }
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: Image.network(
-        resolved,
-        height: 140,
-        width: double.infinity,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) {
-          return Container(
-            height: 140,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.image_not_supported_outlined,
-                color: Colors.grey,
-                size: 36,
-              ),
-            ),
-          );
-        },
+    return Image.network(
+      resolved,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => Container(
+        color: Colors.grey.shade100,
+        child: Icon(Icons.broken_image_outlined, color: Colors.grey.shade300, size: 30),
       ),
     );
   }
 
   String? _resolveImageUrl(String? path) {
-    if (path == null || path.isEmpty) {
-      return null;
-    }
-
-    if (path.startsWith('http://') || path.startsWith('https://')) {
-      return path;
-    }
-
-    final baseUrl = "${AppConfig().baseURL}$path";
-    return baseUrl;
+    if (path == null || path.isEmpty) return null;
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    return "${AppConfig().baseURL}$path";
   }
 
   Widget _buildEmptyState() {
@@ -373,17 +379,21 @@ class ProductManagementScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.inventory_2_outlined,
-            size: 80,
-            color: Colors.grey.shade200,
+          Container(
+            padding: const EdgeInsets.all(30),
+            decoration: BoxDecoration(
+              color: _primaryBlue.withOpacity(0.05),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.inventory_2_outlined, size: 60, color: _primaryBlue.withOpacity(0.5)),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Text(
-            'Kho hàng trống',
+            'Chưa có sản phẩm nào',
             style: TextStyle(
-              color: Colors.grey.shade400,
-              fontWeight: FontWeight.w500,
+                color: Colors.grey.shade500,
+                fontWeight: FontWeight.w500,
+                fontSize: 16
             ),
           ),
         ],
@@ -392,28 +402,19 @@ class ProductManagementScreen extends StatelessWidget {
   }
 
   void _showProductDialog(
-    BuildContext context, {
-    required List<CategoryResponse> categories,
-    ProductResponse? item,
-  }) {
+      BuildContext context, {
+        required List<CategoryResponse> categories,
+        ProductResponse? item,
+      }) {
     final productCubit = context.read<ProductCubit>();
     final nameController = TextEditingController(text: item?.name ?? '');
-    final descriptionController = TextEditingController(
-      text: item?.description ?? '',
-    );
-    final basePriceController = TextEditingController(
-      text: item?.basePrice?.toStringAsFixed(0) ?? '',
-    );
-    final availableCategories = categories
-        .where((c) => c.parentId != null)
-        .toList();
-    final selectableCategories = availableCategories.isEmpty
-        ? categories
-        : availableCategories;
-    int? selectedCategoryId = _matchCategoryId(
-      selectableCategories,
-      item?.categoryName,
-    );
+    final descriptionController = TextEditingController(text: item?.description ?? '');
+    final basePriceController = TextEditingController(text: item?.basePrice?.toStringAsFixed(0) ?? '');
+
+    // Logic lọc category giữ nguyên
+    final availableCategories = categories.where((c) => c.parentId != null).toList();
+    final selectableCategories = availableCategories.isEmpty ? categories : availableCategories;
+    int? selectedCategoryId = _matchCategoryId(selectableCategories, item?.categoryName);
 
     showModalBottomSheet(
       context: context,
@@ -422,10 +423,10 @@ class ProductManagementScreen extends StatelessWidget {
       builder: (dialogContext) => Container(
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
         ),
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(dialogContext).viewInsets.bottom,
+          bottom: MediaQuery.of(dialogContext).viewInsets.bottom + 30,
           left: 24,
           right: 24,
           top: 32,
@@ -435,65 +436,66 @@ class ProductManagementScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                item == null ? 'Sản phẩm mới' : 'Chỉnh sửa sản phẩm',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                ),
+              // Dialog Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    item == null ? 'Thêm mới' : 'Cập nhật',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: _primaryBlue,
+                    ),
+                  ),
+                  IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: Icon(Icons.close, color: Colors.grey.shade400)
+                  )
+                ],
               ),
               const SizedBox(height: 24),
-              _buildModernField(
-                nameController,
-                'Tên sản phẩm',
-                Icons.drive_file_rename_outline,
-              ),
-              _buildModernField(
-                descriptionController,
-                'Mô tả',
-                Icons.description_outlined,
-                maxLines: 3,
-              ),
-              _buildModernField(
-                basePriceController,
-                'Giá gốc',
-                Icons.payments_outlined,
-                keyboardType: TextInputType.number,
-              ),
-              DropdownButtonFormField<int>(
-                value: selectedCategoryId,
-                decoration: _fieldDecoration(
-                  'Danh mục',
-                  Icons.category_outlined,
+
+              _buildModernField(nameController, 'Tên sản phẩm', Icons.drive_file_rename_outline_rounded),
+              _buildModernField(descriptionController, 'Mô tả', Icons.description_outlined, maxLines: 3),
+              _buildModernField(basePriceController, 'Giá gốc', Icons.attach_money_rounded, keyboardType: TextInputType.number),
+
+              // Dropdown
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                items: selectableCategories
-                    .map(
-                      (c) => DropdownMenuItem(
-                        value: c.id,
-                        child: Text(c.name ?? '-'),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (val) => selectedCategoryId = val,
+                child: DropdownButtonFormField<int>(
+                  value: selectedCategoryId,
+                  icon: Icon(Icons.keyboard_arrow_down_rounded, color: _primaryBlue),
+                  dropdownColor: Colors.white,
+                  decoration: _fieldDecoration('Danh mục', Icons.category_outlined),
+                  items: selectableCategories.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name ?? '-'))).toList(),
+                  onChanged: (val) => selectedCategoryId = val,
+                ),
               ),
+
               const SizedBox(height: 32),
+
+              // Save Button
               SizedBox(
                 width: double.infinity,
-                height: 60,
+                height: 56,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
+                    backgroundColor: _primaryBlue,
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    elevation: 0,
+                    elevation: 5,
+                    shadowColor: _primaryBlue.withOpacity(0.4),
                   ),
                   onPressed: () {
                     final name = nameController.text.trim();
                     final price = double.tryParse(basePriceController.text);
-                    if (name.isNotEmpty &&
-                        price != null &&
-                        selectedCategoryId != null) {
+                    if (name.isNotEmpty && price != null && selectedCategoryId != null) {
                       final req = ProductRequest(
                         name: name,
                         description: descriptionController.text,
@@ -511,13 +513,13 @@ class ProductManagementScreen extends StatelessWidget {
                   child: const Text(
                     'LƯU SẢN PHẨM',
                     style: TextStyle(
-                      color: Colors.white,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 40),
             ],
           ),
         ),
@@ -525,13 +527,7 @@ class ProductManagementScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildModernField(
-    TextEditingController controller,
-    String label,
-    IconData icon, {
-    TextInputType? keyboardType,
-    int maxLines = 1,
-  }) {
+  Widget _buildModernField(TextEditingController controller, String label, IconData icon, {TextInputType? keyboardType, int maxLines = 1}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: TextField(
@@ -546,20 +542,17 @@ class ProductManagementScreen extends StatelessWidget {
   InputDecoration _fieldDecoration(String label, IconData icon) {
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon, size: 20),
+      labelStyle: TextStyle(color: Colors.grey.shade500),
+      prefixIcon: Icon(icon, size: 22, color: _primaryBlue.withOpacity(0.7)),
       filled: true,
       fillColor: Colors.grey.shade50,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
-      ),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.grey.shade200)),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: _primaryBlue, width: 1.5)),
     );
   }
 
-  int? _matchCategoryId(
-    List<CategoryResponse> categories,
-    String? categoryName,
-  ) {
+  int? _matchCategoryId(List<CategoryResponse> categories, String? categoryName) {
     if (categoryName == null) return null;
     try {
       return categories.firstWhere((c) => c.name == categoryName).id;
@@ -572,20 +565,42 @@ class ProductManagementScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text('Xác nhận xóa'),
-        content: Text('Xóa "${item.name}" khỏi danh mục?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: _primaryOrange),
+            const SizedBox(width: 10),
+            const Text('Xác nhận xóa'),
+          ],
+        ),
+        content: Text.rich(
+            TextSpan(
+                text: 'Bạn có muốn xóa ',
+                style: const TextStyle(color: Colors.black87),
+                children: [
+                  TextSpan(text: '"${item.name}"', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const TextSpan(text: ' không?'),
+                ]
+            )
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
+            style: TextButton.styleFrom(foregroundColor: Colors.grey),
             child: const Text('Hủy'),
           ),
-          TextButton(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+            ),
             onPressed: () {
               context.read<ProductCubit>().remove(item.id!);
               Navigator.pop(ctx);
             },
-            child: const Text('Xóa', style: TextStyle(color: Colors.red)),
+            child: const Text('Xóa ngay'),
           ),
         ],
       ),
