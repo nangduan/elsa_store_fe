@@ -63,7 +63,9 @@ class OrderCubit extends Cubit<OrderState> {
 
     try {
       final orders = await _getOrders(userId);
-      emit(state.copyWith(status: OrderStatus.success, orders: orders));
+      final sortedOrders = List<OrderResponse>.from(orders)
+        ..sort(_compareOrderDateDesc);
+      emit(state.copyWith(status: OrderStatus.success, orders: sortedOrders));
     } on AppException catch (e) {
       emit(
         state.copyWith(status: OrderStatus.failure, errorMessage: e.message),
@@ -172,5 +174,32 @@ class OrderCubit extends Cubit<OrderState> {
     final raw = await _storage.read(key: Constants.userId);
     if (raw == null) return null;
     return int.tryParse(raw);
+  }
+
+  int _compareOrderDateDesc(OrderResponse a, OrderResponse b) {
+    final aDate = _parseOrderDate(a.orderDate);
+    final bDate = _parseOrderDate(b.orderDate);
+    if (aDate == null && bDate == null) return 0;
+    if (aDate == null) return 1;
+    if (bDate == null) return -1;
+    return bDate.compareTo(aDate);
+  }
+
+  DateTime? _parseOrderDate(String? value) {
+    if (value == null || value.trim().isEmpty) return null;
+    final parsed = DateTime.tryParse(value);
+    if (parsed != null) return parsed;
+
+    final normalized = value.replaceAll('-', '/');
+    final parts = normalized.split('/');
+    if (parts.length == 3) {
+      final day = int.tryParse(parts[0]);
+      final month = int.tryParse(parts[1]);
+      final year = int.tryParse(parts[2]);
+      if (day != null && month != null && year != null) {
+        return DateTime(year, month, day);
+      }
+    }
+    return null;
   }
 }
