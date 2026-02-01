@@ -3,7 +3,6 @@ class Constants {
   static const String refreshToken = 'refresh_token';
   static const String role = 'role';
   static const String userId = 'user_id';
-  static const String hotelId = 'hotel_id';
 
   static const List<String> provinces = [
     'An Giang',

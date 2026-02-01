@@ -4,7 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_skeleton/core/constants/format.dart';
 import 'package:flutter_skeleton/features/product/data/models/response/product_variant_response.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:injectable/injectable.dart';
 import '../../core/navigation/app_routes.dart';
+import '../../core/storage/flutter_store_core.dart';
+import '../orders/data/models/request/create_order_item_request.dart';
+import '../orders/domain/usecases/create_order_use_case.dart';
 import '../product/data/models/response/product_detail_response.dart';
 
 import '../../core/api/app_config.dart';
@@ -503,7 +507,7 @@ class _ProductDetailFullScreenState extends State<ProductDetailFullScreen> {
                   ),
                   elevation: 0,
                 ),
-                onPressed: () {
+                onPressed: () async {
                   if (_selectedVariant == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -512,6 +516,39 @@ class _ProductDetailFullScreenState extends State<ProductDetailFullScreen> {
                     );
                     return;
                   }
+                  final userId = await FlutterStoreCore.readUserId();
+                  if (userId == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Thiếu thông tin người dùng'),
+                      ),
+                    );
+                    return;
+                  }
+                  await getIt<CreateOrderUseCase>()
+                      .call(userId, [
+                        CreateOrderItemRequest(
+                          productVariantId: _selectedVariant!.id ?? 0,
+                          quantity: 1,
+                        ),
+                      ])
+                      .then((value) {
+                        if (value != null) {
+                          context.router.push(
+                            PaymentRoute(
+                              productName: productName,
+                              imageUrl: _selectedVariant!.imageUrl ?? imageUrl,
+                              amount: amount,
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Tạo đơn hàng thất bại'),
+                            ),
+                          );
+                        }
+                      });
                   context.router.push(
                     PaymentRoute(
                       productName: productName,

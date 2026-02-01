@@ -439,7 +439,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i371.GetOrdersUseCase>(),
         gh<_i1066.GetOrdersByUserUseCase>(),
         gh<_i962.CreateOrderUseCase>(),
-        gh<_i558.FlutterSecureStorage>(),
       ),
     );
     gh.factory<_i152.CreatePromotionUseCase>(

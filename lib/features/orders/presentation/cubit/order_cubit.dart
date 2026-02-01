@@ -1,10 +1,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_skeleton/core/enum/role_enum.dart';
+import 'package:flutter_skeleton/core/storage/flutter_store_core.dart';
 import 'package:flutter_skeleton/features/orders/domain/usecases/get_orders_by_user_use_case%20copy.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/constants/constant.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../data/models/request/create_order_item_request.dart';
 import '../../data/models/response/order_response.dart';
@@ -46,23 +46,18 @@ class OrderCubit extends Cubit<OrderState> {
   final GetOrdersUseCase _getOrders;
   final GetOrdersByUserUseCase _getOrdersByUserUseCase;
   final CreateOrderUseCase _createOrder;
-  final FlutterSecureStorage _storage;
 
-  OrderCubit(
-    this._getOrders,
-    this._getOrdersByUserUseCase,
-    this._createOrder,
-    this._storage,
-  ) : super(const OrderState());
+  OrderCubit(this._getOrders, this._getOrdersByUserUseCase, this._createOrder)
+    : super(const OrderState());
 
   Future<void> load() async {
     emit(state.copyWith(status: OrderStatus.loading));
-    final role = await _readRole();
+    final role = await FlutterStoreCore.readRole();
     late final List<OrderResponse> orders;
     if (role.isAdmin) {
       orders = await _getOrders.call();
     } else {
-      final userId = await _readUserId();
+      final userId = await FlutterStoreCore.readUserId();
       orders = await _getOrdersByUserUseCase.call(userId ?? 0);
     }
 
@@ -82,7 +77,7 @@ class OrderCubit extends Cubit<OrderState> {
     required int quantity,
   }) async {
     emit(state.copyWith(status: OrderStatus.creating));
-    final userId = await _readUserId();
+    final userId = await FlutterStoreCore.readUserId();
     if (userId == null) {
       final error = AppException(
         message: 'Thiếu thông tin người dùng',
@@ -98,7 +93,7 @@ class OrderCubit extends Cubit<OrderState> {
     }
 
     try {
-      final order = await _createOrder(userId, [
+      final order = await _createOrder.call(userId, [
         CreateOrderItemRequest(
           productVariantId: productVariantId,
           quantity: quantity,
@@ -138,7 +133,7 @@ class OrderCubit extends Cubit<OrderState> {
     }
 
     emit(state.copyWith(status: OrderStatus.creating));
-    final userId = await _readUserId();
+    final userId = await FlutterStoreCore.readUserId();
     if (userId == null) {
       final error = AppException(
         message: 'Thiếu thông tin người dùng',
@@ -154,7 +149,7 @@ class OrderCubit extends Cubit<OrderState> {
     }
 
     try {
-      final order = await _createOrder(userId, items);
+      final order = await _createOrder.call(userId, items);
       final updatedOrders = order == null
           ? state.orders
           : [order, ...state.orders];
@@ -172,17 +167,6 @@ class OrderCubit extends Cubit<OrderState> {
       );
       rethrow;
     }
-  }
-
-  Future<int?> _readUserId() async {
-    final raw = await _storage.read(key: Constants.userId);
-    if (raw == null) return null;
-    return int.tryParse(raw);
-  }
-
-  Future<Role> _readRole() async {
-    final raw = await _storage.read(key: Constants.role);
-    return Role.fromString(raw);
   }
 
   int _compareOrderDateDesc(OrderResponse a, OrderResponse b) {

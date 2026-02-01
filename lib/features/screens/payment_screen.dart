@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_skeleton/core/navigation/app_routes.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../core/api/app_config.dart';
@@ -65,60 +66,61 @@ class _PaymentScreenState extends State<PaymentScreen> {
           const SizedBox(height: 8),
 
           Column(
-            children: (items.isNotEmpty
-                    ? items
-                    : [
-                        CartItemResponse(
-                          productName: displayName,
-                          imageUrl: widget.imageUrl,
-                          unitPrice: displayAmount,
-                          quantity: 1,
-                          lineTotal: displayAmount,
+            children:
+                (items.isNotEmpty
+                        ? items
+                        : [
+                            CartItemResponse(
+                              productName: displayName,
+                              imageUrl: widget.imageUrl,
+                              unitPrice: displayAmount,
+                              quantity: 1,
+                              lineTotal: displayAmount,
+                            ),
+                          ])
+                    .map((item) {
+                      final itemTotal = _calculateItemTotal(item);
+                      final itemImage = _resolveImageUrl(item.imageUrl);
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              height: 56,
+                              width: 56,
+                              color: Colors.grey.shade100,
+                              child: itemImage == null
+                                  ? const Icon(
+                                      Icons.image_not_supported_outlined,
+                                      color: Colors.grey,
+                                    )
+                                  : Image.network(
+                                      itemImage,
+                                      fit: BoxFit.contain,
+                                      errorBuilder: (_, __, ___) => const Icon(
+                                        Icons.broken_image_outlined,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                          title: Text(
+                            item.productName ?? 'San pham',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          subtitle: Text('x${item.quantity ?? 0}'),
+                          trailing: Text(
+                            Format.formatCurrency(itemTotal),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
                         ),
-                      ])
-                .map((item) {
-                  final itemTotal = _calculateItemTotal(item);
-                  final itemImage = _resolveImageUrl(item.imageUrl);
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Container(
-                          height: 56,
-                          width: 56,
-                          color: Colors.grey.shade100,
-                          child: itemImage == null
-                              ? const Icon(
-                                  Icons.image_not_supported_outlined,
-                                  color: Colors.grey,
-                                )
-                              : Image.network(
-                                  itemImage,
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (_, __, ___) => const Icon(
-                                    Icons.broken_image_outlined,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                        ),
-                      ),
-                      title: Text(
-                        item.productName ?? 'San pham',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      subtitle: Text('x${item.quantity ?? 0}'),
-                      trailing: Text(
-                        Format.formatCurrency(itemTotal),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  );
-                })
-                .toList(),
+                      );
+                    })
+                    .toList(),
           ),
           const SizedBox(height: 16),
           const Text(
@@ -183,7 +185,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   Future<void> _handlePay() async {
-    final amount = widget.amount ?? _calculateCartTotal(widget.cartItems ?? const []);
+    final amount =
+        widget.amount ?? _calculateCartTotal(widget.cartItems ?? const []);
     if (amount <= 0) {
       _showSnackBar('Số tiền không hợp lý');
       return;
@@ -268,9 +271,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
       if (mounted) {
         setState(() => _isProcessing = false);
       }
+      context.router.replaceAll([MainBottomNavRoute()]);
     }
   }
-
 
   double _calculateItemTotal(CartItemResponse item) {
     return item.lineTotal ??

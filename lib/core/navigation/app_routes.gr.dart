@@ -519,32 +519,6 @@ class ProductDetailFullRouteArgs {
   int get hashCode => key.hashCode ^ product.hashCode;
 }
 
-/// generated route for
-/// [ProductDetailScreen]
-class ProductDetailRoute extends PageRouteInfo<ProductDetailRouteArgs> {
-  ProductDetailRoute({
-    Key? key,
-    bool isSale = false,
-    List<PageRouteInfo>? children,
-  }) : super(
-         ProductDetailRoute.name,
-         args: ProductDetailRouteArgs(key: key, isSale: isSale),
-         initialChildren: children,
-       );
-
-  static const String name = 'ProductDetailRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      final args = data.argsAs<ProductDetailRouteArgs>(
-        orElse: () => const ProductDetailRouteArgs(),
-      );
-      return ProductDetailScreen(key: args.key, isSale: args.isSale);
-    },
-  );
-}
-
 class ProductDetailRouteArgs {
   const ProductDetailRouteArgs({this.key, this.isSale = false});
 

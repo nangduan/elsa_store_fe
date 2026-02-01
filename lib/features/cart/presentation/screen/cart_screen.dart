@@ -1,10 +1,15 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_skeleton/core/di/injector.dart';
+import 'package:flutter_skeleton/core/storage/flutter_store_core.dart';
+import 'package:flutter_skeleton/features/orders/domain/usecases/create_order_use_case.dart';
+import 'package:flutter_skeleton/features/orders/presentation/cubit/order_cubit.dart';
 
 import '../../../../core/api/app_config.dart';
 import '../../../../core/constants/format.dart';
 import '../../../../core/navigation/app_routes.dart';
+import '../../../orders/data/models/request/create_order_item_request.dart';
 import '../../data/models/response/cart_item_response.dart';
 import '../cubit/cart_cubit.dart';
 
@@ -192,19 +197,40 @@ class CartScreen extends StatelessWidget {
             : null);
     if (variantId == null || amount == null || amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Du lieu san pham khong hop le')),
+        const SnackBar(content: Text('Dữ liệu sản phẩm không hợp lệ')),
       );
       return;
     }
 
-    context.router.push(
-      PaymentRoute(
-        productName: item.productName ?? 'San pham',
-        imageUrl: item.imageUrl,
-        amount: amount,
-        productVariantId: variantId,
-      ),
-    );
+    final userId = await FlutterStoreCore.readUserId();
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Thiếu thông tin người dùng')),
+      );
+      return;
+    }
+    await getIt<CreateOrderUseCase>()
+        .call(userId, [
+          CreateOrderItemRequest(
+            productVariantId: variantId,
+            quantity: item.quantity ?? 1,
+          ),
+        ])
+        .then((value) {
+          if (value != null) {
+            context.router.push(
+              PaymentRoute(
+                productName: item.productName ?? 'San pham',
+                imageUrl: item.imageUrl,
+                amount: amount,
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Tạo đơn hàng thất bại')),
+            );
+          }
+        });
   }
 
   Widget _buildBottomCheckout(
@@ -292,13 +318,35 @@ class CartScreen extends StatelessWidget {
       return;
     }
 
-    context.router.push(
-      PaymentRoute(
-        productName: 'Thanh toan gio hang',
-        amount: total,
-        cartItems: items,
-      ),
-    );
+    List<CreateOrderItemRequest> orderItems = items.map((item) {
+      return CreateOrderItemRequest(
+        productVariantId: item.productVariantId!,
+        quantity: item.quantity!,
+      );
+    }).toList();
+
+    final userId = await FlutterStoreCore.readUserId();
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Thiếu thông tin người dùng')),
+      );
+      return;
+    }
+    await getIt<CreateOrderUseCase>().call(userId, orderItems).then((value) {
+      if (value != null) {
+        context.router.push(
+          PaymentRoute(
+            productName: 'Thanh toán giỏ hàng',
+            amount: total,
+            cartItems: items,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Tạo đơn hàng thất bại')));
+      }
+    });
   }
 }
 

@@ -28,7 +28,6 @@ import '../../features/screens/password_recovery_screen.dart';
 import '../../features/screens/password_screen.dart';
 import '../../features/screens/payment_screen.dart';
 import '../../features/screens/product_detail_full_screen.dart';
-import '../../features/screens/product_detail_screen.dart';
 import '../../features/home/presentation/screens/profile_screen.dart';
 import '../../features/screens/ready_card_screen.dart';
 import '../../features/screens/recently_viewed_screen.dart';
@@ -98,10 +97,6 @@ class AppRoutes extends RootStackRouter {
       path: '/${MainBottomNavRoute.name}',
     ),
     AutoRoute(page: ShopRoute.page, path: '/${ShopRoute.name}'),
-    AutoRoute(
-      page: ProductDetailRoute.page,
-      path: '/${ProductDetailRoute.name}-detail',
-    ),
     AutoRoute(
       page: ProductDetailFullRoute.page,
       path: '/${ProductDetailFullRoute.name}-detail-full',
