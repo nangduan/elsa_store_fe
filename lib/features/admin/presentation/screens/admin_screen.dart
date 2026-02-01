@@ -24,7 +24,7 @@ class AdminScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: false,
         title: const Text(
-          'Quan ly cua hang',
+          'Quản lý cửa hàng',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.w900,
@@ -39,7 +39,7 @@ class AdminScreen extends StatelessWidget {
             },
           ),
           IconButton(
-            tooltip: 'Dang xuat',
+            tooltip: 'Đăng xuất',
             icon: const Icon(Icons.logout, color: Colors.red),
             onPressed: () => _showLogoutDialog(context),
           ),
@@ -62,28 +62,28 @@ class AdminScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Tong quan',
+                    'Tổng quan',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
                   _buildStatsGrid(),
                   const SizedBox(height: 32),
                   const Text(
-                    'Phan tich doanh thu',
+                    'Phân tích doanh thu 30 ngày gần nhất',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
                   _buildRevenueChart(context, state, range),
                   const SizedBox(height: 24),
                   const Text(
-                    'Doanh thu theo thang',
+                    'Doanh thu từng tháng',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
                   _buildMonthlyRevenueChart(context),
                   const SizedBox(height: 32),
                   const Text(
-                    'Quan ly',
+                    'Quản lý',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
@@ -102,8 +102,8 @@ class AdminScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Dang xuat'),
-        content: const Text('Ban co chac chan muon dang xuat?'),
+        title: const Text('Đăng xuất'),
+        content: const Text('Bạn có chắc chắn muốn đăng xuát?'),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
           TextButton(
@@ -122,7 +122,7 @@ class AdminScreen extends StatelessWidget {
                   });
             },
             child: const Text(
-              'Dong y',
+              'Đồng ý',
               style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
             ),
           ),
@@ -140,15 +140,15 @@ class AdminScreen extends StatelessWidget {
       mainAxisSpacing: 15,
       childAspectRatio: 1.5,
       children: [
+        _statCard('Doanh số hôm nay', '312', Icons.calendar_month, Colors.blue),
         _statCard(
-          'Doanh so hang thang',
+          'Doanh số tháng này',
           '1,284',
-          Icons.calendar_month,
-          Colors.blue,
+          Icons.view_week,
+          Colors.orange,
         ),
-        _statCard('Doanh so hang tuan', '312', Icons.view_week, Colors.orange),
-        _statCard('Dang xu ly', '45', Icons.autorenew, Colors.purple),
-        _statCard('Da hoan thanh', '2,100', Icons.check_circle, Colors.green),
+        _statCard('Đang xử lý', '45', Icons.autorenew, Colors.purple),
+        _statCard('Đã hoàn thành', '2,100', Icons.check_circle, Colors.green),
       ],
     );
   }
@@ -192,9 +192,7 @@ class AdminScreen extends StatelessWidget {
     RevenueState state,
     DateTimeRange range,
   ) {
-    if (state.status == RevenueStatus.loading &&
-        state.timeseries == null &&
-        state.summary == null) {
+    if (state.status == RevenueStatus.loading && state.timeseries == null) {
       return _buildRevenueContainer(
         child: const Center(child: CircularProgressIndicator()),
       );
@@ -209,13 +207,12 @@ class AdminScreen extends StatelessWidget {
               const Icon(Icons.error_outline, color: Colors.red, size: 36),
               const SizedBox(height: 8),
               Text(
-                state.errorMessage ?? 'Khong tai duoc doanh thu',
+                state.errorMessage ?? 'Lỗi tải dữ liệu',
                 style: const TextStyle(color: Colors.grey),
               ),
-              const SizedBox(height: 12),
               TextButton(
                 onPressed: () => _reloadRevenue(context, range),
-                child: const Text('Thu lai'),
+                child: const Text('Thử lại'),
               ),
             ],
           ),
@@ -225,98 +222,39 @@ class AdminScreen extends StatelessWidget {
 
     final summary = state.summary;
     final points = state.timeseries?.points ?? const [];
-    final total = Format.formatCurrency(summary?.netRevenue);
-    final avg = Format.formatCurrency(summary?.averageOrderValue);
-    final orders = summary?.ordersCount ?? 0;
 
     return _buildRevenueContainer(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Expanded(
-                child: Text(
-                  'Doanh thu 30 ngay gan nhat',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
+              const Text(
+                'Hiệu suất bán hàng',
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
               IconButton(
-                tooltip: 'Lam moi',
                 onPressed: () => _reloadRevenue(context, range),
                 icon: const Icon(Icons.refresh, size: 18),
               ),
             ],
           ),
-          const SizedBox(height: 6),
           Row(
             children: [
-              _statChip('Tong', total),
+              _statChip('Tổng', Format.formatCurrency(summary?.netRevenue)),
               const SizedBox(width: 8),
-              _statChip('TB/Don', avg),
-              const SizedBox(width: 8),
-              _statChip('Don', orders.toString()),
+              _statChip('Đơn', (summary?.ordersCount ?? 0).toString()),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Expanded(
             child: points.isEmpty
-                ? const Center(child: Text('Chua co du lieu doanh thu'))
+                ? const Center(child: Text('Không có dữ liệu'))
                 : _RevenueBarChart(points: points),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildRevenueContainer({required Widget child}) {
-    return Container(
-      height: 200,
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade100),
-      ),
-      child: child,
-    );
-  }
-
-  Widget _statChip(String label, String value) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            '$label: ',
-            style: TextStyle(
-              color: Colors.grey.shade600,
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _reloadRevenue(BuildContext context, DateTimeRange range) {
-    context.read<RevenueCubit>().loadAll(
-      from: _formatDate(range.start),
-      to: _formatDate(range.end),
-      groupBy: RevenueGroupBy.day,
-      statuses: const [0, 1],
     );
   }
 
@@ -332,77 +270,86 @@ class AdminScreen extends StatelessWidget {
         ),
       child: BlocBuilder<RevenueCubit, RevenueState>(
         builder: (context, state) {
-          if (state.status == RevenueStatus.loading &&
-              state.timeseries == null) {
-            return _buildRevenueContainer(
-              child: const Center(child: CircularProgressIndicator()),
-            );
-          }
-
-          if (state.status == RevenueStatus.failure) {
-            return _buildRevenueContainer(
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      color: Colors.red,
-                      size: 36,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      state.errorMessage ?? 'Khong tai duoc doanh thu',
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                    const SizedBox(height: 12),
-                    TextButton(
-                      onPressed: () => _reloadMonthlyRevenue(context, range),
-                      child: const Text('Thu lai'),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-
-          final points = state.timeseries?.points ?? const [];
           return _buildRevenueContainer(
-            child: points.isEmpty
-                ? const Center(child: Text('Chua co du lieu doanh thu'))
-                : _RevenueBarChart(points: points),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Biểu đồ theo tháng',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: state.status == RevenueStatus.loading
+                      ? const Center(child: CircularProgressIndicator())
+                      : (state.timeseries?.points.isEmpty ?? true)
+                      ? const Center(child: Text('Không có dữ liệu'))
+                      : _RevenueBarChart(points: state.timeseries!.points),
+                ),
+              ],
+            ),
           );
         },
       ),
     );
   }
 
-  void _reloadMonthlyRevenue(BuildContext context, DateTimeRange range) {
-    context.read<RevenueCubit>().loadTimeseries(
+  Widget _buildRevenueContainer({required Widget child}) {
+    return Container(
+      height: 280,
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.shade100),
+      ),
+      child: child,
+    );
+  }
+
+  Widget _statChip(String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Text(
+        '$label: $value',
+        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  void _reloadRevenue(BuildContext context, DateTimeRange range) {
+    context.read<RevenueCubit>().loadAll(
       from: _formatDate(range.start),
       to: _formatDate(range.end),
-      groupBy: RevenueGroupBy.month,
+      groupBy: RevenueGroupBy.day,
       statuses: const [0, 1],
     );
   }
 
   DateTimeRange _yearRange() {
     final now = DateTime.now();
-    final start = DateTime(now.year, 1, 1);
-    final end = DateTime(now.year, 12, 31);
-    return DateTimeRange(start: start, end: end);
+    return DateTimeRange(
+      start: DateTime(now.year, 1, 1),
+      end: DateTime(now.year, 12, 31),
+    );
   }
 
   DateTimeRange _defaultRange() {
     final now = DateTime.now();
     final end = DateTime(now.year, now.month, now.day);
-    final start = end.subtract(const Duration(days: 29));
-    return DateTimeRange(start: start, end: end);
+    return DateTimeRange(
+      start: end.subtract(const Duration(days: 29)),
+      end: end,
+    );
   }
 
-  String _formatDate(DateTime date) {
-    return DateFormat('yyyy-MM-dd').format(date);
-  }
+  String _formatDate(DateTime date) => DateFormat('yyyy-MM-dd').format(date);
 
   Widget _buildNavigationGrid(BuildContext context) {
     return GridView.count(
@@ -412,21 +359,36 @@ class AdminScreen extends StatelessWidget {
       crossAxisSpacing: 15,
       mainAxisSpacing: 15,
       children: [
-        _navItem(context, 'Nha cung cap', Icons.local_shipping_outlined, () {
-          context.router.push(const SupplierManagementRoute());
-        }),
-        _navItem(context, 'Danh muc', Icons.category_outlined, () {
-          context.router.push(const CategoryManagementRoute());
-        }),
-        _navItem(context, 'San pham', Icons.inventory_2_outlined, () {
-          context.router.push(const ProductManagementRoute());
-        }),
-        _navItem(context, 'Khuyen mai', Icons.confirmation_number_outlined, () {
-          context.router.push(const PromotionManagementRoute());
-        }),
-        _navItem(context, 'Don hang', Icons.receipt_long_outlined, () {
-          context.router.push(const OrdersRoute());
-        }),
+        _navItem(
+          context,
+          'Nhà cung cấp',
+          Icons.local_shipping_outlined,
+          () => context.router.push(const SupplierManagementRoute()),
+        ),
+        _navItem(
+          context,
+          'Danh mục',
+          Icons.category_outlined,
+          () => context.router.push(const CategoryManagementRoute()),
+        ),
+        _navItem(
+          context,
+          'Sản phẩm',
+          Icons.inventory_2_outlined,
+          () => context.router.push(const ProductManagementRoute()),
+        ),
+        _navItem(
+          context,
+          'Khuyến mãi',
+          Icons.confirmation_number_outlined,
+          () => context.router.push(const PromotionManagementRoute()),
+        ),
+        _navItem(
+          context,
+          'Đơn hàng',
+          Icons.receipt_long_outlined,
+          () => context.router.push(const OrdersRoute()),
+        ),
       ],
     );
   }
@@ -481,7 +443,7 @@ class _RevenueBarChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final values = points
-        .map((item) => (item.netRevenue as num?)?.toDouble() ?? 0)
+        .map((item) => (item.netRevenue as num?)?.toDouble() ?? 0.0)
         .toList();
     final labels = points
         .map((item) => (item.period as String?) ?? '')
@@ -490,124 +452,106 @@ class _RevenueBarChart extends StatelessWidget {
     final maxValue = values.isEmpty
         ? 0.0
         : values.reduce((a, b) => a > b ? a : b);
-    final midValue = maxValue / 2;
-
-    const double barWidth = 18.0;
+    const double barWidth = 20.0;
     const double barGap = 12.0;
-    const double labelHeight = 20.0;
+    const double labelHeight = 30.0;
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final totalHeight = constraints.maxHeight;
-        final chartHeight = (totalHeight - labelHeight).clamp(0.0, totalHeight);
-        final contentWidth = values.isEmpty
-            ? constraints.maxWidth
-            : (values.length * (barWidth + barGap)).toDouble();
-        final scrollWidth = contentWidth < constraints.maxWidth
-            ? constraints.maxWidth
-            : contentWidth;
+        final chartHeight = constraints.maxHeight - labelHeight;
+        final scrollWidth = (values.length * (barWidth + barGap))
+            .toDouble()
+            .clamp(constraints.maxWidth, double.infinity);
 
         return Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Y-Axis
             SizedBox(
-              width: 36,
+              width: 40,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   _AxisLabel(_formatAxisValue(maxValue)),
-                  _AxisLabel(_formatAxisValue(midValue)),
+                  _AxisLabel(_formatAxisValue(maxValue / 2)),
                   const _AxisLabel('0'),
+                  const SizedBox(height: labelHeight),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
+            // Chart Content
             Expanded(
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: chartHeight,
-                    child: Stack(
-                      children: [
-                        _GridLine(top: 0),
-                        _GridLine(top: chartHeight / 2),
-                        _GridLine(top: chartHeight),
-                        Positioned.fill(
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: SizedBox(
-                              width: scrollWidth,
-                              child: Align(
-                                alignment: Alignment.bottomLeft,
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: List.generate(values.length, (
-                                    index,
-                                  ) {
-                                    final value = values[index];
-                                    final height = maxValue == 0
-                                        ? 0
-                                        : (value / maxValue) * chartHeight;
-                                    return Padding(
-                                      padding: EdgeInsets.only(
-                                        right: index == values.length - 1
-                                            ? 0
-                                            : barGap,
-                                      ),
-                                      child: Container(
-                                        width: barWidth,
-                                        height: height
-                                            .clamp(2, chartHeight)
-                                            .toDouble(),
-                                        decoration: BoxDecoration(
-                                          color: Colors.black,
-                                          borderRadius: BorderRadius.circular(
-                                            6,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  }),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SizedBox(
+                  width: scrollWidth,
+                  child: Column(
+                    children: [
+                      // Bars
+                      SizedBox(
+                        height: chartHeight,
+                        child: Stack(
+                          children: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: List.generate(
+                                3,
+                                (_) => Container(
+                                  height: 1,
+                                  color: Colors.grey.shade100,
                                 ),
                               ),
                             ),
-                          ),
+                            Positioned.fill(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: List.generate(values.length, (index) {
+                                  final barHeight = maxValue == 0
+                                      ? 0.0
+                                      : (values[index] / maxValue) *
+                                            chartHeight;
+                                  return Container(
+                                    width: barWidth,
+                                    height: barHeight.clamp(4.0, chartHeight),
+                                    margin: const EdgeInsets.only(
+                                      right: barGap,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black,
+                                      borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(4),
+                                      ),
+                                    ),
+                                  );
+                                }),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: labelHeight,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: SizedBox(
-                        width: scrollWidth,
+                      ),
+                      // X-Axis Labels
+                      SizedBox(
+                        height: labelHeight,
                         child: Row(
                           children: List.generate(labels.length, (index) {
-                            final label = labels[index];
-                            return SizedBox(
+                            return Container(
                               width: barWidth,
-                              child: Padding(
-                                padding: const EdgeInsets.only(right: barGap),
+                              margin: const EdgeInsets.only(right: barGap),
+                              child: Center(
                                 child: Text(
-                                  _shortDate(label),
-                                  textAlign: TextAlign.center,
+                                  _shortDate(labels[index]),
                                   style: const TextStyle(
-                                    fontSize: 10,
+                                    fontSize: 9,
                                     color: Colors.grey,
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             );
                           }),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ],
@@ -617,60 +561,24 @@ class _RevenueBarChart extends StatelessWidget {
   }
 
   String _formatAxisValue(double value) {
-    if (value >= 1000000000) {
-      return '${(value / 1000000000).toStringAsFixed(1)}B';
-    }
-    if (value >= 1000000) {
-      return '${(value / 1000000).toStringAsFixed(1)}M';
-    }
-    if (value >= 1000) {
-      return '${(value / 1000).toStringAsFixed(1)}K';
-    }
+    if (value >= 1000000) return '${(value / 1000000).toStringAsFixed(1)}M';
+    if (value >= 1000) return '${(value / 1000).toStringAsFixed(0)}K';
     return value.toStringAsFixed(0);
   }
 
   String _shortDate(String raw) {
-    final normalized = raw.split('T').first;
-    if (normalized.length >= 10) {
-      final day = normalized.substring(8, 10);
-      final month = normalized.substring(5, 7);
-      return '$day/$month';
-    }
-    if (normalized.length >= 7) {
-      return normalized.substring(5, 7);
-    }
-    return normalized;
-  }
-}
-
-class _GridLine extends StatelessWidget {
-  final double top;
-  const _GridLine({required this.top});
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      top: top,
-      left: 0,
-      right: 0,
-      child: Container(height: 1, color: Colors.grey.shade200),
-    );
+    if (raw.contains('T')) raw = raw.split('T').first;
+    final parts = raw.split('-');
+    if (parts.length >= 3) return '${parts[2]}/${parts[1]}'; // dd/MM
+    if (parts.length == 2) return parts[1]; // MM
+    return raw;
   }
 }
 
 class _AxisLabel extends StatelessWidget {
   final String text;
   const _AxisLabel(this.text);
-
   @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 10,
-        color: Colors.grey,
-        fontWeight: FontWeight.w500,
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      Text(text, style: const TextStyle(fontSize: 10, color: Colors.grey));
 }
