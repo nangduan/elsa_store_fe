@@ -77,6 +77,15 @@ class AdminScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   _buildRevenueChart(context, state, range),
 
+                  const SizedBox(height: 24),
+
+                  const Text(
+                    "Doanh thu theo thang",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildMonthlyRevenueChart(context),
+
                   const SizedBox(height: 32),
 
                   const Text(
@@ -320,6 +329,79 @@ class AdminScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildMonthlyRevenueChart(BuildContext context) {
+    final range = _yearRange();
+    return BlocProvider(
+      create: (_) => getIt<RevenueCubit>()
+        ..loadTimeseries(
+          from: _formatDate(range.start),
+          to: _formatDate(range.end),
+          groupBy: RevenueGroupBy.month,
+          statuses: const [0, 1],
+        ),
+      child: BlocBuilder<RevenueCubit, RevenueState>(
+        builder: (context, state) {
+          if (state.status == RevenueStatus.loading &&
+              state.timeseries == null) {
+            return _buildRevenueContainer(
+              child: const Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          if (state.status == RevenueStatus.failure) {
+            return _buildRevenueContainer(
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 36,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      state.errorMessage ?? 'Khong tai duoc doanh thu',
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: () => _reloadMonthlyRevenue(context, range),
+                      child: const Text('Thu lai'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          final points = state.timeseries?.points ?? const [];
+          return _buildRevenueContainer(
+            child: points.isEmpty
+                ? const Center(child: Text('Chua co du lieu doanh thu'))
+                : _RevenueBarChart(points: points),
+          );
+        },
+      ),
+    );
+  }
+
+  void _reloadMonthlyRevenue(BuildContext context, DateTimeRange range) {
+    context.read<RevenueCubit>().loadTimeseries(
+      from: _formatDate(range.start),
+      to: _formatDate(range.end),
+      groupBy: RevenueGroupBy.month,
+      statuses: const [0, 1],
+    );
+  }
+
+  DateTimeRange _yearRange() {
+    final now = DateTime.now();
+    final start = DateTime(now.year, 1, 1);
+    final end = DateTime(now.year, 12, 31);
+    return DateTimeRange(start: start, end: end);
+  }
+
   DateTimeRange _defaultRange() {
     final now = DateTime.now();
     final end = DateTime(now.year, now.month, now.day);
@@ -555,13 +637,18 @@ class _RevenueBarChart extends StatelessWidget {
   }
 
   String _shortDate(String raw) {
-    if (raw.length >= 10) {
-      // Expecting yyyy-MM-dd -> lấy dd/MM
-      final day = raw.substring(8, 10);
-      final month = raw.substring(5, 7);
+    final normalized = raw.split('T').first;
+    if (normalized.length >= 10) {
+      // Expecting yyyy-MM-dd -> get dd/MM
+      final day = normalized.substring(8, 10);
+      final month = normalized.substring(5, 7);
       return '$day/$month';
     }
-    return raw;
+    if (normalized.length >= 7) {
+      // Expecting yyyy-MM -> get MM
+      return normalized.substring(5, 7);
+    }
+    return normalized;
   }
 }
 
