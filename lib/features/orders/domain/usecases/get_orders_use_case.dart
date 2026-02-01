@@ -9,7 +9,7 @@ class GetOrdersUseCase {
 
   GetOrdersUseCase(this._repository);
 
-  Future<List<OrderResponse>> call(int userId) {
-    return _repository.getOrders(userId);
+  Future<List<OrderResponse>> call() {
+    return _repository.getAllOrder();
   }
 }

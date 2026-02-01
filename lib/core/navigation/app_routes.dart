@@ -57,6 +57,7 @@ class AppRoutes extends RootStackRouter {
       path: '/${StartRoute.name}',
       initial: true,
     ),
+    AutoRoute(page: OrdersRoute.page, path: '/${OrdersRoute.name}'),
     AutoRoute(
       page: CategoryManagementRoute.page,
       path: '/${CategoryManagementRoute.name}',

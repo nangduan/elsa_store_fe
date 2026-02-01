@@ -11,7 +11,10 @@ abstract class OrderApiService {
   factory OrderApiService(Dio dio, {String? baseUrl}) = _OrderApiService;
 
   @GET('/orders')
-  Future<ApiResponse> getOrders(@Query('userId') int userId);
+  Future<ApiResponse> getAllOrder();
+
+  @GET('/orders/by-user/{userId}')
+  Future<ApiResponse> getAllOrderByUser(@Path('userId') int userId);
 
   @POST('/orders')
   Future<ApiResponse> createOrder(@Body() CreateOrderRequest body);
