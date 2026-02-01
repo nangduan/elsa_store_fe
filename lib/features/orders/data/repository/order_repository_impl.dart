@@ -33,6 +33,23 @@ class OrderRepositoryImpl implements OrderRepository {
   }
 
   @override
+  Future<List<OrderResponse>> getAllOrderByUser(int userId) async {
+    try {
+      final apiResp = await apiService.getAllOrderByUser(userId);
+      final data = apiResp.data;
+      if (data is List) {
+        return data
+            .whereType<Map<String, dynamic>>()
+            .map(OrderResponse.fromJson)
+            .toList();
+      }
+      return const [];
+    } on DioException catch (e) {
+      throw dioClient.handleDioError(e);
+    }
+  }
+
+  @override
   Future<OrderResponse?> createOrder(
     int userId,
     List<CreateOrderItemRequest> items,

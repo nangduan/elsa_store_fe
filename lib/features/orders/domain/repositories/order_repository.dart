@@ -3,6 +3,7 @@ import '../../data/models/response/order_response.dart';
 
 abstract class OrderRepository {
   Future<List<OrderResponse>> getAllOrder();
+  Future<List<OrderResponse>> getAllOrderByUser(int userId);
   Future<OrderResponse?> createOrder(
     int userId,
     List<CreateOrderItemRequest> items,

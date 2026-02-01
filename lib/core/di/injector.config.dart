@@ -141,6 +141,8 @@ import 'package:flutter_skeleton/features/orders/domain/repositories/order_repos
     as _i825;
 import 'package:flutter_skeleton/features/orders/domain/usecases/create_order_use_case.dart'
     as _i962;
+import 'package:flutter_skeleton/features/orders/domain/usecases/get_orders_by_user_use_case%20copy.dart'
+    as _i1066;
 import 'package:flutter_skeleton/features/orders/domain/usecases/get_orders_use_case.dart'
     as _i371;
 import 'package:flutter_skeleton/features/orders/presentation/cubit/order_cubit.dart'
@@ -298,6 +300,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i371.GetOrdersUseCase>(
       () => _i371.GetOrdersUseCase(gh<_i825.OrderRepository>()),
     );
+    gh.factory<_i1066.GetOrdersByUserUseCase>(
+      () => _i1066.GetOrdersByUserUseCase(gh<_i825.OrderRepository>()),
+    );
     gh.factory<_i1051.CreateProductUseCase>(
       () => _i1051.CreateProductUseCase(gh<_i195.ProductRepository>()),
     );
@@ -314,13 +319,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i511.ProductRepositoryImpl(
         gh<_i1001.ProductApiService>(),
         gh<_i520.DioClient>(),
-      ),
-    );
-    gh.factory<_i513.OrderCubit>(
-      () => _i513.OrderCubit(
-        gh<_i371.GetOrdersUseCase>(),
-        gh<_i962.CreateOrderUseCase>(),
-        gh<_i558.FlutterSecureStorage>(),
       ),
     );
     gh.factory<_i767.CreateProductVariantUseCase>(
@@ -433,6 +431,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i423.AddCartItemUseCase>(),
         gh<_i1002.UpdateCartItemQuantityUseCase>(),
         gh<_i273.DeleteCartItemUseCase>(),
+        gh<_i558.FlutterSecureStorage>(),
+      ),
+    );
+    gh.factory<_i513.OrderCubit>(
+      () => _i513.OrderCubit(
+        gh<_i371.GetOrdersUseCase>(),
+        gh<_i1066.GetOrdersByUserUseCase>(),
+        gh<_i962.CreateOrderUseCase>(),
         gh<_i558.FlutterSecureStorage>(),
       ),
     );

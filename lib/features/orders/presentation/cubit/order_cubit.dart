@@ -1,5 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_skeleton/core/enum/role_enum.dart';
+import 'package:flutter_skeleton/features/orders/domain/usecases/get_orders_by_user_use_case%20copy.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/constants/constant.dart';
@@ -42,27 +44,29 @@ class OrderState {
 @injectable
 class OrderCubit extends Cubit<OrderState> {
   final GetOrdersUseCase _getOrders;
+  final GetOrdersByUserUseCase _getOrdersByUserUseCase;
   final CreateOrderUseCase _createOrder;
   final FlutterSecureStorage _storage;
 
-  OrderCubit(this._getOrders, this._createOrder, this._storage)
-    : super(const OrderState());
+  OrderCubit(
+    this._getOrders,
+    this._getOrdersByUserUseCase,
+    this._createOrder,
+    this._storage,
+  ) : super(const OrderState());
 
   Future<void> load() async {
     emit(state.copyWith(status: OrderStatus.loading));
-    final userId = await _readUserId();
-    if (userId == null) {
-      emit(
-        state.copyWith(
-          status: OrderStatus.failure,
-          errorMessage: 'Thiếu thông tin người dùng',
-        ),
-      );
-      return;
+    final role = await _readRole();
+    late final List<OrderResponse> orders;
+    if (role.isAdmin) {
+      orders = await _getOrders.call();
+    } else {
+      final userId = await _readUserId();
+      orders = await _getOrdersByUserUseCase.call(userId ?? 0);
     }
 
     try {
-      final orders = await _getOrders(userId);
       final sortedOrders = List<OrderResponse>.from(orders)
         ..sort(_compareOrderDateDesc);
       emit(state.copyWith(status: OrderStatus.success, orders: sortedOrders));
@@ -174,6 +178,11 @@ class OrderCubit extends Cubit<OrderState> {
     final raw = await _storage.read(key: Constants.userId);
     if (raw == null) return null;
     return int.tryParse(raw);
+  }
+
+  Future<Role> _readRole() async {
+    final raw = await _storage.read(key: Constants.role);
+    return Role.fromString(raw);
   }
 
   int _compareOrderDateDesc(OrderResponse a, OrderResponse b) {
