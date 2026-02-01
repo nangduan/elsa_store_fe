@@ -57,7 +57,8 @@ class HomeScreen extends StatelessWidget {
             }
 
             return RefreshIndicator(
-              onRefresh: () async => context.read<HomeCubit>().load(),
+              onRefresh: () async =>
+                  context.read<HomeCubit>().selectedCategory(),
               color: Colors.black,
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -113,40 +114,66 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 30),
                   _buildSectionTitle('Danh mục'),
                   const SizedBox(height: 16),
-
-                  // Category List
-                  SizedBox(
-                    height: 45,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: state.categories.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 10),
-                      itemBuilder: (_, i) {
-                        final item = state.categories[i];
-                        return Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          decoration: BoxDecoration(
-                            color: i == 0 ? Colors.black : Colors.grey.shade50,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade100),
-                          ),
-                          child: Center(
-                            child: Text(
-                              item.name ?? '-',
-                              style: TextStyle(
-                                color: i == 0 ? Colors.white : Colors.black,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
+                  BlocBuilder<HomeCubit, HomeState>(
+                    buildWhen: (previous, current) =>
+                        previous.selectedCategoryId !=
+                        current.selectedCategoryId,
+                    builder: (context, state) {
+                      return SizedBox(
+                        height: 45,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: state.categories.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(width: 10),
+                          itemBuilder: (_, i) {
+                            final item = state.categories[i];
+                            return GestureDetector(
+                              onTap: () {
+                                context.read<HomeCubit>().selectedCategory(
+                                  categoryId: item.id,
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: item.id == state.selectedCategoryId
+                                      ? Colors.black
+                                      : Colors.grey.shade50,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.grey.shade100,
+                                  ),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    item.name ?? '-',
+                                    style: TextStyle(
+                                      color: item.id == state.selectedCategoryId
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+                            );
+                          },
+                        ),
+                      );
+                    },
                   ),
 
                   const SizedBox(height: 30),
-                  _buildSectionTitle('Hàng mới'),
+                  _buildSectionTitle(
+                    'Hàng mới',
+                    onSeeAll: () {
+                      context.read<HomeCubit>().selectedCategory();
+                    },
+                  ),
                   const SizedBox(height: 16),
 
                   // Product Grid (Thay thế ListTile cũ)
@@ -264,7 +291,11 @@ class HomeScreen extends StatelessWidget {
     return baseUrl;
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(
+    String title, {
+    bool showSeeAll = true,
+    void Function()? onSeeAll,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -276,14 +307,18 @@ class HomeScreen extends StatelessWidget {
             letterSpacing: -0.5,
           ),
         ),
-        Text(
-          'Xem tất cả',
-          style: TextStyle(
-            color: Colors.grey.shade500,
-            fontWeight: FontWeight.w600,
-            fontSize: 13,
+        if (showSeeAll)
+          GestureDetector(
+            onTap: onSeeAll,
+            child: Text(
+              'Xem tất cả',
+              style: TextStyle(
+                color: Colors.grey.shade500,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
           ),
-        ),
       ],
     );
   }

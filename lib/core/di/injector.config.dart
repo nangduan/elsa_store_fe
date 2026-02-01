@@ -434,13 +434,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i558.FlutterSecureStorage>(),
       ),
     );
-    gh.factory<_i513.OrderCubit>(
-      () => _i513.OrderCubit(
-        gh<_i371.GetOrdersUseCase>(),
-        gh<_i1066.GetOrdersByUserUseCase>(),
-        gh<_i962.CreateOrderUseCase>(),
-      ),
-    );
     gh.factory<_i152.CreatePromotionUseCase>(
       () => _i152.CreatePromotionUseCase(gh<_i1041.PromotionRepository>()),
     );
@@ -474,6 +467,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i152.CreatePromotionUseCase>(),
         gh<_i222.UpdatePromotionUseCase>(),
         gh<_i721.DeletePromotionUseCase>(),
+      ),
+    );
+    gh.factory<_i513.OrderCubit>(
+      () => _i513.OrderCubit(
+        gh<_i371.GetOrdersUseCase>(),
+        gh<_i1066.GetOrdersByUserUseCase>(),
+        gh<_i962.CreateOrderUseCase>(),
       ),
     );
     gh.factory<_i701.ProductDetailCubit>(

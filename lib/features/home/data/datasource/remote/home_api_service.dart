@@ -13,5 +13,5 @@ abstract class HomeApiService {
   Future<ApiResponse> getCategories();
 
   @GET('/products')
-  Future<ApiResponse> getProducts();
+  Future<ApiResponse> getProducts({@Query('categoryId') int? categoryId});
 }

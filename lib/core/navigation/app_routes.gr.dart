@@ -519,29 +519,6 @@ class ProductDetailFullRouteArgs {
   int get hashCode => key.hashCode ^ product.hashCode;
 }
 
-class ProductDetailRouteArgs {
-  const ProductDetailRouteArgs({this.key, this.isSale = false});
-
-  final Key? key;
-
-  final bool isSale;
-
-  @override
-  String toString() {
-    return 'ProductDetailRouteArgs{key: $key, isSale: $isSale}';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! ProductDetailRouteArgs) return false;
-    return key == other.key && isSale == other.isSale;
-  }
-
-  @override
-  int get hashCode => key.hashCode ^ isSale.hashCode;
-}
-
 /// generated route for
 /// [ProductManagementScreen]
 class ProductManagementRoute extends PageRouteInfo<void> {

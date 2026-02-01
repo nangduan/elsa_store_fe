@@ -34,9 +34,9 @@ class HomeRepositoryImpl implements HomeRepository {
   }
 
   @override
-  Future<List<ProductResponse>> getProducts() async {
+  Future<List<ProductResponse>> getProducts({int? categoryId}) async {
     try {
-      final apiResp = await apiService.getProducts();
+      final apiResp = await apiService.getProducts(categoryId: categoryId);
       final data = apiResp.data;
 
       if (data is List) {
