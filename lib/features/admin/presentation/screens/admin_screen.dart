@@ -1,8 +1,14 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_skeleton/core/di/injector.dart';
 import 'package:flutter_skeleton/core/navigation/app_routes.dart';
 import 'package:flutter_skeleton/features/auth/domain/repositories/auth_repository.dart';
+import 'package:intl/intl.dart';
+
+import '../../../../core/constants/format.dart';
+import '../../../revenues/domain/entities/revenue_group_by.dart';
+import '../../../revenues/presentation/cubit/revenue_cubit.dart';
 
 @RoutePage()
 class AdminScreen extends StatelessWidget {
@@ -10,6 +16,7 @@ class AdminScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final range = _defaultRange();
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -25,14 +32,12 @@ class AdminScreen extends StatelessWidget {
           ),
         ),
         actions: [
-          // Nút Settings (Giữ nguyên)
           IconButton(
             icon: const Icon(Icons.settings_outlined, color: Colors.black),
             onPressed: () {
               // TODO: Navigate to Settings
             },
           ),
-          // --- [NEW] NÚT LOGOUT ---
           IconButton(
             tooltip: 'Đăng xuất',
             icon: const Icon(Icons.logout, color: Colors.red),
@@ -41,38 +46,51 @@ class AdminScreen extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Tổng quan",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            _buildStatsGrid(),
+      body: BlocProvider(
+        create: (_) => getIt<RevenueCubit>()
+          ..loadAll(
+            from: _formatDate(range.start),
+            to: _formatDate(range.end),
+            groupBy: RevenueGroupBy.day,
+            statuses: const [0, 1],
+          ),
+        child: BlocBuilder<RevenueCubit, RevenueState>(
+          builder: (context, state) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Tổng quan",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildStatsGrid(),
 
-            const SizedBox(height: 32),
+                  const SizedBox(height: 32),
 
-            const Text(
-              "Phân tích doanh thu",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            _buildRevenueChart(),
+                  const Text(
+                    "Phân tích doanh thu",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildRevenueChart(context, state, range),
 
-            const SizedBox(height: 32),
+                  const SizedBox(height: 32),
 
-            const Text(
-              "Quản lý",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            _buildNavigationGrid(context),
+                  const Text(
+                    "Quản lý",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildNavigationGrid(context),
 
-            const SizedBox(height: 40),
-          ],
+                  const SizedBox(height: 40),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
@@ -89,7 +107,7 @@ class AdminScreen extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context), // Đóng dialog
+            onPressed: () => Navigator.pop(context),
             child: const Text("Hủy", style: TextStyle(color: Colors.grey)),
           ),
           TextButton(
@@ -169,10 +187,91 @@ class AdminScreen extends StatelessWidget {
     );
   }
 
-  // Widget hiển thị biểu đồ (Placeholder)
-  Widget _buildRevenueChart() {
+  Widget _buildRevenueChart(
+    BuildContext context,
+    RevenueState state,
+    DateTimeRange range,
+  ) {
+    if (state.status == RevenueStatus.loading &&
+        state.timeseries == null &&
+        state.summary == null) {
+      return _buildRevenueContainer(
+        child: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (state.status == RevenueStatus.failure) {
+      return _buildRevenueContainer(
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error_outline, color: Colors.red, size: 36),
+              const SizedBox(height: 8),
+              Text(
+                state.errorMessage ?? 'Không tải được doanh thu',
+                style: const TextStyle(color: Colors.grey),
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: () => _reloadRevenue(context, range),
+                child: const Text('Thử lại'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final summary = state.summary;
+    final points = state.timeseries?.points ?? const [];
+    final total = Format.formatCurrency(summary?.netRevenue);
+    final avg = Format.formatCurrency(summary?.averageOrderValue);
+    final orders = summary?.ordersCount ?? 0;
+
+    return _buildRevenueContainer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  "Doanh thu 30 ngày gần nhất",
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+              IconButton(
+                tooltip: 'Làm mới',
+                onPressed: () => _reloadRevenue(context, range),
+                icon: const Icon(Icons.refresh, size: 18),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              _statChip('Tổng', total),
+              const SizedBox(width: 8),
+              _statChip('TB/Đơn', avg),
+              const SizedBox(width: 8),
+              _statChip('Đơn', orders.toString()),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: points.isEmpty
+                ? const Center(child: Text('Chưa có dữ liệu doanh thu'))
+                : _RevenueBarChart(points: points),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRevenueContainer({required Widget child}) {
     return Container(
-      height: 200,
+      height: 300, // Tăng chiều cao lên chút để thoáng hơn
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -180,34 +279,58 @@ class AdminScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.grey.shade100),
       ),
-      child: Column(
+      child: child,
+    );
+  }
+
+  Widget _statChip(String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "Doanh thu hàng tuần",
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-              Text(
-                "+12.5%",
-                style: TextStyle(
-                  color: Colors.green.shade700,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+          Text(
+            '$label: ',
+            style: TextStyle(
+              color: Colors.grey.shade600,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-          const Spacer(),
-          // dùng package fl_chart
-          const Center(child: Text("Hiện chưa có doanh thu nào")),
-          const Spacer(),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11),
+          ),
         ],
       ),
     );
   }
 
-  // Widget điều hướng đến các màn hình quản lý
+  void _reloadRevenue(BuildContext context, DateTimeRange range) {
+    context.read<RevenueCubit>().loadAll(
+      from: _formatDate(range.start),
+      to: _formatDate(range.end),
+      groupBy: RevenueGroupBy.day,
+      statuses: const [0, 1],
+    );
+  }
+
+  DateTimeRange _defaultRange() {
+    final now = DateTime.now();
+    final end = DateTime(now.year, now.month, now.day);
+    final start = end.subtract(const Duration(days: 29));
+    return DateTimeRange(start: start, end: end);
+  }
+
+  String _formatDate(DateTime date) {
+    return DateFormat('yyyy-MM-dd').format(date);
+  }
+
   Widget _buildNavigationGrid(BuildContext context) {
     return GridView.count(
       shrinkWrap: true,
@@ -269,6 +392,206 @@ class AdminScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// --- CLASS ĐỒ THỊ MỚI ĐƯỢC CẢI TIẾN ---
+class _RevenueBarChart extends StatelessWidget {
+  final List<dynamic> points;
+
+  const _RevenueBarChart({required this.points});
+
+  @override
+  Widget build(BuildContext context) {
+    // 1. Tính toán giá trị Max/Mid như logic cũ
+    final values = points
+        .map((item) => (item.netRevenue as num?)?.toDouble() ?? 0.0)
+        .toList();
+    final labels = points
+        .map((item) => (item.period as String?) ?? '')
+        .toList();
+
+    final maxValue = values.isEmpty
+        ? 0.0
+        : values.reduce((a, b) => a > b ? a : b);
+    final midValue = maxValue / 2;
+
+    // Cấu hình UI
+    const double barWidth = 18.0; // Chiều rộng cố định của cột
+    const double barGap = 16.0; // Khoảng cách giữa các cột
+    const double labelHeight = 20.0; // Chiều cao khu vực hiển thị ngày
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final totalHeight = constraints.maxHeight;
+        final chartHeight = (totalHeight - labelHeight).clamp(0.0, totalHeight);
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // CỘT TRỤC Y (Bên trái, cố định)
+            SizedBox(
+              width: 35,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  _AxisLabel(_formatAxisValue(maxValue)),
+                  _AxisLabel(_formatAxisValue(midValue)),
+                  const _AxisLabel('0'),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+
+            // KHU VỰC BIỂU ĐỒ (Bên phải, có thể cuộn ngang)
+            Expanded(
+              child: Stack(
+                children: [
+                  // Lớp nền: Đường kẻ ngang (Grid lines)
+                  Column(
+                    children: [
+                      _GridLine(top: 0), // Line Max
+                      _GridLine(
+                        top: chartHeight / 2 - 0.5,
+                      ), // Line Mid (trừ nửa độ dày line)
+                      _GridLine(top: chartHeight - 1), // Line 0
+                    ],
+                  ),
+
+                  // Lớp dữ liệu: Các cột có thể cuộn
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    reverse:
+                        true, // Để mặc định hiển thị ngày gần nhất (bên phải)
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        right: 10,
+                      ), // Padding cuối list
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: List.generate(values.length, (index) {
+                          final value = values[index];
+                          final label = labels[index];
+
+                          // Tính chiều cao cột
+                          final height = maxValue == 0
+                              ? 0.0
+                              : (value / maxValue) * chartHeight;
+
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              left: index == 0 ? 0 : barGap,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                // CỘT
+                                Container(
+                                  width: barWidth,
+                                  height: height.clamp(0.0, chartHeight),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black,
+                                    borderRadius: const BorderRadius.vertical(
+                                      top: Radius.circular(4),
+                                    ),
+                                    // Hiệu ứng đổ bóng nhẹ cho đẹp
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.2),
+                                        blurRadius: 4,
+                                        offset: const Offset(2, 2),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                // LABEL NGÀY
+                                SizedBox(
+                                  height: labelHeight,
+                                  width:
+                                      barWidth +
+                                      10, // Rộng hơn cột chút để chữ ko bị cắt
+                                  child: Center(
+                                    child: Text(
+                                      _shortDate(label),
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                      maxLines: 1,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _formatAxisValue(double value) {
+    if (value >= 1000000000) {
+      return '${(value / 1000000000).toStringAsFixed(1)}B';
+    }
+    if (value >= 1000000) {
+      return '${(value / 1000000).toStringAsFixed(1)}M';
+    }
+    if (value >= 1000) {
+      return '${(value / 1000).toStringAsFixed(1)}K';
+    }
+    return value.toStringAsFixed(0);
+  }
+
+  String _shortDate(String raw) {
+    if (raw.length >= 10) {
+      // Expecting yyyy-MM-dd -> lấy dd/MM
+      final day = raw.substring(8, 10);
+      final month = raw.substring(5, 7);
+      return '$day/$month';
+    }
+    return raw;
+  }
+}
+
+class _GridLine extends StatelessWidget {
+  final double top;
+  const _GridLine({required this.top});
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: top,
+      left: 0,
+      right: 0,
+      child: Container(height: 1, color: Colors.grey.shade200),
+    );
+  }
+}
+
+class _AxisLabel extends StatelessWidget {
+  final String text;
+  const _AxisLabel(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 10,
+        color: Colors.grey,
+        fontWeight: FontWeight.w500,
       ),
     );
   }

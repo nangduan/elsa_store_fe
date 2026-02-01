@@ -316,6 +316,22 @@ class NewPasswordRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [OrdersScreen]
+class OrdersRoute extends PageRouteInfo<void> {
+  const OrdersRoute({List<PageRouteInfo>? children})
+    : super(OrdersRoute.name, initialChildren: children);
+
+  static const String name = 'OrdersRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const OrdersScreen();
+    },
+  );
+}
+
+/// generated route for
 /// [PasswordCodeScreen]
 class PasswordCodeRoute extends PageRouteInfo<void> {
   const PasswordCodeRoute({List<PageRouteInfo>? children})
@@ -365,18 +381,95 @@ class PasswordRoute extends PageRouteInfo<void> {
 
 /// generated route for
 /// [PaymentScreen]
-class PaymentRoute extends PageRouteInfo<void> {
-  const PaymentRoute({List<PageRouteInfo>? children})
-    : super(PaymentRoute.name, initialChildren: children);
+class PaymentRoute extends PageRouteInfo<PaymentRouteArgs> {
+  PaymentRoute({
+    Key? key,
+    String? productName,
+    String? imageUrl,
+    double? amount,
+    int? productVariantId,
+    List<CartItemResponse>? cartItems,
+    List<PageRouteInfo>? children,
+  }) : super(
+         PaymentRoute.name,
+         args: PaymentRouteArgs(
+           key: key,
+           productName: productName,
+           imageUrl: imageUrl,
+           amount: amount,
+           productVariantId: productVariantId,
+           cartItems: cartItems,
+         ),
+         initialChildren: children,
+       );
 
   static const String name = 'PaymentRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const PaymentScreen();
+      final args = data.argsAs<PaymentRouteArgs>(
+        orElse: () => const PaymentRouteArgs(),
+      );
+      return PaymentScreen(
+        key: args.key,
+        productName: args.productName,
+        imageUrl: args.imageUrl,
+        amount: args.amount,
+        productVariantId: args.productVariantId,
+        cartItems: args.cartItems,
+      );
     },
   );
+}
+
+class PaymentRouteArgs {
+  const PaymentRouteArgs({
+    this.key,
+    this.productName,
+    this.imageUrl,
+    this.amount,
+    this.productVariantId,
+    this.cartItems,
+  });
+
+  final Key? key;
+
+  final String? productName;
+
+  final String? imageUrl;
+
+  final double? amount;
+
+  final int? productVariantId;
+
+  final List<CartItemResponse>? cartItems;
+
+  @override
+  String toString() {
+    return 'PaymentRouteArgs{key: $key, productName: $productName, imageUrl: $imageUrl, amount: $amount, productVariantId: $productVariantId, cartItems: $cartItems}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! PaymentRouteArgs) return false;
+    return key == other.key &&
+        productName == other.productName &&
+        imageUrl == other.imageUrl &&
+        amount == other.amount &&
+        productVariantId == other.productVariantId &&
+        const ListEquality().equals(cartItems, other.cartItems);
+  }
+
+  @override
+  int get hashCode =>
+      key.hashCode ^
+      productName.hashCode ^
+      imageUrl.hashCode ^
+      amount.hashCode ^
+      productVariantId.hashCode ^
+      const ListEquality().hash(cartItems);
 }
 
 /// generated route for

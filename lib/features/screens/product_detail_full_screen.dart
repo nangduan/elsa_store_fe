@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_skeleton/core/constants/format.dart';
 import 'package:flutter_skeleton/features/product/data/models/response/product_variant_response.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../core/navigation/app_routes.dart';
 import '../product/data/models/response/product_detail_response.dart';
 
 import '../../core/api/app_config.dart';
@@ -11,7 +12,6 @@ import '../../core/constants/constant.dart';
 import '../../core/di/injector.dart';
 import '../../core/errors/app_exception.dart';
 import '../cart/domain/repositories/cart_repository.dart';
-import '../cart/presentation/cubit/cart_cubit.dart';
 import '../home/data/models/response/product_response.dart';
 import '../product/presentation/cubit/product_detail_cubit.dart';
 
@@ -249,7 +249,15 @@ class _ProductDetailFullScreenState extends State<ProductDetailFullScreen> {
                   bottom: 0,
                   left: 0,
                   right: 0,
-                  child: _buildBottomAction(context),
+                  child: _buildBottomAction(
+                    context,
+                    productName: name,
+                    amount: displayPrice,
+                    imageUrl:
+                        _selectedVariant?.imageUrl ??
+                        detail?.imageUrl ??
+                        widget.product.imageUrl,
+                  ),
                 ),
               ],
             );
@@ -462,7 +470,12 @@ class _ProductDetailFullScreenState extends State<ProductDetailFullScreen> {
     );
   }
 
-  Widget _buildBottomAction(BuildContext context) {
+  Widget _buildBottomAction(
+    BuildContext context, {
+    required String productName,
+    required double amount,
+    required String? imageUrl,
+  }) {
     return Container(
       padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 30),
       decoration: BoxDecoration(
@@ -478,15 +491,6 @@ class _ProductDetailFullScreenState extends State<ProductDetailFullScreen> {
       ),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.favorite_border),
-          ),
-          const SizedBox(width: 16),
           Expanded(
             child: SizedBox(
               height: 54,
@@ -508,16 +512,45 @@ class _ProductDetailFullScreenState extends State<ProductDetailFullScreen> {
                     );
                     return;
                   }
-                  _addToCart();
+                  context.router.push(
+                    PaymentRoute(
+                      productName: productName,
+                      amount: amount,
+                      imageUrl: imageUrl,
+                      productVariantId: _selectedVariant!.id,
+                    ),
+                  );
                 },
                 child: const Text(
-                  'THÊM VÀO GIỎ',
+                  'Đặt hàng ngay',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1,
                   ),
                 ),
               ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          GestureDetector(
+            onTap: () {
+              if (_selectedVariant == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Vui lòng chọn biến thể (Màu/Kích cỡ)'),
+                  ),
+                );
+                return;
+              }
+              _addToCart();
+            },
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.add_shopping_cart_outlined),
             ),
           ),
         ],
