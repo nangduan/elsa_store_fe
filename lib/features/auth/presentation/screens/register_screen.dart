@@ -28,7 +28,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   bool _isPasswordVisible = false;
 
-  // Style Constants (Đồng bộ với Login)
   final Color _primaryColor = const Color(0xFFE64A19);
   final Color _accentColor = const Color(0xFF1565C0);
 
@@ -124,7 +123,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           const SizedBox(height: 10),
 
                           Text(
-                            'Sign Up',
+                            'Tạo tài khoản',
                             style: TextStyle(
                               fontSize: 32,
                               fontWeight: FontWeight.w800,
@@ -135,7 +134,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Hãy điền đầy đủ thông tin để tạo tài khoản',
+                            'Điền thông tin để bắt đầu trải nghiệm',
                             style: TextStyle(
                               color: Colors.grey.shade500,
                               fontSize: 15,

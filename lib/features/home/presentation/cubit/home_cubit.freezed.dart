@@ -20,6 +20,7 @@ mixin _$HomeState {
   HomeStatus get status => throw _privateConstructorUsedError;
   List<CategoryResponse> get categories => throw _privateConstructorUsedError;
   List<ProductResponse> get products => throw _privateConstructorUsedError;
+  int? get selectedCategoryId => throw _privateConstructorUsedError;
   String? get errorMessage => throw _privateConstructorUsedError;
 
   /// Create a copy of HomeState
@@ -38,6 +39,7 @@ abstract class $HomeStateCopyWith<$Res> {
     HomeStatus status,
     List<CategoryResponse> categories,
     List<ProductResponse> products,
+    int? selectedCategoryId,
     String? errorMessage,
   });
 }
@@ -60,6 +62,7 @@ class _$HomeStateCopyWithImpl<$Res, $Val extends HomeState>
     Object? status = null,
     Object? categories = null,
     Object? products = null,
+    Object? selectedCategoryId = freezed,
     Object? errorMessage = freezed,
   }) {
     return _then(
@@ -76,6 +79,10 @@ class _$HomeStateCopyWithImpl<$Res, $Val extends HomeState>
                 ? _value.products
                 : products // ignore: cast_nullable_to_non_nullable
                       as List<ProductResponse>,
+            selectedCategoryId: freezed == selectedCategoryId
+                ? _value.selectedCategoryId
+                : selectedCategoryId // ignore: cast_nullable_to_non_nullable
+                      as int?,
             errorMessage: freezed == errorMessage
                 ? _value.errorMessage
                 : errorMessage // ignore: cast_nullable_to_non_nullable
@@ -99,6 +106,7 @@ abstract class _$$InitialImplCopyWith<$Res>
     HomeStatus status,
     List<CategoryResponse> categories,
     List<ProductResponse> products,
+    int? selectedCategoryId,
     String? errorMessage,
   });
 }
@@ -120,6 +128,7 @@ class __$$InitialImplCopyWithImpl<$Res>
     Object? status = null,
     Object? categories = null,
     Object? products = null,
+    Object? selectedCategoryId = freezed,
     Object? errorMessage = freezed,
   }) {
     return _then(
@@ -136,6 +145,10 @@ class __$$InitialImplCopyWithImpl<$Res>
             ? _value._products
             : products // ignore: cast_nullable_to_non_nullable
                   as List<ProductResponse>,
+        selectedCategoryId: freezed == selectedCategoryId
+            ? _value.selectedCategoryId
+            : selectedCategoryId // ignore: cast_nullable_to_non_nullable
+                  as int?,
         errorMessage: freezed == errorMessage
             ? _value.errorMessage
             : errorMessage // ignore: cast_nullable_to_non_nullable
@@ -152,6 +165,7 @@ class _$InitialImpl implements _Initial {
     this.status = HomeStatus.initial,
     final List<CategoryResponse> categories = const [],
     final List<ProductResponse> products = const [],
+    this.selectedCategoryId,
     this.errorMessage,
   }) : _categories = categories,
        _products = products;
@@ -178,11 +192,13 @@ class _$InitialImpl implements _Initial {
   }
 
   @override
+  final int? selectedCategoryId;
+  @override
   final String? errorMessage;
 
   @override
   String toString() {
-    return 'HomeState(status: $status, categories: $categories, products: $products, errorMessage: $errorMessage)';
+    return 'HomeState(status: $status, categories: $categories, products: $products, selectedCategoryId: $selectedCategoryId, errorMessage: $errorMessage)';
   }
 
   @override
@@ -196,6 +212,8 @@ class _$InitialImpl implements _Initial {
               _categories,
             ) &&
             const DeepCollectionEquality().equals(other._products, _products) &&
+            (identical(other.selectedCategoryId, selectedCategoryId) ||
+                other.selectedCategoryId == selectedCategoryId) &&
             (identical(other.errorMessage, errorMessage) ||
                 other.errorMessage == errorMessage));
   }
@@ -206,6 +224,7 @@ class _$InitialImpl implements _Initial {
     status,
     const DeepCollectionEquality().hash(_categories),
     const DeepCollectionEquality().hash(_products),
+    selectedCategoryId,
     errorMessage,
   );
 
@@ -223,6 +242,7 @@ abstract class _Initial implements HomeState {
     final HomeStatus status,
     final List<CategoryResponse> categories,
     final List<ProductResponse> products,
+    final int? selectedCategoryId,
     final String? errorMessage,
   }) = _$InitialImpl;
 
@@ -232,6 +252,8 @@ abstract class _Initial implements HomeState {
   List<CategoryResponse> get categories;
   @override
   List<ProductResponse> get products;
+  @override
+  int? get selectedCategoryId;
   @override
   String? get errorMessage;
 

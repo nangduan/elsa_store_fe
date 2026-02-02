@@ -18,9 +18,9 @@ class _OrderApiService implements OrderApiService {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<ApiResponse> getOrders(int userId) async {
+  Future<ApiResponse> getAllOrder() async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'userId': userId};
+    final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<ApiResponse>(
@@ -45,14 +45,47 @@ class _OrderApiService implements OrderApiService {
   }
 
   @override
+  Future<ApiResponse> getAllOrderByUser(int userId) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<ApiResponse>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/orders/by-user/${userId}',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late ApiResponse _value;
+    try {
+      _value = ApiResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
   Future<ApiResponse> createOrder(CreateOrderRequest body) async {
     final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
     final _options = _setStreamType<ApiResponse>(
       Options(method: 'POST', headers: _headers, extra: _extra)
-          .compose(_dio.options, '/orders', data: _data)
+          .compose(
+            _dio.options,
+            '/orders',
+            queryParameters: queryParameters,
+            data: _data,
+          )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);

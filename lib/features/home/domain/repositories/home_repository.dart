@@ -4,5 +4,5 @@ import '../../data/models/response/product_response.dart';
 abstract class HomeRepository {
   Future<List<CategoryResponse>> getCategories();
 
-  Future<List<ProductResponse>> getProducts();
+  Future<List<ProductResponse>> getProducts({int? categoryId});
 }

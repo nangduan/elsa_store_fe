@@ -121,18 +121,6 @@ import 'package:flutter_skeleton/features/cart/domain/usecases/update_cart_item_
     as _i1002;
 import 'package:flutter_skeleton/features/cart/presentation/cubit/cart_cubit.dart'
     as _i307;
-import 'package:flutter_skeleton/features/orders/data/datasource/remote/order_api_service.dart'
-    as _i1112;
-import 'package:flutter_skeleton/features/orders/data/repository/order_repository_impl.dart'
-    as _i1028;
-import 'package:flutter_skeleton/features/orders/domain/repositories/order_repository.dart'
-    as _i200;
-import 'package:flutter_skeleton/features/orders/domain/usecases/create_order_use_case.dart'
-    as _i823;
-import 'package:flutter_skeleton/features/orders/domain/usecases/get_orders_use_case.dart'
-    as _i517;
-import 'package:flutter_skeleton/features/orders/presentation/cubit/order_cubit.dart'
-    as _i903;
 import 'package:flutter_skeleton/features/home/data/datasource/remote/home_api_service.dart'
     as _i578;
 import 'package:flutter_skeleton/features/home/data/repository/home_repository_impl.dart'
@@ -145,6 +133,20 @@ import 'package:flutter_skeleton/features/home/domain/usecases/get_products_use_
     as _i131;
 import 'package:flutter_skeleton/features/home/presentation/cubit/home_cubit.dart'
     as _i233;
+import 'package:flutter_skeleton/features/orders/data/datasource/remote/order_api_service.dart'
+    as _i102;
+import 'package:flutter_skeleton/features/orders/data/repository/order_repository_impl.dart'
+    as _i945;
+import 'package:flutter_skeleton/features/orders/domain/repositories/order_repository.dart'
+    as _i825;
+import 'package:flutter_skeleton/features/orders/domain/usecases/create_order_use_case.dart'
+    as _i962;
+import 'package:flutter_skeleton/features/orders/domain/usecases/get_orders_by_user_use_case%20copy.dart'
+    as _i1066;
+import 'package:flutter_skeleton/features/orders/domain/usecases/get_orders_use_case.dart'
+    as _i371;
+import 'package:flutter_skeleton/features/orders/presentation/cubit/order_cubit.dart'
+    as _i513;
 import 'package:flutter_skeleton/features/product/data/datasource/remote/product_api_service.dart'
     as _i1001;
 import 'package:flutter_skeleton/features/product/data/repository/product_repository_impl.dart'
@@ -159,6 +161,20 @@ import 'package:flutter_skeleton/features/product/presentation/cubit/product_det
     as _i701;
 import 'package:flutter_skeleton/features/product/presentation/cubit/product_variant_cubit.dart'
     as _i363;
+import 'package:flutter_skeleton/features/revenues/data/datasource/remote/revenue_api_service.dart'
+    as _i852;
+import 'package:flutter_skeleton/features/revenues/data/repository/revenue_repository_impl.dart'
+    as _i780;
+import 'package:flutter_skeleton/features/revenues/domain/repositories/revenue_repository.dart'
+    as _i639;
+import 'package:flutter_skeleton/features/revenues/domain/usecases/get_revenue_summary_use_case.dart'
+    as _i693;
+import 'package:flutter_skeleton/features/revenues/domain/usecases/get_revenue_timeseries_use_case.dart'
+    as _i1059;
+import 'package:flutter_skeleton/features/revenues/domain/usecases/get_revenue_top_products_use_case.dart'
+    as _i225;
+import 'package:flutter_skeleton/features/revenues/presentation/cubit/revenue_cubit.dart'
+    as _i82;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
@@ -185,15 +201,18 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i578.HomeApiService>(
       () => networkModule.provideHomeApiService(gh<_i361.Dio>()),
     );
-  gh.lazySingleton<_i998.CartApiService>(
-    () => networkModule.provideCartApiService(gh<_i361.Dio>()),
-  );
-  gh.lazySingleton<_i1112.OrderApiService>(
-    () => networkModule.provideOrderApiService(gh<_i361.Dio>()),
-  );
-  gh.lazySingleton<_i1001.ProductApiService>(
-    () => networkModule.provideProductApiService(gh<_i361.Dio>()),
-  );
+    gh.lazySingleton<_i998.CartApiService>(
+      () => networkModule.provideCartApiService(gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i102.OrderApiService>(
+      () => networkModule.provideOrderApiService(gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i852.RevenueApiService>(
+      () => networkModule.provideRevenueApiService(gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i1001.ProductApiService>(
+      () => networkModule.provideProductApiService(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i792.SupplierApiService>(
       () => networkModule.provideSupplierApiService(gh<_i361.Dio>()),
     );
@@ -221,18 +240,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i520.DioClient>(),
       ),
     );
-  gh.lazySingleton<_i207.CartRepository>(
-    () => _i992.CartRepositoryImpl(
-      gh<_i998.CartApiService>(),
-      gh<_i520.DioClient>(),
-    ),
-  );
-  gh.lazySingleton<_i200.OrderRepository>(
-    () => _i1028.OrderRepositoryImpl(
-      gh<_i1112.OrderApiService>(),
-      gh<_i520.DioClient>(),
-    ),
-  );
+    gh.lazySingleton<_i825.OrderRepository>(
+      () => _i945.OrderRepositoryImpl(
+        gh<_i102.OrderApiService>(),
+        gh<_i520.DioClient>(),
+      ),
+    );
+    gh.lazySingleton<_i207.CartRepository>(
+      () => _i992.CartRepositoryImpl(
+        gh<_i998.CartApiService>(),
+        gh<_i520.DioClient>(),
+      ),
+    );
     gh.factory<_i602.GetCategoriesUseCase>(
       () => _i602.GetCategoriesUseCase(gh<_i275.HomeRepository>()),
     );
@@ -251,6 +270,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i520.DioClient>(),
       ),
     );
+    gh.lazySingleton<_i639.RevenueRepository>(
+      () => _i780.RevenueRepositoryImpl(
+        gh<_i852.RevenueApiService>(),
+        gh<_i520.DioClient>(),
+      ),
+    );
     gh.factory<_i423.AddCartItemUseCase>(
       () => _i423.AddCartItemUseCase(gh<_i207.CartRepository>()),
     );
@@ -260,20 +285,23 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i1052.GetCartUseCase>(
       () => _i1052.GetCartUseCase(gh<_i207.CartRepository>()),
     );
-  gh.factory<_i1002.UpdateCartItemQuantityUseCase>(
-    () => _i1002.UpdateCartItemQuantityUseCase(gh<_i207.CartRepository>()),
-  );
-  gh.factory<_i823.CreateOrderUseCase>(
-    () => _i823.CreateOrderUseCase(gh<_i200.OrderRepository>()),
-  );
-  gh.factory<_i517.GetOrdersUseCase>(
-    () => _i517.GetOrdersUseCase(gh<_i200.OrderRepository>()),
-  );
+    gh.factory<_i1002.UpdateCartItemQuantityUseCase>(
+      () => _i1002.UpdateCartItemQuantityUseCase(gh<_i207.CartRepository>()),
+    );
     gh.lazySingleton<_i413.SupplierRepository>(
       () => _i210.SupplierRepositoryImpl(
         gh<_i792.SupplierApiService>(),
         gh<_i520.DioClient>(),
       ),
+    );
+    gh.factory<_i962.CreateOrderUseCase>(
+      () => _i962.CreateOrderUseCase(gh<_i825.OrderRepository>()),
+    );
+    gh.factory<_i371.GetOrdersUseCase>(
+      () => _i371.GetOrdersUseCase(gh<_i825.OrderRepository>()),
+    );
+    gh.factory<_i1066.GetOrdersByUserUseCase>(
+      () => _i1066.GetOrdersByUserUseCase(gh<_i825.OrderRepository>()),
     );
     gh.factory<_i1051.CreateProductUseCase>(
       () => _i1051.CreateProductUseCase(gh<_i195.ProductRepository>()),
@@ -397,22 +425,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i235.RegisterUseCase>(
       () => _i235.RegisterUseCase(gh<_i518.AuthRepository>()),
     );
-  gh.factory<_i307.CartCubit>(
-    () => _i307.CartCubit(
-      gh<_i1052.GetCartUseCase>(),
-      gh<_i423.AddCartItemUseCase>(),
-      gh<_i1002.UpdateCartItemQuantityUseCase>(),
-      gh<_i273.DeleteCartItemUseCase>(),
-      gh<_i558.FlutterSecureStorage>(),
-    ),
-  );
-  gh.factory<_i903.OrderCubit>(
-    () => _i903.OrderCubit(
-      gh<_i517.GetOrdersUseCase>(),
-      gh<_i823.CreateOrderUseCase>(),
-      gh<_i558.FlutterSecureStorage>(),
-    ),
-  );
+    gh.factory<_i307.CartCubit>(
+      () => _i307.CartCubit(
+        gh<_i1052.GetCartUseCase>(),
+        gh<_i423.AddCartItemUseCase>(),
+        gh<_i1002.UpdateCartItemQuantityUseCase>(),
+        gh<_i273.DeleteCartItemUseCase>(),
+        gh<_i558.FlutterSecureStorage>(),
+      ),
+    );
     gh.factory<_i152.CreatePromotionUseCase>(
       () => _i152.CreatePromotionUseCase(gh<_i1041.PromotionRepository>()),
     );
@@ -425,11 +446,20 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i222.UpdatePromotionUseCase>(
       () => _i222.UpdatePromotionUseCase(gh<_i1041.PromotionRepository>()),
     );
-    gh.factory<_i983.GetProductVariantsUseCase>(
-      () => _i983.GetProductVariantsUseCase(gh<_i564.ProductRepository>()),
+    gh.factory<_i693.GetRevenueSummaryUseCase>(
+      () => _i693.GetRevenueSummaryUseCase(gh<_i639.RevenueRepository>()),
+    );
+    gh.factory<_i1059.GetRevenueTimeseriesUseCase>(
+      () => _i1059.GetRevenueTimeseriesUseCase(gh<_i639.RevenueRepository>()),
+    );
+    gh.factory<_i225.GetRevenueTopProductsUseCase>(
+      () => _i225.GetRevenueTopProductsUseCase(gh<_i639.RevenueRepository>()),
     );
     gh.factory<_i481.GetProductDetailUseCase>(
       () => _i481.GetProductDetailUseCase(gh<_i564.ProductRepository>()),
+    );
+    gh.factory<_i983.GetProductVariantsUseCase>(
+      () => _i983.GetProductVariantsUseCase(gh<_i564.ProductRepository>()),
     );
     gh.factory<_i245.PromotionCubit>(
       () => _i245.PromotionCubit(
@@ -439,8 +469,22 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i721.DeletePromotionUseCase>(),
       ),
     );
+    gh.factory<_i513.OrderCubit>(
+      () => _i513.OrderCubit(
+        gh<_i371.GetOrdersUseCase>(),
+        gh<_i1066.GetOrdersByUserUseCase>(),
+        gh<_i962.CreateOrderUseCase>(),
+      ),
+    );
     gh.factory<_i701.ProductDetailCubit>(
       () => _i701.ProductDetailCubit(gh<_i481.GetProductDetailUseCase>()),
+    );
+    gh.factory<_i82.RevenueCubit>(
+      () => _i82.RevenueCubit(
+        gh<_i693.GetRevenueSummaryUseCase>(),
+        gh<_i1059.GetRevenueTimeseriesUseCase>(),
+        gh<_i225.GetRevenueTopProductsUseCase>(),
+      ),
     );
     gh.factory<_i363.ProductVariantCubit>(
       () => _i363.ProductVariantCubit(gh<_i983.GetProductVariantsUseCase>()),

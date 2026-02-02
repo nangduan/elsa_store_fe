@@ -17,23 +17,21 @@ Future<void> main() async {
   final token = await storage.read(key: Constants.accessToken);
 
   runApp(
-    BookingHotelManagerApp(
-      initialAuthenticated: (token != null && token.isNotEmpty),
-    ),
+    ElsaStoreApp(initialAuthenticated: (token != null && token.isNotEmpty)),
   );
 }
 
-class BookingHotelManagerApp extends StatelessWidget {
+class ElsaStoreApp extends StatelessWidget {
   final bool initialAuthenticated;
 
-  const BookingHotelManagerApp({super.key, this.initialAuthenticated = false});
+  const ElsaStoreApp({super.key, this.initialAuthenticated = false});
 
   @override
   Widget build(BuildContext context) {
     final router = AppRoutes();
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'Hotel Manager',
+      title: 'Elsa Store',
       theme: AppTheme.lightTheme,
       routerConfig: router.config(),
     );

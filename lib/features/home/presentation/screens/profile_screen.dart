@@ -11,55 +11,90 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Giả lập dữ liệu user từ JSON bạn cung cấp
-    // Trong thực tế, bạn sẽ lấy biến này từ State Management (Bloc/Provider/GetX)
+    final primaryBlue = const Color(0xFF1565C0);
+    final primaryOrange = const Color(0xFFE64A19);
+
     final user = {
       "id": 2,
       "username": "user02",
-      "email": "emai2@gmail.com",
+      "email": "lenangduan2003@gmail.com",
       "phone": "0378847761",
       "fullName": "Lê Năng Duẫn",
       "enabled": true,
     };
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50, // Màu nền nhẹ nhàng
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text(
-          'Hồ sơ cá nhân',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          'HỒ SƠ CÁ NHÂN',
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            color: primaryBlue,
+            letterSpacing: 1.0,
+            fontSize: 18,
+          ),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.grey.shade700,
+            size: 20,
+          ),
+          onPressed: () => context.router.pop(),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.settings_outlined, color: primaryBlue),
+            onPressed: () {},
+          )
+        ],
       ),
       body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            const SizedBox(height: 20),
-
-            // 1. HEADER: Avatar & Tên chính
             Container(
-              color: Colors.white,
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 24),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryBlue.withOpacity(0.08),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
               child: Column(
                 children: [
                   Stack(
                     children: [
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundColor: Colors.blue.shade100,
-                        child: Text(
-                          _getInitials(user['fullName'] as String),
-                          style: const TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: primaryBlue.withOpacity(0.2),
+                            width: 2,
                           ),
                         ),
-                        // Nếu có link ảnh thì dùng dòng dưới:
-                        // backgroundImage: NetworkImage('...'),
+                        child: CircleAvatar(
+                          radius: 45,
+                          backgroundColor: primaryBlue.withOpacity(0.1),
+                          child: Text(
+                            _getInitials(user['fullName'] as String),
+                            style: TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.w800,
+                              color: primaryBlue,
+                            ),
+                          ),
+                        ),
                       ),
                       Positioned(
                         bottom: 0,
@@ -72,8 +107,8 @@ class ProfileScreen extends StatelessWidget {
                           ),
                           child: Container(
                             padding: const EdgeInsets.all(6),
-                            decoration: const BoxDecoration(
-                              color: Colors.blue,
+                            decoration: BoxDecoration(
+                              color: primaryOrange,
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
@@ -90,40 +125,71 @@ class ProfileScreen extends StatelessWidget {
                   Text(
                     user['fullName'] as String,
                     style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
                       color: Colors.black87,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    "@${user['username']}",
-                    style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      "@${user['username']}",
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-
-            const SizedBox(height: 12),
-
-            // 2. BODY: Thông tin chi tiết
+            const SizedBox(height: 20),
             Container(
-              color: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.05),
+                    blurRadius: 15,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
               child: Column(
                 children: [
                   _buildProfileItem(
                     icon: Icons.email_outlined,
                     title: 'Email',
                     value: user['email'] as String,
+                    iconColor: primaryBlue,
                   ),
-                  _buildDivider(),
+                  Divider(
+                    height: 1,
+                    thickness: 0.5,
+                    color: Colors.grey.shade100,
+                  ),
                   _buildProfileItem(
-                    icon: Icons.phone_outlined,
+                    icon: Icons.phone_android_rounded,
                     title: 'Số điện thoại',
                     value: user['phone'] as String,
+                    iconColor: primaryBlue,
                   ),
-                  _buildDivider(),
+                  Divider(
+                    height: 1,
+                    thickness: 0.5,
+                    color: Colors.grey.shade100,
+                  ),
                   _buildProfileItem(
                     icon: Icons.verified_user_outlined,
                     title: 'Trạng thái',
@@ -133,37 +199,33 @@ class ProfileScreen extends StatelessWidget {
                     valueColor: (user['enabled'] as bool)
                         ? Colors.green
                         : Colors.red,
+                    iconColor: primaryBlue,
                   ),
                 ],
               ),
             ),
-
-            const SizedBox(height: 32),
-
-            // 3. FOOTER: Nút Đăng xuất
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    // Xử lý logic đăng xuất tại đây (Clear token, navigate to login...)
-                    _showLogoutDialog(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red.shade50,
-                    foregroundColor: Colors.red,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: Colors.red.shade200),
-                    ),
+            const SizedBox(height: 30),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton.icon(
+                onPressed: () => _showLogoutDialog(context, primaryOrange),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: primaryOrange,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(color: primaryOrange.withOpacity(0.5)),
                   ),
-                  icon: const Icon(Icons.logout),
-                  label: const Text(
-                    'Đăng xuất',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                icon: const Icon(Icons.logout_rounded),
+                label: const Text(
+                  'ĐĂNG XUẤT',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
                   ),
                 ),
               ),
@@ -175,24 +237,24 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // Widget con hiển thị từng dòng thông tin
   Widget _buildProfileItem({
     required IconData icon,
     required String title,
     required String value,
+    required Color iconColor,
     Color? valueColor,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: 18),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(8),
+              color: iconColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, size: 22, color: Colors.grey.shade700),
+            child: Icon(icon, size: 22, color: iconColor),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -207,8 +269,8 @@ class ProfileScreen extends StatelessWidget {
                 Text(
                   value,
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
                     color: valueColor ?? Colors.black87,
                   ),
                 ),
@@ -220,42 +282,61 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDivider() {
-    return Divider(height: 1, thickness: 1, color: Colors.grey.shade100);
-  }
-
-  // Hàm lấy chữ cái đầu của tên (Ví dụ: Lê Năng Duẫn -> LD)
   String _getInitials(String name) {
     List<String> names = name.split(" ");
     String initials = "";
     if (names.isNotEmpty) {
-      initials += names[0][0]; // Chữ đầu của Họ
+      initials += names[0][0];
       if (names.length > 1) {
-        initials += names[names.length - 1][0]; // Chữ đầu của Tên
+        initials += names[names.length - 1][0];
       }
     }
     return initials.toUpperCase();
   }
 
-  // Dialog xác nhận đăng xuất
-  void _showLogoutDialog(BuildContext context) {
+  void _showLogoutDialog(BuildContext context, Color primaryOrange) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Đăng xuất'),
-        content: const Text('Bạn có chắc chắn muốn đăng xuất không?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: primaryOrange),
+            const SizedBox(width: 10),
+            const Text('Đăng xuất'),
+          ],
+        ),
+        content: const Text(
+          'Bạn có chắc chắn muốn đăng xuất khỏi tài khoản này không?',
+        ),
+        actionsPadding: const EdgeInsets.all(20),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.grey,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+            child: const Text('Hủy'),
           ),
-          TextButton(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primaryOrange,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
             onPressed: () async {
               await getIt<AuthRepository>().logout();
-              Navigator.pop(context);
-              context.router.replaceAll([const LoginRoute()]);
+              if (context.mounted) {
+                Navigator.pop(context);
+                context.router.replaceAll([const LoginRoute()]);
+              }
             },
-            child: const Text('Đồng ý', style: TextStyle(color: Colors.red)),
+            child: const Text('Đăng xuất'),
           ),
         ],
       ),

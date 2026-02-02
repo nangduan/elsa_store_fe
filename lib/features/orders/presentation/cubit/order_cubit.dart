@@ -1,8 +1,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_skeleton/core/enum/role_enum.dart';
+import 'package:flutter_skeleton/core/storage/flutter_store_core.dart';
+import 'package:flutter_skeleton/features/orders/domain/usecases/get_orders_by_user_use_case%20copy.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/constants/constant.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../data/models/request/create_order_item_request.dart';
 import '../../data/models/response/order_response.dart';
@@ -42,28 +44,27 @@ class OrderState {
 @injectable
 class OrderCubit extends Cubit<OrderState> {
   final GetOrdersUseCase _getOrders;
+  final GetOrdersByUserUseCase _getOrdersByUserUseCase;
   final CreateOrderUseCase _createOrder;
-  final FlutterSecureStorage _storage;
 
-  OrderCubit(this._getOrders, this._createOrder, this._storage)
+  OrderCubit(this._getOrders, this._getOrdersByUserUseCase, this._createOrder)
     : super(const OrderState());
 
   Future<void> load() async {
     emit(state.copyWith(status: OrderStatus.loading));
-    final userId = await _readUserId();
-    if (userId == null) {
-      emit(
-        state.copyWith(
-          status: OrderStatus.failure,
-          errorMessage: 'Thiếu thông tin người dùng',
-        ),
-      );
-      return;
+    final role = await FlutterStoreCore.readRole();
+    late final List<OrderResponse> orders;
+    if (role.isAdmin) {
+      orders = await _getOrders.call();
+    } else {
+      final userId = await FlutterStoreCore.readUserId();
+      orders = await _getOrdersByUserUseCase.call(userId ?? 0);
     }
 
     try {
-      final orders = await _getOrders(userId);
-      emit(state.copyWith(status: OrderStatus.success, orders: orders));
+      final sortedOrders = List<OrderResponse>.from(orders)
+        ..sort(_compareOrderDateDesc);
+      emit(state.copyWith(status: OrderStatus.success, orders: sortedOrders));
     } on AppException catch (e) {
       emit(
         state.copyWith(status: OrderStatus.failure, errorMessage: e.message),
@@ -76,7 +77,7 @@ class OrderCubit extends Cubit<OrderState> {
     required int quantity,
   }) async {
     emit(state.copyWith(status: OrderStatus.creating));
-    final userId = await _readUserId();
+    final userId = await FlutterStoreCore.readUserId();
     if (userId == null) {
       final error = AppException(
         message: 'Thiếu thông tin người dùng',
@@ -92,7 +93,7 @@ class OrderCubit extends Cubit<OrderState> {
     }
 
     try {
-      final order = await _createOrder(userId, [
+      final order = await _createOrder.call(userId, [
         CreateOrderItemRequest(
           productVariantId: productVariantId,
           quantity: quantity,
@@ -132,7 +133,7 @@ class OrderCubit extends Cubit<OrderState> {
     }
 
     emit(state.copyWith(status: OrderStatus.creating));
-    final userId = await _readUserId();
+    final userId = await FlutterStoreCore.readUserId();
     if (userId == null) {
       final error = AppException(
         message: 'Thiếu thông tin người dùng',
@@ -148,7 +149,7 @@ class OrderCubit extends Cubit<OrderState> {
     }
 
     try {
-      final order = await _createOrder(userId, items);
+      final order = await _createOrder.call(userId, items);
       final updatedOrders = order == null
           ? state.orders
           : [order, ...state.orders];
@@ -168,9 +169,30 @@ class OrderCubit extends Cubit<OrderState> {
     }
   }
 
-  Future<int?> _readUserId() async {
-    final raw = await _storage.read(key: Constants.userId);
-    if (raw == null) return null;
-    return int.tryParse(raw);
+  int _compareOrderDateDesc(OrderResponse a, OrderResponse b) {
+    final aDate = _parseOrderDate(a.orderDate);
+    final bDate = _parseOrderDate(b.orderDate);
+    if (aDate == null && bDate == null) return 0;
+    if (aDate == null) return 1;
+    if (bDate == null) return -1;
+    return bDate.compareTo(aDate);
+  }
+
+  DateTime? _parseOrderDate(String? value) {
+    if (value == null || value.trim().isEmpty) return null;
+    final parsed = DateTime.tryParse(value);
+    if (parsed != null) return parsed;
+
+    final normalized = value.replaceAll('-', '/');
+    final parts = normalized.split('/');
+    if (parts.length == 3) {
+      final day = int.tryParse(parts[0]);
+      final month = int.tryParse(parts[1]);
+      final year = int.tryParse(parts[2]);
+      if (day != null && month != null && year != null) {
+        return DateTime(year, month, day);
+      }
+    }
+    return null;
   }
 }

@@ -67,6 +67,6 @@ class Constants {
     'Tuyên Quang',
     'Vĩnh Long',
     'Vĩnh Phúc',
-    'Yên Bái'
+    'Yên Bái',
   ];
 }

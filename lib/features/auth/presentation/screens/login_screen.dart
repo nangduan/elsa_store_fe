@@ -24,7 +24,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
 
-  // Màu chủ đạo (bạn có thể thay đổi theo brand)
   final Color _primaryColor = const Color(0xFFE64A19);
   final Color _accentColor = const Color(0xFF1565C0);
 
@@ -63,10 +62,8 @@ class _LoginScreenState extends State<LoginScreen> {
             }
           },
           builder: (context, state) {
-            // Sử dụng Stack để tạo các lớp background trang trí
             return Stack(
               children: [
-                // 1. Background Decoration (Vòng tròn trang trí)
                 Positioned(
                   top: -100,
                   right: -100,
@@ -92,7 +89,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
 
-                // 2. Main Content
                 SafeArea(
                   child: Center(
                     child: SingleChildScrollView(
@@ -107,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             Icon(Icons.storefront_rounded, size: 60, color: _primaryColor),
                             const SizedBox(height: 24),
                             Text(
-                              'ELSA STORE!',
+                              'Xin chào!',
                               style: TextStyle(
                                 fontSize: 32,
                                 fontWeight: FontWeight.w800,
@@ -118,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Xin chào, hãy đăng nhập để sử dụng dịch vụ!',
+                              'Đăng nhập để có trải nghiệm tốt nhất',
                               style: TextStyle(
                                 color: Colors.grey.shade500,
                                 fontSize: 16,
@@ -243,6 +239,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                             const SizedBox(height: 40),
 
+                            // Footer: Register
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [

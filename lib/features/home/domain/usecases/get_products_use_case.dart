@@ -9,7 +9,7 @@ class GetProductsUseCase {
 
   GetProductsUseCase(this.repository);
 
-  Future<List<ProductResponse>> call() {
-    return repository.getProducts();
+  Future<List<ProductResponse>> call({int? categoryId}) {
+    return repository.getProducts(categoryId: categoryId);
   }
 }

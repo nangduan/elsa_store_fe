@@ -1,12 +1,14 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_skeleton/core/di/injector.dart';
+import 'package:flutter_skeleton/core/storage/flutter_store_core.dart';
+import 'package:flutter_skeleton/features/orders/domain/usecases/create_order_use_case.dart';
+import 'package:flutter_skeleton/features/orders/presentation/cubit/order_cubit.dart';
 
 import '../../../../core/api/app_config.dart';
 import '../../../../core/constants/format.dart';
-import '../../../../core/di/injector.dart';
-import '../../../../core/errors/app_exception.dart';
-import '../../../orders/presentation/cubit/order_cubit.dart';
+import '../../../../core/navigation/app_routes.dart';
 import '../../../orders/data/models/request/create_order_item_request.dart';
 import '../../data/models/response/cart_item_response.dart';
 import '../cubit/cart_cubit.dart';
@@ -17,110 +19,107 @@ class CartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<OrderCubit>(),
-      child: Scaffold(
-        backgroundColor: Colors.grey.shade50,
-        appBar: AppBar(
-          title: const Text(
-            'Giỏ hàng',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-          ),
-          centerTitle: true,
-          backgroundColor: Colors.white,
-          elevation: 0,
-          foregroundColor: Colors.black,
+    return Scaffold(
+      backgroundColor: Colors.grey.shade50,
+      appBar: AppBar(
+        title: const Text(
+          'Giỏ hàng',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
-        body: BlocBuilder<CartCubit, CartState>(
-          builder: (context, state) {
-            if (state.status == CartStatus.loading) {
-              return const Center(
-                child: CircularProgressIndicator(color: Colors.black),
-              );
-            }
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        foregroundColor: Colors.black,
+      ),
+      body: BlocBuilder<CartCubit, CartState>(
+        builder: (context, state) {
+          if (state.status == CartStatus.loading) {
+            return const Center(
+              child: CircularProgressIndicator(color: Colors.black),
+            );
+          }
 
-            if (state.status == CartStatus.failure) {
-              Future<void> onRetry() => context.read<CartCubit>().load();
-              return RefreshIndicator(
-                onRefresh: onRetry,
-                child: ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: [
-                    const SizedBox(height: 120),
-                    _buildErrorState(state.errorMessage, onRetry),
-                  ],
-                ),
-              );
-            }
+          if (state.status == CartStatus.failure) {
+            Future<void> onRetry() => context.read<CartCubit>().load();
+            return RefreshIndicator(
+              onRefresh: onRetry,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  const SizedBox(height: 120),
+                  _buildErrorState(state.errorMessage, onRetry),
+                ],
+              ),
+            );
+          }
 
-            final items = state.cart?.items ?? const [];
+          final items = state.cart?.items ?? const [];
 
-            if (items.isEmpty) {
-              return RefreshIndicator(
-                onRefresh: () => context.read<CartCubit>().load(),
-                child: ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: [
-                    const SizedBox(height: 80),
-                    _buildEmptyState(context),
-                  ],
-                ),
-              );
-            }
+          if (items.isEmpty) {
+            return RefreshIndicator(
+              onRefresh: () => context.read<CartCubit>().load(),
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  const SizedBox(height: 80),
+                  _buildEmptyState(context),
+                ],
+              ),
+            );
+          }
 
-            return Column(
-              children: [
-                Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: () => context.read<CartCubit>().load(),
-                    child: ListView.separated(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16,
-                      ),
-                      itemCount: items.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 16),
-                      itemBuilder: (_, i) {
-                        final item = items[i];
-                        return _CartItemCard(
-                          item: item,
-                          onDecrease: () {
-                            final qty = item.quantity ?? 0;
-                            if (item.id == null) return;
-                            if (qty <= 1) {
-                              _confirmDelete(context, item);
-                            } else {
-                              context.read<CartCubit>().updateItemQuantity(
-                                item.id!,
-                                qty - 1,
-                              );
-                            }
-                          },
-                          onIncrease: () {
-                            final qty = item.quantity ?? 0;
-                            if (item.id == null) return;
+          return Column(
+            children: [
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () => context.read<CartCubit>().load(),
+                  child: ListView.separated(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
+                    itemCount: items.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 16),
+                    itemBuilder: (_, i) {
+                      final item = items[i];
+                      return _CartItemCard(
+                        item: item,
+                        onDecrease: () {
+                          final qty = item.quantity ?? 0;
+                          if (item.id == null) return;
+                          if (qty <= 1) {
+                            _confirmDelete(context, item);
+                          } else {
                             context.read<CartCubit>().updateItemQuantity(
                               item.id!,
-                              qty + 1,
+                              qty - 1,
                             );
-                          },
-                          onDelete: () {
-                            if (item.id != null) {
-                              context.read<CartCubit>().deleteItem(item.id!);
-                            }
-                          },
-                          onCheckout: () => _checkoutItem(context, item),
-                        );
-                      },
-                    ),
+                          }
+                        },
+                        onIncrease: () {
+                          final qty = item.quantity ?? 0;
+                          if (item.id == null) return;
+                          context.read<CartCubit>().updateItemQuantity(
+                            item.id!,
+                            qty + 1,
+                          );
+                        },
+                        onDelete: () {
+                          if (item.id != null) {
+                            context.read<CartCubit>().deleteItem(item.id!);
+                          }
+                        },
+                        onCheckout: () => _checkoutItem(context, item),
+                      );
+                    },
                   ),
                 ),
-                _buildBottomCheckout(context, state.cart?.totalAmount, items),
-              ],
-            );
-          },
-        ),
+              ),
+              _buildBottomCheckout(context, state.cart?.totalAmount, items),
+            ],
+          );
+        },
       ),
     );
   }
@@ -174,7 +173,7 @@ class CartScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
           ),
-          onPressed: () => context.router.pop(),
+          onPressed: () {},
           child: const Text('Tiếp tục mua sắm'),
         ),
       ],
@@ -191,33 +190,47 @@ class CartScreen extends StatelessWidget {
     CartItemResponse item,
   ) async {
     final variantId = item.productVariantId;
-    final quantity = item.quantity;
-    if (variantId == null || quantity == null || quantity <= 0) {
+    final amount =
+        item.lineTotal ??
+        (item.unitPrice != null && item.quantity != null
+            ? item.unitPrice! * item.quantity!
+            : null);
+    if (variantId == null || amount == null || amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Dữ liệu sản phẩm không hợp lệ')),
       );
       return;
     }
 
-    try {
-      final order = await context.read<OrderCubit>().createOrderForItem(
-        productVariantId: variantId,
-        quantity: quantity,
+    final userId = await FlutterStoreCore.readUserId();
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Thiếu thông tin người dùng')),
       );
-      if (!context.mounted) return;
-      final code = order?.code;
-      final message = code == null || code.isEmpty
-          ? 'Đặt hàng thành công'
-          : 'Đặt hàng thành công ($code)';
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
-    } on AppException catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.message)));
+      return;
     }
+    await getIt<CreateOrderUseCase>()
+        .call(userId, [
+          CreateOrderItemRequest(
+            productVariantId: variantId,
+            quantity: item.quantity ?? 1,
+          ),
+        ])
+        .then((value) {
+          if (value != null) {
+            context.router.push(
+              PaymentRoute(
+                productName: item.productName ?? 'San pham',
+                imageUrl: item.imageUrl,
+                amount: amount,
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Tạo đơn hàng thất bại')),
+            );
+          }
+        });
   }
 
   Widget _buildBottomCheckout(
@@ -293,43 +306,47 @@ class CartScreen extends StatelessWidget {
     BuildContext context,
     List<CartItemResponse> items,
   ) async {
-    final payloadItems = items
-        .where(
-          (item) => item.productVariantId != null && (item.quantity ?? 0) > 0,
-        )
-        .map(
-          (item) => CreateOrderItemRequest(
-            productVariantId: item.productVariantId!,
-            quantity: item.quantity!,
-          ),
-        )
-        .toList();
+    final total = items.fold<double>(
+      0,
+      (sum, item) => sum + (item.lineTotal ?? 0),
+    );
 
-    if (payloadItems.isEmpty) {
+    if (total <= 0) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Giỏ hàng đang trống')));
+      ).showSnackBar(const SnackBar(content: Text('Gio hang dang trong')));
       return;
     }
 
-    try {
-      final order = await context.read<OrderCubit>().createOrderForItems(
-        payloadItems,
+    List<CreateOrderItemRequest> orderItems = items.map((item) {
+      return CreateOrderItemRequest(
+        productVariantId: item.productVariantId!,
+        quantity: item.quantity!,
       );
-      if (!context.mounted) return;
-      final code = order?.code;
-      final message = code == null || code.isEmpty
-          ? 'Đặt hàng thành công'
-          : 'Đặt hàng thành công ($code)';
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
-    } on AppException catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.message)));
+    }).toList();
+
+    final userId = await FlutterStoreCore.readUserId();
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Thiếu thông tin người dùng')),
+      );
+      return;
     }
+    await getIt<CreateOrderUseCase>().call(userId, orderItems).then((value) {
+      if (value != null) {
+        context.router.push(
+          PaymentRoute(
+            productName: 'Thanh toán giỏ hàng',
+            amount: total,
+            cartItems: items,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Tạo đơn hàng thất bại')));
+      }
+    });
   }
 }
 

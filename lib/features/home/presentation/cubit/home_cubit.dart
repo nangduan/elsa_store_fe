@@ -18,15 +18,31 @@ class HomeCubit extends Cubit<HomeState> {
 
   HomeCubit(this._getCategories, this._getProducts) : super(HomeState());
 
-  Future<void> load() async {
+  Future<void> load({int? categoryId}) async {
     emit(state.copyWith(status: HomeStatus.loading));
     try {
       final categories = await _getCategories();
-      final products = await _getProducts();
+      final products = await _getProducts(categoryId: categoryId);
       emit(
         state.copyWith(
           status: HomeStatus.success,
-          categories: categories,
+          categories: categories.where((e) => e.parentId != null).toList(),
+          products: products,
+        ),
+      );
+    } on AppException catch (e) {
+      emit(state.copyWith(status: HomeStatus.failure, errorMessage: e.message));
+    }
+  }
+
+  Future<void> selectedCategory({int? categoryId}) async {
+    emit(state.copyWith(status: HomeStatus.loading));
+    try {
+      final products = await _getProducts(categoryId: categoryId);
+      emit(
+        state.copyWith(
+          selectedCategoryId: categoryId,
+          status: HomeStatus.success,
           products: products,
         ),
       );

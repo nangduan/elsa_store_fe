@@ -15,6 +15,7 @@ class HomeState with _$HomeState {
     @Default(HomeStatus.initial) HomeStatus status,
     @Default([]) List<CategoryResponse> categories,
     @Default([]) List<ProductResponse> products,
+    int? selectedCategoryId,
     String? errorMessage,
   }) = _Initial;
 }

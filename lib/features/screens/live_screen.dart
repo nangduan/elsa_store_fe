@@ -11,7 +11,6 @@ class LiveScreen extends StatelessWidget {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Live image / video (demo)
           Image.network(
             'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e',
             height: double.infinity,

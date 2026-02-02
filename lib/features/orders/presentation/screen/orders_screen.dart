@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/api/app_config.dart';
 import '../../../../core/constants/format.dart';
 import '../../../../core/di/injector.dart';
 import '../../data/models/response/order_response.dart';
@@ -176,14 +177,41 @@ class _OrderCard extends StatelessWidget {
           const SizedBox(height: 12),
           Column(
             children: order.items.map((item) {
+              final imageUrl = _resolveImageUrl(item.pathImage);
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
                   children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        height: 48,
+                        width: 48,
+                        color: Colors.grey.shade100,
+                        child: imageUrl == null
+                            ? const Icon(
+                                Icons.image_not_supported_outlined,
+                                color: Colors.grey,
+                                size: 20,
+                              )
+                            : Image.network(
+                                imageUrl,
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, __, ___) => const Icon(
+                                  Icons.broken_image_outlined,
+                                  color: Colors.grey,
+                                  size: 20,
+                                ),
+                              ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         item.productName ?? '-',
                         style: const TextStyle(fontWeight: FontWeight.w600),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     Text(
@@ -237,5 +265,13 @@ class _OrderCard extends StatelessWidget {
       default:
         return 'Không rõ';
     }
+  }
+
+  String? _resolveImageUrl(String? path) {
+    if (path == null || path.isEmpty) return null;
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    return "${AppConfig().baseURL}$path";
   }
 }

@@ -59,8 +59,6 @@ class _StartScreenState extends State<StartScreen> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // 1. Background Decoration (Giống hệt Login/Register)
-          // Vòng tròn trên cùng bên phải
           Positioned(
             top: -100,
             right: -100,
@@ -73,7 +71,6 @@ class _StartScreenState extends State<StartScreen> {
               ),
             ),
           ),
-          // Vòng tròn giữa bên trái
           Positioned(
             top: 200,
             left: -50,
@@ -94,12 +91,11 @@ class _StartScreenState extends State<StartScreen> {
               children: [
                 const Spacer(),
 
-                // Logo được làm mềm mại hơn
                 Container(
                   padding: const EdgeInsets.all(28),
                   decoration: BoxDecoration(
-                    color: _primaryColor, // Dùng màu chủ đạo
-                    shape: BoxShape.circle, // Hình tròn thay vì hình vuông bo góc
+                    color: _primaryColor,
+                    shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
                         color: _primaryColor.withOpacity(0.4),
@@ -130,7 +126,6 @@ class _StartScreenState extends State<StartScreen> {
 
                 const SizedBox(height: 12),
 
-                // Tagline
                 Text(
                   'FASHION STORE',
                   style: TextStyle(
@@ -143,7 +138,6 @@ class _StartScreenState extends State<StartScreen> {
 
                 const Spacer(),
 
-                // Loading Indicator tinh tế hơn
                 SizedBox(
                   width: 30,
                   height: 30,

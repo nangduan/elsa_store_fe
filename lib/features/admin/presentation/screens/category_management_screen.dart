@@ -20,14 +20,12 @@ class CategoryManagementScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Colors.grey.shade50,
         body: BlocConsumer<CategoryCubit, CategoryState>(
-          listener: (context, state) {
-          },
+          listener: (context, state) {},
           builder: (context, state) {
             return CustomScrollView(
               slivers: [
                 _buildAppBar(context, state.categories),
                 _buildSearchBar(),
-
                 if (state.status.isLoading)
                   SliverFillRemaining(
                     child: Center(
@@ -56,7 +54,6 @@ class CategoryManagementScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-
                 const SliverToBoxAdapter(child: SizedBox(height: 40)),
               ],
             );
@@ -72,12 +69,14 @@ class CategoryManagementScreen extends StatelessWidget {
       pinned: true,
       elevation: 0,
       backgroundColor: Colors.white,
-
       leading: IconButton(
-        icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.grey.shade700, size: 22),
+        icon: Icon(
+          Icons.arrow_back_ios_new_rounded,
+          color: Colors.grey.shade700,
+          size: 22,
+        ),
         onPressed: () => context.router.pop(),
       ),
-
       centerTitle: true,
       title: Text(
         'TẤT CẢ DANH MỤC',
@@ -88,14 +87,20 @@ class CategoryManagementScreen extends StatelessWidget {
           letterSpacing: 1.0,
         ),
       ),
-
       actions: [
         Padding(
           padding: const EdgeInsets.only(right: 16),
           child: IconButton(
-            tooltip: 'Thêm danh mục',
-            onPressed: () => _showCategoryDialog(context, categories: categories),
-            icon: Icon(Icons.add_circle_rounded, color: _primaryOrange, size: 32),
+            onPressed:
+                () => _showCategoryDialog(context, categories: categories),
+            icon: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: _primaryOrange,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.add, color: Colors.white, size: 24),
+            ),
           ),
         ),
       ],
@@ -109,7 +114,7 @@ class CategoryManagementScreen extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(30),
             boxShadow: [
               BoxShadow(
                 color: Colors.grey.withOpacity(0.08),
@@ -127,7 +132,7 @@ class CategoryManagementScreen extends StatelessWidget {
               fillColor: Colors.transparent,
               contentPadding: const EdgeInsets.symmetric(vertical: 16),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(30),
                 borderSide: BorderSide.none,
               ),
             ),
@@ -161,11 +166,11 @@ class CategoryManagementScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            // Icon Box
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: isSubCategory
+                color:
+                isSubCategory
                     ? Colors.grey.shade50
                     : _primaryBlue.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(18),
@@ -173,14 +178,12 @@ class CategoryManagementScreen extends StatelessWidget {
               child: Icon(
                 isSubCategory
                     ? Icons.subdirectory_arrow_right_rounded
-                    : Icons.layers_rounded, // Icon hiện đại hơn
+                    : Icons.layers_rounded,
                 color: isSubCategory ? Colors.grey.shade600 : _primaryBlue,
                 size: 24,
               ),
             ),
             const SizedBox(width: 16),
-
-            // Content
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,7 +191,8 @@ class CategoryManagementScreen extends StatelessWidget {
                   Text(
                     item.name ?? 'Không có tên',
                     style: TextStyle(
-                      fontWeight: isSubCategory ? FontWeight.w600 : FontWeight.w800,
+                      fontWeight:
+                      isSubCategory ? FontWeight.w600 : FontWeight.w800,
                       fontSize: 16,
                       color: Colors.grey.shade900,
                     ),
@@ -196,7 +200,10 @@ class CategoryManagementScreen extends StatelessWidget {
                   const SizedBox(height: 6),
                   if (isSubCategory)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: _primaryBlue.withOpacity(0.08),
                         borderRadius: BorderRadius.circular(8),
@@ -213,7 +220,11 @@ class CategoryManagementScreen extends StatelessWidget {
                   else
                     Row(
                       children: [
-                        Icon(Icons.check_circle, size: 14, color: Colors.green.shade400),
+                        Icon(
+                          Icons.check_circle,
+                          size: 14,
+                          color: Colors.green.shade400,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           'Danh mục gốc',
@@ -228,8 +239,6 @@ class CategoryManagementScreen extends StatelessWidget {
                 ],
               ),
             ),
-
-            // Actions
             Row(
               children: [
                 _buildCircleAction(
@@ -281,7 +290,11 @@ class CategoryManagementScreen extends StatelessWidget {
               color: _primaryBlue.withOpacity(0.05),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.category_outlined, size: 60, color: _primaryBlue.withOpacity(0.5)),
+            child: Icon(
+              Icons.category_outlined,
+              size: 60,
+              color: _primaryBlue.withOpacity(0.5),
+            ),
           ),
           const SizedBox(height: 20),
           Text(
@@ -310,11 +323,15 @@ class CategoryManagementScreen extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setState) => Container(
+      builder:
+          (dialogContext) => StatefulBuilder(
+        builder:
+            (context, setState) => Container(
           decoration: const BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(30),
+            ),
           ),
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(dialogContext).viewInsets.bottom + 30,
@@ -326,7 +343,6 @@ class CategoryManagementScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Dialog Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -339,14 +355,15 @@ class CategoryManagementScreen extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: Icon(Icons.close, color: Colors.grey.shade400)
-                  )
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(
+                      Icons.close,
+                      color: Colors.grey.shade400,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 24),
-
-              // Input Name
               TextField(
                 controller: nameController,
                 decoration: _inputDecoration(
@@ -355,8 +372,6 @@ class CategoryManagementScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Dropdown
               Container(
                 decoration: BoxDecoration(
                   color: Colors.grey.shade50,
@@ -365,7 +380,10 @@ class CategoryManagementScreen extends StatelessWidget {
                 child: DropdownButtonFormField<int?>(
                   value: parentId,
                   dropdownColor: Colors.white,
-                  icon: Icon(Icons.keyboard_arrow_down_rounded, color: _primaryBlue),
+                  icon: Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: _primaryBlue,
+                  ),
                   decoration: _inputDecoration(
                     'Danh mục cha (Tùy chọn)',
                     Icons.account_tree_rounded,
@@ -377,7 +395,10 @@ class CategoryManagementScreen extends StatelessWidget {
                       child: Text('Danh mục gốc (Không có cha)'),
                     ),
                     ...categories
-                        .where((c) => c.parentId == null && c.id != item?.id)
+                        .where(
+                          (c) =>
+                      c.parentId == null && c.id != item?.id,
+                    )
                         .map(
                           (c) => DropdownMenuItem<int?>(
                         value: c.id,
@@ -389,8 +410,6 @@ class CategoryManagementScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 32),
-
-              // Save Button
               SizedBox(
                 width: double.infinity,
                 height: 56,
@@ -433,11 +452,19 @@ class CategoryManagementScreen extends StatelessWidget {
     );
   }
 
-  InputDecoration _inputDecoration(String label, IconData icon, {bool isDropdown = false}) {
+  InputDecoration _inputDecoration(
+      String label,
+      IconData icon, {
+        bool isDropdown = false,
+      }) {
     return InputDecoration(
       labelText: label,
       labelStyle: TextStyle(color: Colors.grey.shade500),
-      prefixIcon: Icon(icon, size: 22, color: _primaryBlue.withOpacity(0.7)),
+      prefixIcon: Icon(
+        icon,
+        size: 22,
+        color: _primaryBlue.withOpacity(0.7),
+      ),
       filled: true,
       fillColor: Colors.grey.shade50,
       enabledBorder: OutlineInputBorder(
@@ -458,8 +485,11 @@ class CategoryManagementScreen extends StatelessWidget {
   void _confirmDelete(BuildContext context, CategoryResponse item) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      builder:
+          (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
         title: Row(
           children: [
             Icon(Icons.warning_amber_rounded, color: _primaryOrange),
@@ -480,7 +510,10 @@ class CategoryManagementScreen extends StatelessWidget {
             ],
           ),
         ),
-        actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        actionsPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -491,7 +524,9 @@ class CategoryManagementScreen extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
               elevation: 0,
             ),
             onPressed: () {
