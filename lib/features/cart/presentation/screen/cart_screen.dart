@@ -197,7 +197,7 @@ class CartScreen extends StatelessWidget {
             : null);
     if (variantId == null || amount == null || amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Dữ liệu sản phẩm không hợp lệ')),
+        const SnackBar(content: Text('D? li?u s?n ph?m kh?ng h?p l?')),
       );
       return;
     }
@@ -205,32 +205,33 @@ class CartScreen extends StatelessWidget {
     final userId = await FlutterStoreCore.readUserId();
     if (userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Thiếu thông tin người dùng')),
+        const SnackBar(content: Text('Thi?u th?ng tin ng??i d?ng')),
       );
       return;
     }
-    await getIt<CreateOrderUseCase>()
-        .call(userId, [
-          CreateOrderItemRequest(
-            productVariantId: variantId,
-            quantity: item.quantity ?? 1,
-          ),
-        ])
-        .then((value) {
-          if (value != null) {
-            context.router.push(
-              PaymentRoute(
-                productName: item.productName ?? 'San pham',
-                imageUrl: item.imageUrl,
-                amount: amount,
-              ),
-            );
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Tạo đơn hàng thất bại')),
-            );
-          }
-        });
+
+    final order = await getIt<CreateOrderUseCase>().call(userId, [
+      CreateOrderItemRequest(
+        productVariantId: variantId,
+        quantity: item.quantity ?? 1,
+      ),
+    ]);
+
+    if (order != null) {
+      await _openPaymentAndRefresh(
+        context,
+        PaymentRoute(
+          productName: item.productName ?? 'S?n ph?m',
+          imageUrl: item.imageUrl,
+          amount: amount,
+          cartItems: [item],
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('T?o ??n h?ng th?t b?i')),
+      );
+    }
   }
 
   Widget _buildBottomCheckout(
@@ -312,9 +313,9 @@ class CartScreen extends StatelessWidget {
     );
 
     if (total <= 0) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Gio hang dang trong')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gio hang dang trong')),
+      );
       return;
     }
 
@@ -328,25 +329,39 @@ class CartScreen extends StatelessWidget {
     final userId = await FlutterStoreCore.readUserId();
     if (userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Thiếu thông tin người dùng')),
+        const SnackBar(content: Text('Thi?u th?ng tin ng??i d?ng')),
       );
       return;
     }
-    await getIt<CreateOrderUseCase>().call(userId, orderItems).then((value) {
-      if (value != null) {
-        context.router.push(
-          PaymentRoute(
-            productName: 'Thanh toán giỏ hàng',
-            amount: total,
-            cartItems: items,
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Tạo đơn hàng thất bại')));
-      }
-    });
+
+    final order = await getIt<CreateOrderUseCase>().call(userId, orderItems);
+    if (order != null) {
+      await _openPaymentAndRefresh(
+        context,
+        PaymentRoute(
+          productName: 'Thanh to?n gi? h?ng',
+          amount: total,
+          cartItems: items,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('T?o ??n h?ng th?t b?i')),
+      );
+    }
+  }
+
+  Future<void> _openPaymentAndRefresh(
+    BuildContext context,
+    PageRouteInfo route,
+  ) async {
+    await context.router.push(route);
+    if (!context.mounted) return;
+    context.read<CartCubit>().load();
+    try {
+      final orderCubit = BlocProvider.of<OrderCubit>(context);
+      orderCubit.load();
+    } catch (_) {}
   }
 }
 

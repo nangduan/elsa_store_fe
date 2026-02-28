@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injector.dart';
 import '../../../cart/presentation/cubit/cart_cubit.dart';
 import '../../../cart/presentation/screen/cart_screen.dart';
+import '../../../orders/presentation/cubit/order_cubit.dart';
 import '../../../orders/presentation/screen/orders_screen.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
@@ -21,33 +22,40 @@ class MainBottomNavScreen extends StatefulWidget {
 class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
   int _currentIndex = 0;
   late final CartCubit _cartCubit;
-
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    OrdersScreen(),
-    SearchScreen(),
-    CartScreen(),
-    ProfileScreen(),
-  ];
+  late final OrderCubit _orderCubit;
 
   @override
   void initState() {
     super.initState();
     _cartCubit = getIt<CartCubit>();
+    _orderCubit = getIt<OrderCubit>();
   }
 
   @override
   void dispose() {
     _cartCubit.close();
+    _orderCubit.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _cartCubit,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: _cartCubit),
+        BlocProvider.value(value: _orderCubit),
+      ],
       child: Scaffold(
-        body: IndexedStack(index: _currentIndex, children: _screens),
+        body: IndexedStack(
+          index: _currentIndex,
+          children: const [
+            HomeScreen(),
+            OrdersScreen(),
+            SearchScreen(),
+            CartScreen(),
+            ProfileScreen(),
+          ],
+        ),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
             border: Border(
@@ -70,6 +78,8 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
               setState(() => _currentIndex = index);
               if (index == 3) {
                 _cartCubit.load();
+              } else if (index == 1) {
+                _orderCubit.load();
               }
             },
             items: const [

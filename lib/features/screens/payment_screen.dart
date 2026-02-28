@@ -1,13 +1,18 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_skeleton/core/navigation/app_routes.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../core/api/app_config.dart';
 import '../../core/constants/format.dart';
 import '../../core/di/injector.dart';
+import '../../core/storage/flutter_store_core.dart';
 import '../cart/data/models/response/cart_item_response.dart';
+import '../cart/domain/repositories/cart_repository.dart';
+import '../cart/presentation/cubit/cart_cubit.dart';
+import '../orders/presentation/cubit/order_cubit.dart';
 
 @RoutePage()
 class PaymentScreen extends StatefulWidget {
@@ -196,6 +201,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
       setState(() {
         _statusMessage = 'Đặt hàng thành công (thanh toán khi nhận hàng)';
       });
+      await _removeCartItemsIfNeeded();
+      if (mounted) {
+        _showSnackBar('Đặt hàng thành công');
+        _exitAfterPayment();
+      }
       return;
     }
 
@@ -263,6 +273,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
       }
       setState(() => _statusMessage = message);
       _showSnackBar(message);
+      if (_isPaymentSuccess(message)) {
+        await _removeCartItemsIfNeeded();
+      }
     } on DioException catch (e) {
       _showSnackBar(e.message ?? 'Xác nhận thanh toán thất bại');
     } catch (_) {
@@ -271,8 +284,53 @@ class _PaymentScreenState extends State<PaymentScreen> {
       if (mounted) {
         setState(() => _isProcessing = false);
       }
-      context.router.replaceAll([MainBottomNavRoute()]);
+      _exitAfterPayment();
     }
+  }
+
+  bool _isPaymentSuccess(String message) {
+    final lower = message.toLowerCase();
+    return lower.contains('thành công') || lower.contains('success');
+  }
+
+  Future<void> _removeCartItemsIfNeeded() async {
+    final items = widget.cartItems ?? const [];
+    if (items.isEmpty) return;
+    final userId = await FlutterStoreCore.readUserId();
+    if (userId == null) return;
+    final repo = getIt<CartRepository>();
+    for (final item in items) {
+      final itemId = item.id;
+      if (itemId != null) {
+        await repo.deleteItem(userId, itemId);
+      }
+    }
+    _refreshTabsAfterPayment();
+  }
+
+  void _refreshTabsAfterPayment() {
+    try {
+      final cartCubit = BlocProvider.of<CartCubit>(context);
+      cartCubit.load();
+    } catch (_) {}
+    try {
+      final orderCubit = BlocProvider.of<OrderCubit>(context);
+      orderCubit.load();
+    } catch (_) {}
+  }
+
+  void _exitAfterPayment() {
+    try {
+      context.router.back();
+      return;
+    } catch (_) {}
+    try {
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+        return;
+      }
+    } catch (_) {}
+    context.router.replaceAll([MainBottomNavRoute()]);
   }
 
   double _calculateItemTotal(CartItemResponse item) {

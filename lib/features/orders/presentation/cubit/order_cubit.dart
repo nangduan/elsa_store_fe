@@ -180,17 +180,38 @@ class OrderCubit extends Cubit<OrderState> {
 
   DateTime? _parseOrderDate(String? value) {
     if (value == null || value.trim().isEmpty) return null;
-    final parsed = DateTime.tryParse(value);
+    final trimmed = value.trim();
+    final parsed = DateTime.tryParse(trimmed);
     if (parsed != null) return parsed;
 
-    final normalized = value.replaceAll('-', '/');
+    if (trimmed.contains(' ') && trimmed.contains('-')) {
+      final normalizedIso = trimmed.replaceFirst(' ', 'T');
+      final parsedIso = DateTime.tryParse(normalizedIso);
+      if (parsedIso != null) return parsedIso;
+    }
+
+    final normalized = trimmed.replaceAll('-', '/');
+    final partsWithTime = normalized.split(' ');
     final parts = normalized.split('/');
     if (parts.length == 3) {
       final day = int.tryParse(parts[0]);
       final month = int.tryParse(parts[1]);
-      final year = int.tryParse(parts[2]);
+      final year = int.tryParse(parts[2].split(' ').first);
       if (day != null && month != null && year != null) {
-        return DateTime(year, month, day);
+        int hour = 0;
+        int minute = 0;
+        int second = 0;
+        if (partsWithTime.length > 1) {
+          final timeParts = partsWithTime[1].split(':');
+          if (timeParts.isNotEmpty) hour = int.tryParse(timeParts[0]) ?? 0;
+          if (timeParts.length > 1) {
+            minute = int.tryParse(timeParts[1]) ?? 0;
+          }
+          if (timeParts.length > 2) {
+            second = int.tryParse(timeParts[2]) ?? 0;
+          }
+        }
+        return DateTime(year, month, day, hour, minute, second);
       }
     }
     return null;
