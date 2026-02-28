@@ -123,34 +123,99 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Tìm kiếm')),
+      backgroundColor: Colors.grey.shade50,
+      appBar: AppBar(
+        title: const Text(
+          'Tìm kiếm',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        foregroundColor: Colors.black,
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          TextField(
-            controller: _keywordController,
-            decoration: InputDecoration(
-              hintText: 'Nhập từ khóa...',
-              prefixIcon: const Icon(Icons.search),
-              filled: true,
-              fillColor: Colors.grey.shade100,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide.none,
-              ),
-            ),
-            onSubmitted: (_) => _search(),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _minPriceController,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          _buildSectionCard(
+            child: Column(
+              children: [
+                TextField(
+                  controller: _keywordController,
                   decoration: InputDecoration(
-                    labelText: 'Giá từ',
+                    hintText: 'Nhập từ khóa ...',
+                    prefixIcon: const Icon(Icons.search),
+                    filled: true,
+                    fillColor: Colors.grey.shade100,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  onSubmitted: (_) => _search(),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _minPriceController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        decoration: InputDecoration(
+                          labelText: 'Giá từ',
+                          filled: true,
+                          fillColor: Colors.grey.shade100,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextField(
+                        controller: _maxPriceController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        decoration: InputDecoration(
+                          labelText: 'Giá đến',
+                          filled: true,
+                          fillColor: Colors.grey.shade100,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<int?>(
+                  value: _selectedCategoryId,
+                  items: [
+                    const DropdownMenuItem<int?>(
+                      value: null,
+                      child: Text('Chọn thể loại'),
+                    ),
+                    ..._categories.map(
+                      (e) => DropdownMenuItem<int?>(
+                        value: e.id,
+                        child: Text(e.name ?? 'Tên không xác định'),
+                      ),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() => _selectedCategoryId = value);
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Thể loại',
                     filled: true,
                     fillColor: Colors.grey.shade100,
                     border: OutlineInputBorder(
@@ -159,79 +224,64 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextField(
-                  controller: _maxPriceController,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: InputDecoration(
-                    labelText: 'Giá đến',
-                    filled: true,
-                    fillColor: Colors.grey.shade100,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide.none,
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 46,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: _loadingResults ? null : _search,
+                          child: const Text('Tìm kiếm'),
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    SizedBox(
+                      height: 46,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.black,
+                          side: BorderSide(color: Colors.grey.shade300),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: _loadingResults ? null : _clearFilters,
+                        child: const Text('Xóa lọc'),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          DropdownButtonFormField<int?>(
-            value: _selectedCategoryId,
-            items: [
-              const DropdownMenuItem<int?>(
-                value: null,
-                child: Text('Tất cả thể loại'),
-              ),
-              ..._categories.map(
-                (e) => DropdownMenuItem<int?>(
-                  value: e.id,
-                  child: Text(e.name ?? 'Không tên'),
-                ),
-              ),
-            ],
-            onChanged: (value) {
-              setState(() => _selectedCategoryId = value);
-            },
-            decoration: InputDecoration(
-              labelText: 'Thể loại',
-              filled: true,
-              fillColor: Colors.grey.shade100,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide.none,
-              ),
+              ],
             ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: _loadingResults ? null : _search,
-                  child: const Text('Tìm kiếm'),
-                ),
-              ),
-              const SizedBox(width: 12),
-              OutlinedButton(
-                onPressed: _loadingResults ? null : _clearFilters,
-                child: const Text('Xóa lọc'),
-              ),
-            ],
           ),
           const SizedBox(height: 16),
           if (_loadingCategories)
-            const Center(child: CircularProgressIndicator())
+            const Center(child: CircularProgressIndicator(color: Colors.black))
           else if (_errorMessage != null)
-            Text(_errorMessage!, style: const TextStyle(color: Colors.red))
+            Center(
+              child: Text(
+                _errorMessage!,
+                style: const TextStyle(color: Colors.red),
+              ),
+            )
           else if (_loadingResults)
-            const Center(child: CircularProgressIndicator())
+            const Center(child: CircularProgressIndicator(color: Colors.black))
           else if (_results.isEmpty)
-            const Text('Không có sản phẩm phù hợp')
+            const Center(
+              child: Text(
+                'Không có sản phẩm phù hợp',
+                style: TextStyle(color: Colors.grey),
+              ),
+            )
           else
             GridView.builder(
               shrinkWrap: true,
@@ -258,37 +308,51 @@ class _SearchScreenState extends State<SearchScreen> {
       onTap: () {
         context.router.push(ProductDetailFullRoute(product: product));
       },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: _buildProductImage(product.imageUrl),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              offset: const Offset(0, 4),
+              blurRadius: 12,
             ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            product.name ?? '-',
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          Text(
-            product.categoryName ?? '-',
-            style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            product.basePrice != null
-                ? Format.formatCurrency(product.basePrice)
-                : '-',
-            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
-          ),
-        ],
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: _buildProductImage(product.imageUrl),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              product.name ?? '-',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              product.categoryName ?? '-',
+              style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              product.basePrice != null
+                  ? Format.formatCurrency(product.basePrice)
+                  : '-',
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+            ),
+          ],
+        ),
       ),
     );
     //  InkWell(
@@ -361,6 +425,24 @@ class _SearchScreenState extends State<SearchScreen> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildSectionCard({required Widget child}) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            offset: const Offset(0, 4),
+            blurRadius: 12,
+          ),
+        ],
+      ),
+      child: child,
     );
   }
 
