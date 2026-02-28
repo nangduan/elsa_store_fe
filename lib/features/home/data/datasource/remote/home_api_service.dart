@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
 import '../../../../../core/shared/data/models/api_response.dart';
+import '../../../../product/data/models/request/search_request.dart';
 
 part 'home_api_service.g.dart';
 
@@ -14,4 +15,7 @@ abstract class HomeApiService {
 
   @GET('/products')
   Future<ApiResponse> getProducts({@Query('categoryId') int? categoryId});
+
+  @POST('/products/search')
+  Future<ApiResponse> searchProducts(@Body() SearchProductRequest request);
 }
