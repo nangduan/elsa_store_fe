@@ -13,6 +13,7 @@ import '../../features/revenues/data/datasource/remote/revenue_api_service.dart'
 import '../../features/admin/data/datasource/remote/category_api_service.dart';
 import '../../features/admin/data/datasource/remote/product_api_service.dart';
 import '../../features/admin/data/datasource/remote/supplier_api_service.dart';
+import '../../features/user/data/datasource/remote/user_api_service.dart';
 import '../api/app_config.dart';
 import '../api/auth_interceptor.dart';
 import '../api/dio_client.dart';
@@ -72,6 +73,9 @@ abstract class NetworkModule {
 
   @lazySingleton
   ProductApiService provideProductApiService(Dio dio) => ProductApiService(dio);
+
+  @lazySingleton
+  UserApiService provideUserApiService(Dio dio) => UserApiService(dio);
 
   @lazySingleton
   SupplierApiService provideSupplierApiService(Dio dio) =>

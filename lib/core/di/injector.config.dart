@@ -175,6 +175,20 @@ import 'package:flutter_skeleton/features/revenues/domain/usecases/get_revenue_t
     as _i225;
 import 'package:flutter_skeleton/features/revenues/presentation/cubit/revenue_cubit.dart'
     as _i82;
+import 'package:flutter_skeleton/features/user/data/datasource/remote/user_api_service.dart'
+    as _i1100;
+import 'package:flutter_skeleton/features/user/data/repository/user_repository_impl.dart'
+    as _i1101;
+import 'package:flutter_skeleton/features/user/domain/repositories/user_repository.dart'
+    as _i1102;
+import 'package:flutter_skeleton/features/user/domain/usecases/change_password_use_case.dart'
+    as _i1103;
+import 'package:flutter_skeleton/features/user/domain/usecases/get_user_by_id_use_case.dart'
+    as _i1104;
+import 'package:flutter_skeleton/features/user/domain/usecases/update_user_use_case.dart'
+    as _i1105;
+import 'package:flutter_skeleton/features/user/presentation/cubit/user_cubit.dart'
+    as _i1106;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
@@ -212,6 +226,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i1001.ProductApiService>(
       () => networkModule.provideProductApiService(gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i1100.UserApiService>(
+      () => networkModule.provideUserApiService(gh<_i361.Dio>()),
     );
     gh.lazySingleton<_i792.SupplierApiService>(
       () => networkModule.provideSupplierApiService(gh<_i361.Dio>()),
@@ -318,6 +335,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i564.ProductRepository>(
       () => _i511.ProductRepositoryImpl(
         gh<_i1001.ProductApiService>(),
+        gh<_i520.DioClient>(),
+      ),
+    );
+    gh.lazySingleton<_i1102.UserRepository>(
+      () => _i1101.UserRepositoryImpl(
+        gh<_i1100.UserApiService>(),
         gh<_i520.DioClient>(),
       ),
     );
@@ -461,6 +484,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i983.GetProductVariantsUseCase>(
       () => _i983.GetProductVariantsUseCase(gh<_i564.ProductRepository>()),
     );
+    gh.factory<_i1104.GetUserByIdUseCase>(
+      () => _i1104.GetUserByIdUseCase(gh<_i1102.UserRepository>()),
+    );
+    gh.factory<_i1105.UpdateUserUseCase>(
+      () => _i1105.UpdateUserUseCase(gh<_i1102.UserRepository>()),
+    );
+    gh.factory<_i1103.ChangePasswordUseCase>(
+      () => _i1103.ChangePasswordUseCase(gh<_i1102.UserRepository>()),
+    );
     gh.factory<_i245.PromotionCubit>(
       () => _i245.PromotionCubit(
         gh<_i661.GetPromotionsUseCase>(),
@@ -488,6 +520,14 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i363.ProductVariantCubit>(
       () => _i363.ProductVariantCubit(gh<_i983.GetProductVariantsUseCase>()),
+    );
+    gh.factory<_i1106.UserCubit>(
+      () => _i1106.UserCubit(
+        gh<_i1104.GetUserByIdUseCase>(),
+        gh<_i1105.UpdateUserUseCase>(),
+        gh<_i1103.ChangePasswordUseCase>(),
+        gh<_i558.FlutterSecureStorage>(),
+      ),
     );
     return this;
   }
