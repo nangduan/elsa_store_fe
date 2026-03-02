@@ -145,6 +145,8 @@ import 'package:flutter_skeleton/features/orders/domain/usecases/get_orders_by_u
     as _i1066;
 import 'package:flutter_skeleton/features/orders/domain/usecases/get_orders_use_case.dart'
     as _i371;
+import 'package:flutter_skeleton/features/orders/domain/usecases/update_order_status_use_case.dart'
+    as _i1120;
 import 'package:flutter_skeleton/features/orders/presentation/cubit/order_cubit.dart'
     as _i513;
 import 'package:flutter_skeleton/features/product/data/datasource/remote/product_api_service.dart'
@@ -319,6 +321,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i1066.GetOrdersByUserUseCase>(
       () => _i1066.GetOrdersByUserUseCase(gh<_i825.OrderRepository>()),
+    );
+    gh.factory<_i1120.UpdateOrderStatusUseCase>(
+      () => _i1120.UpdateOrderStatusUseCase(gh<_i825.OrderRepository>()),
     );
     gh.factory<_i1051.CreateProductUseCase>(
       () => _i1051.CreateProductUseCase(gh<_i195.ProductRepository>()),
@@ -506,6 +511,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i371.GetOrdersUseCase>(),
         gh<_i1066.GetOrdersByUserUseCase>(),
         gh<_i962.CreateOrderUseCase>(),
+        gh<_i1120.UpdateOrderStatusUseCase>(),
       ),
     );
     gh.factory<_i701.ProductDetailCubit>(

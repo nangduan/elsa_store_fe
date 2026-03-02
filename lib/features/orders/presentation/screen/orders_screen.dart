@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/api/app_config.dart';
 import '../../../../core/constants/format.dart';
@@ -114,10 +115,17 @@ class _OrdersScreenState extends State<OrdersScreen> {
   }
 }
 
-class _OrderCard extends StatelessWidget {
+class _OrderCard extends StatefulWidget {
   final OrderResponse order;
 
   const _OrderCard({required this.order});
+
+  @override
+  State<_OrderCard> createState() => _OrderCardState();
+}
+
+class _OrderCardState extends State<_OrderCard> {
+  OrderResponse get order => widget.order;
 
   @override
   Widget build(BuildContext context) {
@@ -125,6 +133,8 @@ class _OrderCard extends StatelessWidget {
     final date = order.orderDate ?? '-';
     final total = Format.formatCurrency(order.finalAmount);
     final status = _statusLabel(order.status);
+    final paymentStatus = _paymentStatusLabel(order);
+    final actionButtons = _buildActions(context);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -153,23 +163,10 @@ class _OrderCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  status,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade700,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+              _StatusChip(
+                label: status,
+                backgroundColor: Colors.grey.shade100,
+                textColor: Colors.grey.shade700,
               ),
             ],
           ),
@@ -177,6 +174,18 @@ class _OrderCard extends StatelessWidget {
           Text(
             date,
             style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _StatusChip(
+                label: paymentStatus,
+                backgroundColor: _paymentStatusColor(order),
+                textColor: _paymentStatusTextColor(order),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           Column(
@@ -249,6 +258,14 @@ class _OrderCard extends StatelessWidget {
               ),
             ],
           ),
+          if (actionButtons.isNotEmpty) ...[
+            const Divider(height: 24),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: actionButtons,
+            ),
+          ],
         ],
       ),
     );
@@ -256,17 +273,242 @@ class _OrderCard extends StatelessWidget {
 
   String _statusLabel(String? status) {
     switch (status) {
-      case "CHUA_XAC_NHAN":
+      case 'CHUA_XAC_NHAN':
         return 'Chờ xác nhận';
-      case "DA_XAC_NHAN":
+      case 'DA_XAC_NHAN':
         return 'Đã xác nhận';
-      case "HOAN_THANH":
+      case 'HOAN_THANH':
         return 'Hoàn tất';
-      case "DA_HUY":
+      case 'DA_HUY':
         return 'Đã hủy';
       default:
         return 'Không rõ';
     }
+  }
+
+  String _paymentStatusLabel(OrderResponse order) {
+    if (_isCod(order)) {
+      return 'Chưa thanh toán';
+    }
+
+    final status = _normalize(order.paymentStatus);
+    if (status.isEmpty) return 'Chờ thanh toán';
+    if (_matches(status, const ['DA_THANH_TOAN', 'PAID', 'SUCCESS'])) {
+      return 'Đã thanh toán';
+    }
+    if (_matches(status, const ['CHO_THANH_TOAN', 'PENDING', 'UNPAID'])) {
+      return 'Chờ thanh toán';
+    }
+    if (_matches(status, const ['THAT_BAI', 'FAILED', 'CANCELLED'])) {
+      return 'Thanh toán thất bại';
+    }
+    return 'Không rõ';
+  }
+
+  Color _paymentStatusColor(OrderResponse order) {
+    final status = _normalize(order.paymentStatus);
+    if (_isCod(order)) {
+      return Colors.orange.shade50;
+    }
+    if (_matches(status, const ['DA_THANH_TOAN', 'PAID', 'SUCCESS'])) {
+      return Colors.green.shade50;
+    }
+    if (_matches(status, const ['THAT_BAI', 'FAILED', 'CANCELLED'])) {
+      return Colors.red.shade50;
+    }
+    return Colors.blue.shade50;
+  }
+
+  Color _paymentStatusTextColor(OrderResponse order) {
+    final status = _normalize(order.paymentStatus);
+    if (_isCod(order)) {
+      return Colors.orange.shade700;
+    }
+    if (_matches(status, const ['DA_THANH_TOAN', 'PAID', 'SUCCESS'])) {
+      return Colors.green.shade700;
+    }
+    if (_matches(status, const ['THAT_BAI', 'FAILED', 'CANCELLED'])) {
+      return Colors.red.shade700;
+    }
+    return Colors.blue.shade700;
+  }
+
+  bool _canContinuePayment(OrderResponse order) {
+    if (_isCod(order)) {
+      return false;
+    }
+    final status = _normalize(order.paymentStatus);
+    if (_matches(status, const ['DA_THANH_TOAN', 'PAID', 'SUCCESS'])) {
+      return false;
+    }
+    return order.paymentUrl != null && order.paymentUrl!.trim().isNotEmpty;
+  }
+
+  List<Widget> _buildActions(BuildContext context) {
+    final actions = <Widget>[];
+    final status = order.status ?? '';
+    final orderId = order.id;
+
+    if (orderId != null && status == 'CHUA_XAC_NHAN') {
+      actions.add(
+        OutlinedButton(
+          onPressed: () async {
+            final confirmed = await _confirmDialog(
+              context,
+              'Hủy đơn hàng?',
+              'Bạn có chắc chắn muốn hủy đơn hàng này không?',
+            );
+            if (!confirmed) return;
+            await _handleUpdateStatus(
+              context,
+              orderId,
+              'DA_HUY',
+              successMessage: 'Đã hủy đơn hàng',
+            );
+          },
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.red.shade600,
+            side: BorderSide(color: Colors.red.shade200),
+          ),
+          child: const Text('Hủy'),
+        ),
+      );
+      actions.add(
+        ElevatedButton(
+          onPressed: () async {
+            final confirmed = await _confirmDialog(
+              context,
+              'Xác nhận đơn hàng?',
+              'Xác nhận đơn hàng này?',
+            );
+            if (!confirmed) return;
+            await _handleUpdateStatus(
+              context,
+              orderId,
+              'DA_XAC_NHAN',
+              successMessage: 'Đã xác nhận đơn hàng',
+            );
+          },
+          child: const Text('Xác nhận'),
+        ),
+      );
+    }
+
+    if (orderId != null && status == 'DA_XAC_NHAN') {
+      actions.add(
+        ElevatedButton(
+          onPressed: () async {
+            final confirmed = await _confirmDialog(
+              context,
+              'Hoàn thành đơn hàng?',
+              'Đánh dấu đơn hàng đã hoàn thành?',
+            );
+            if (!confirmed) return;
+            await _handleUpdateStatus(
+              context,
+              orderId,
+              'HOAN_THANH',
+              successMessage: 'Đã hoàn thành đơn hàng',
+            );
+          },
+          child: const Text('Hoàn thành'),
+        ),
+      );
+    }
+
+    if (_canContinuePayment(order)) {
+      actions.add(
+        OutlinedButton.icon(
+          onPressed: () => _openPaymentUrl(context, order.paymentUrl!),
+          icon: const Icon(Icons.payment_outlined, size: 18),
+          label: const Text('Tiếp tục thanh toán'),
+        ),
+      );
+    }
+
+    return actions;
+  }
+
+  Future<void> _handleUpdateStatus(
+    BuildContext context,
+    int orderId,
+    String status, {
+    String? successMessage,
+  }) async {
+    try {
+      await context.read<OrderCubit>().updateOrderStatus(
+            orderId: orderId,
+            status: status,
+          );
+      if (successMessage != null) {
+        _showSnackBar(context, successMessage);
+      }
+    } catch (_) {
+      _showSnackBar(context, 'Không thể cập nhật đơn hàng');
+    }
+  }
+
+  Future<void> _openPaymentUrl(BuildContext context, String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null) {
+      _showSnackBar(context, 'Liên kết thanh toán không hợp lệ');
+      return;
+    }
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok) {
+      _showSnackBar(context, 'Không thể mở liên kết thanh toán');
+    }
+  }
+
+  Future<bool> _confirmDialog(
+    BuildContext context,
+    String title,
+    String content,
+  ) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Xác nhận'),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
+  }
+
+  void _showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  String _normalize(String? value) {
+    return (value ?? '').trim().toUpperCase();
+  }
+
+  bool _isCod(OrderResponse order) {
+    final method = _normalize(order.paymentMethod);
+    if (method == 'COD' || method == 'CASH_ON_DELIVERY') {
+      return true;
+    }
+    final statusEmpty =
+        order.paymentStatus == null || order.paymentStatus!.trim().isEmpty;
+    final urlEmpty =
+        order.paymentUrl == null || order.paymentUrl!.trim().isEmpty;
+    return method.isEmpty && statusEmpty && urlEmpty;
+  }
+
+  bool _matches(String value, List<String> options) {
+    return options.any((option) => value == option);
   }
 
   String? _resolveImageUrl(String? path) {
@@ -275,5 +517,36 @@ class _OrderCard extends StatelessWidget {
       return path;
     }
     return "${AppConfig().baseURL}$path";
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  final String label;
+  final Color backgroundColor;
+  final Color textColor;
+
+  const _StatusChip({
+    required this.label,
+    required this.backgroundColor,
+    required this.textColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          color: textColor,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
   }
 }

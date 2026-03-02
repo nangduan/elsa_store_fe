@@ -67,4 +67,25 @@ class OrderRepositoryImpl implements OrderRepository {
       throw dioClient.handleDioError(e);
     }
   }
+
+  @override
+  Future<OrderResponse?> updateOrderStatus(int orderId, String status) async {
+    try {
+      final response = await dioClient.dio.patch(
+        '/orders/$orderId',
+        data: {'status': status},
+      );
+      final data = response.data;
+      if (data is Map<String, dynamic>) {
+        final payload = data['data'];
+        if (payload is Map<String, dynamic>) {
+          return OrderResponse.fromJson(payload);
+        }
+        return OrderResponse.fromJson(data);
+      }
+      return null;
+    } on DioException catch (e) {
+      throw dioClient.handleDioError(e);
+    }
+  }
 }

@@ -525,36 +525,35 @@ class _ProductDetailFullScreenState extends State<ProductDetailFullScreen> {
                     );
                     return;
                   }
-                  await getIt<CreateOrderUseCase>()
-                      .call(userId, [
-                        CreateOrderItemRequest(
-                          productVariantId: _selectedVariant!.id ?? 0,
-                          quantity: 1,
-                        ),
-                      ])
-                      .then((value) {
-                        if (value != null) {
-                          context.router.push(
-                            PaymentRoute(
-                              productName: productName,
-                              imageUrl: _selectedVariant!.imageUrl ?? imageUrl,
-                              amount: amount,
-                            ),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Tạo đơn hàng thất bại'),
-                            ),
-                          );
-                        }
-                      });
+
                   context.router.push(
                     PaymentRoute(
                       productName: productName,
                       amount: amount,
                       imageUrl: imageUrl,
                       productVariantId: _selectedVariant!.id,
+                      onPaymentSuccess: () async {
+                        final orderId = await getIt<CreateOrderUseCase>()
+                            .call(userId, [
+                              CreateOrderItemRequest(
+                                productVariantId: _selectedVariant!.id ?? 0,
+                                quantity: 1,
+                              ),
+                            ])
+                            .then((value) {
+                              if (value == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Tạo đơn hàng thất bại'),
+                                  ),
+                                );
+                                return 0;
+                              }
+
+                              return value.id ?? 0;
+                            });
+                        return orderId;
+                      },
                     ),
                   );
                 },

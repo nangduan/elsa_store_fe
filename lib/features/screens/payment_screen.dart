@@ -23,6 +23,7 @@ class PaymentScreen extends StatefulWidget {
     this.amount,
     this.productVariantId,
     this.cartItems,
+    this.onPaymentSuccess,
   });
 
   final String? productName;
@@ -30,6 +31,7 @@ class PaymentScreen extends StatefulWidget {
   final double? amount;
   final int? productVariantId;
   final List<CartItemResponse>? cartItems;
+  final Future<int> Function()? onPaymentSuccess;
 
   @override
   State<PaymentScreen> createState() => _PaymentScreenState();
@@ -201,6 +203,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       setState(() {
         _statusMessage = 'Đặt hàng thành công (thanh toán khi nhận hàng)';
       });
+      final orderId = await widget.onPaymentSuccess?.call();
       await _removeCartItemsIfNeeded();
       if (mounted) {
         _showSnackBar('Đặt hàng thành công');
@@ -239,10 +242,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
     required double amount,
     required String bankCode,
   }) async {
+    final orderId = await widget.onPaymentSuccess?.call();
+
     final dio = getIt<Dio>();
     final response = await dio.get(
       '/payment/vn-pay',
-      queryParameters: {'amount': amount.round(), 'bankCode': bankCode},
+      queryParameters: {'orderId': orderId, 'bankCode': bankCode},
     );
     final data = response.data;
     if (data is Map<String, dynamic>) {
@@ -269,6 +274,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
         final payload = data['data'];
         if (payload is Map<String, dynamic>) {
           message = payload['message'] as String? ?? message;
+        } else if (payload is String) {
+          message = payload;
         }
       }
       setState(() => _statusMessage = message);

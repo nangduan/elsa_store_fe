@@ -8,4 +8,5 @@ abstract class OrderRepository {
     int userId,
     List<CreateOrderItemRequest> items,
   );
+  Future<OrderResponse?> updateOrderStatus(int orderId, String status);
 }

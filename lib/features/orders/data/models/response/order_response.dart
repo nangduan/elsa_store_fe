@@ -7,6 +7,9 @@ class OrderResponse {
   final double? totalAmount;
   final double? finalAmount;
   final String? status;
+  final String? paymentMethod;
+  final String? paymentStatus;
+  final String? paymentUrl;
   final List<OrderItemResponse> items;
 
   OrderResponse({
@@ -16,6 +19,9 @@ class OrderResponse {
     this.totalAmount,
     this.finalAmount,
     this.status,
+    this.paymentMethod,
+    this.paymentStatus,
+    this.paymentUrl,
     this.items = const [],
   });
 
@@ -28,6 +34,9 @@ class OrderResponse {
       totalAmount: (json['totalAmount'] as num?)?.toDouble(),
       finalAmount: (json['finalAmount'] as num?)?.toDouble(),
       status: json['status'] as String?,
+      paymentMethod: json['paymentMethod'] as String?,
+      paymentStatus: json['paymentStatus'] as String?,
+      paymentUrl: json['paymentUrl'] as String?,
       items: rawItems is List
           ? rawItems
                 .whereType<Map<String, dynamic>>()

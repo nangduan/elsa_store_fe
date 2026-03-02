@@ -10,6 +10,7 @@ import '../../data/models/request/create_order_item_request.dart';
 import '../../data/models/response/order_response.dart';
 import '../../domain/usecases/create_order_use_case.dart';
 import '../../domain/usecases/get_orders_use_case.dart';
+import '../../domain/usecases/update_order_status_use_case.dart';
 
 enum OrderStatus { initial, loading, success, failure, creating }
 
@@ -46,9 +47,14 @@ class OrderCubit extends Cubit<OrderState> {
   final GetOrdersUseCase _getOrders;
   final GetOrdersByUserUseCase _getOrdersByUserUseCase;
   final CreateOrderUseCase _createOrder;
+  final UpdateOrderStatusUseCase _updateOrderStatus;
 
-  OrderCubit(this._getOrders, this._getOrdersByUserUseCase, this._createOrder)
-    : super(const OrderState());
+  OrderCubit(
+    this._getOrders,
+    this._getOrdersByUserUseCase,
+    this._createOrder,
+    this._updateOrderStatus,
+  ) : super(const OrderState());
 
   Future<void> load() async {
     emit(state.copyWith(status: OrderStatus.loading));
@@ -169,6 +175,24 @@ class OrderCubit extends Cubit<OrderState> {
     }
   }
 
+  Future<OrderResponse?> updateOrderStatus({
+    required int orderId,
+    required String status,
+  }) async {
+    try {
+      final updated = await _updateOrderStatus.call(orderId, status);
+      if (updated != null) {
+        emit(state.copyWith(orders: _replaceOrder(updated)));
+      } else {
+        emit(state.copyWith(orders: _replaceOrderStatus(orderId, status)));
+      }
+      return updated;
+    } on AppException catch (e) {
+      emit(state.copyWith(errorMessage: e.message));
+      rethrow;
+    }
+  }
+
   int _compareOrderDateDesc(OrderResponse a, OrderResponse b) {
     final aDate = _parseOrderDate(a.orderDate);
     final bDate = _parseOrderDate(b.orderDate);
@@ -215,5 +239,37 @@ class OrderCubit extends Cubit<OrderState> {
       }
     }
     return null;
+  }
+
+  List<OrderResponse> _replaceOrder(OrderResponse updated) {
+    final orders = List<OrderResponse>.from(state.orders);
+    final index = orders.indexWhere((order) => order.id == updated.id);
+    if (index >= 0) {
+      orders[index] = updated;
+    } else {
+      orders.insert(0, updated);
+    }
+    return orders;
+  }
+
+  List<OrderResponse> _replaceOrderStatus(int orderId, String status) {
+    return state.orders
+        .map(
+          (order) => order.id == orderId
+              ? OrderResponse(
+                  id: order.id,
+                  code: order.code,
+                  orderDate: order.orderDate,
+                  totalAmount: order.totalAmount,
+                  finalAmount: order.finalAmount,
+                  status: status,
+                  paymentMethod: order.paymentMethod,
+                  paymentStatus: order.paymentStatus,
+                  paymentUrl: order.paymentUrl,
+                  items: order.items,
+                )
+              : order,
+        )
+        .toList();
   }
 }

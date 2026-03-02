@@ -390,6 +390,7 @@ class PaymentRoute extends PageRouteInfo<PaymentRouteArgs> {
     int? productVariantId,
     List<CartItemResponse>? cartItems,
     List<PageRouteInfo>? children,
+    Future<int> Function()? onPaymentSuccess,
   }) : super(
          PaymentRoute.name,
          args: PaymentRouteArgs(
@@ -399,6 +400,7 @@ class PaymentRoute extends PageRouteInfo<PaymentRouteArgs> {
            amount: amount,
            productVariantId: productVariantId,
            cartItems: cartItems,
+           onPaymentSuccess: onPaymentSuccess,
          ),
          initialChildren: children,
        );
@@ -418,6 +420,7 @@ class PaymentRoute extends PageRouteInfo<PaymentRouteArgs> {
         amount: args.amount,
         productVariantId: args.productVariantId,
         cartItems: args.cartItems,
+        onPaymentSuccess: args.onPaymentSuccess,
       );
     },
   );
@@ -431,6 +434,7 @@ class PaymentRouteArgs {
     this.amount,
     this.productVariantId,
     this.cartItems,
+    this.onPaymentSuccess,
   });
 
   final Key? key;
@@ -444,6 +448,8 @@ class PaymentRouteArgs {
   final int? productVariantId;
 
   final List<CartItemResponse>? cartItems;
+
+  final Future<int> Function()? onPaymentSuccess;
 
   @override
   String toString() {
