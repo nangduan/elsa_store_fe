@@ -28,7 +28,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         title: const Text(
-          '??n h?ng',
+          'Đơn hàng',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         centerTitle: true,
@@ -61,12 +61,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          state.errorMessage ?? 'Kh?ng t?i ???c ??n h?ng',
+                          state.errorMessage ?? 'Không tải được đơn hàng',
                           style: const TextStyle(color: Colors.grey),
                         ),
                         TextButton(
                           onPressed: () => context.read<OrderCubit>().load(),
-                          child: const Text('Th? l?i'),
+                          child: const Text('Thử lại'),
                         ),
                       ],
                     ),
@@ -86,7 +86,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   SizedBox(height: 120),
                   Center(
                     child: Text(
-                      'Ch?a c? ??n h?ng n?o',
+                      'Chưa có đơn hàng nào',
                       style: TextStyle(color: Colors.grey),
                     ),
                   ),
@@ -99,10 +99,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
             onRefresh: () => context.read<OrderCubit>().load(),
             child: ListView.separated(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               itemCount: orders.length,
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (_, index) {
@@ -239,7 +236,7 @@ class _OrderCard extends StatelessWidget {
           Row(
             children: [
               const Text(
-                'T?ng c?ng:',
+                'Tổng cộng:',
                 style: TextStyle(color: Colors.grey, fontSize: 12),
               ),
               const Spacer(),
@@ -257,20 +254,18 @@ class _OrderCard extends StatelessWidget {
     );
   }
 
-  String _statusLabel(int? status) {
+  String _statusLabel(String? status) {
     switch (status) {
-      case 0:
-        return 'M?i';
-      case 1:
-        return '?ang x? l?';
-      case 2:
-        return '?ang giao';
-      case 3:
-        return 'Ho?n t?t';
-      case 4:
-        return '?? h?y';
+      case "CHUA_XAC_NHAN":
+        return 'Chờ xác nhận';
+      case "DA_XAC_NHAN":
+        return 'Đã xác nhận';
+      case "HOAN_THANH":
+        return 'Hoàn tất';
+      case "DA_HUY":
+        return 'Đã hủy';
       default:
-        return 'Kh?ng r?';
+        return 'Không rõ';
     }
   }
 

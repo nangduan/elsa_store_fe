@@ -6,7 +6,7 @@ class OrderResponse {
   final String? orderDate;
   final double? totalAmount;
   final double? finalAmount;
-  final int? status;
+  final String? status;
   final List<OrderItemResponse> items;
 
   OrderResponse({
@@ -27,12 +27,12 @@ class OrderResponse {
       orderDate: json['orderDate'] as String?,
       totalAmount: (json['totalAmount'] as num?)?.toDouble(),
       finalAmount: (json['finalAmount'] as num?)?.toDouble(),
-      status: json['status'] as int?,
+      status: json['status'] as String?,
       items: rawItems is List
           ? rawItems
-              .whereType<Map<String, dynamic>>()
-              .map(OrderItemResponse.fromJson)
-              .toList()
+                .whereType<Map<String, dynamic>>()
+                .map(OrderItemResponse.fromJson)
+                .toList()
           : const [],
     );
   }
