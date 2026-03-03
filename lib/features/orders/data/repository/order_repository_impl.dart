@@ -70,10 +70,29 @@ class OrderRepositoryImpl implements OrderRepository {
 
   @override
   Future<OrderResponse?> updateOrderStatus(int orderId, String status) async {
+    return _updateOrderAndPaymentStatus(orderId, status: status);
+  }
+
+  @override
+  Future<OrderResponse?> updatePaymentStatus(
+    int orderId,
+    String paymentStatus,
+  ) async {
+    return _updateOrderAndPaymentStatus(orderId, paymentStatus: paymentStatus);
+  }
+
+  Future<OrderResponse?> _updateOrderAndPaymentStatus(
+    int orderId, {
+    String? status,
+    String? paymentStatus,
+  }) async {
     try {
-      final response = await dioClient.dio.patch(
-        '/orders/$orderId',
-        data: {'status': status},
+      final response = await dioClient.dio.put(
+        '/orders/$orderId/status',
+        queryParameters: {
+          if (status != null) 'status': status,
+          if (paymentStatus != null) 'paymentStatus': paymentStatus,
+        },
       );
       final data = response.data;
       if (data is Map<String, dynamic>) {

@@ -1,5 +1,4 @@
 import 'package:bloc/bloc.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_skeleton/core/enum/role_enum.dart';
 import 'package:flutter_skeleton/core/storage/flutter_store_core.dart';
 import 'package:flutter_skeleton/features/orders/domain/usecases/get_orders_by_user_use_case%20copy.dart';
@@ -193,6 +192,31 @@ class OrderCubit extends Cubit<OrderState> {
     }
   }
 
+  Future<OrderResponse?> updatePaymentStatus({
+    required int orderId,
+    required String paymentStatus,
+  }) async {
+    try {
+      final updated = await _updateOrderStatus.updatePaymentStatus(
+        orderId,
+        paymentStatus,
+      );
+      if (updated != null) {
+        emit(state.copyWith(orders: _replaceOrder(updated)));
+      } else {
+        emit(
+          state.copyWith(
+            orders: _replaceOrderPaymentStatus(orderId, paymentStatus),
+          ),
+        );
+      }
+      return updated;
+    } on AppException catch (e) {
+      emit(state.copyWith(errorMessage: e.message));
+      rethrow;
+    }
+  }
+
   int _compareOrderDateDesc(OrderResponse a, OrderResponse b) {
     final aDate = _parseOrderDate(a.orderDate);
     final bDate = _parseOrderDate(b.orderDate);
@@ -265,6 +289,30 @@ class OrderCubit extends Cubit<OrderState> {
                   status: status,
                   paymentMethod: order.paymentMethod,
                   paymentStatus: order.paymentStatus,
+                  paymentUrl: order.paymentUrl,
+                  items: order.items,
+                )
+              : order,
+        )
+        .toList();
+  }
+
+  List<OrderResponse> _replaceOrderPaymentStatus(
+    int orderId,
+    String paymentStatus,
+  ) {
+    return state.orders
+        .map(
+          (order) => order.id == orderId
+              ? OrderResponse(
+                  id: order.id,
+                  code: order.code,
+                  orderDate: order.orderDate,
+                  totalAmount: order.totalAmount,
+                  finalAmount: order.finalAmount,
+                  status: order.status,
+                  paymentMethod: order.paymentMethod,
+                  paymentStatus: paymentStatus,
                   paymentUrl: order.paymentUrl,
                   items: order.items,
                 )

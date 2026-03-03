@@ -12,4 +12,11 @@ class UpdateOrderStatusUseCase {
   Future<OrderResponse?> call(int orderId, String status) {
     return _repository.updateOrderStatus(orderId, status);
   }
+
+  Future<OrderResponse?> updatePaymentStatus(
+    int orderId,
+    String paymentStatus,
+  ) {
+    return _repository.updatePaymentStatus(orderId, paymentStatus);
+  }
 }
