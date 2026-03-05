@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_skeleton/core/di/injector.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/api/app_config.dart';
@@ -9,107 +10,103 @@ import '../../data/models/response/order_response.dart';
 import '../cubit/order_cubit.dart';
 
 @RoutePage()
-class OrdersScreen extends StatefulWidget {
+class OrdersScreen extends StatelessWidget {
   const OrdersScreen({super.key});
 
   @override
-  State<OrdersScreen> createState() => _OrdersScreenState();
-}
-
-class _OrdersScreenState extends State<OrdersScreen> {
-  @override
-  void initState() {
-    super.initState();
-    context.read<OrderCubit>().load();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        title: const Text(
-          'Đơn hàng',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+    return BlocProvider(
+      create: (context) =>
+          OrderCubit(getIt(), getIt(), getIt(), getIt())..load(),
+      child: Scaffold(
+        backgroundColor: Colors.grey.shade50,
+        appBar: AppBar(
+          title: const Text(
+            'Đơn hàng',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.white,
+          elevation: 0,
+          foregroundColor: Colors.black,
         ),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0,
-        foregroundColor: Colors.black,
-      ),
-      body: BlocBuilder<OrderCubit, OrderState>(
-        builder: (context, state) {
-          if (state.status == OrderStatus.loading) {
-            return const Center(
-              child: CircularProgressIndicator(color: Colors.black),
-            );
-          }
+        body: BlocBuilder<OrderCubit, OrderState>(
+          builder: (context, state) {
+            if (state.status == OrderStatus.loading) {
+              return const Center(
+                child: CircularProgressIndicator(color: Colors.black),
+              );
+            }
 
-          if (state.status == OrderStatus.failure) {
+            if (state.status == OrderStatus.failure) {
+              return RefreshIndicator(
+                onRefresh: () => context.read<OrderCubit>().load(),
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    const SizedBox(height: 120),
+                    Center(
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: 48,
+                            color: Colors.red.shade300,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            state.errorMessage ?? 'Không tải được đơn hàng',
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                          TextButton(
+                            onPressed: () => context.read<OrderCubit>().load(),
+                            child: const Text('Thử lại'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            final orders = state.orders;
+            if (orders.isEmpty) {
+              return RefreshIndicator(
+                onRefresh: () => context.read<OrderCubit>().load(),
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: const [
+                    SizedBox(height: 120),
+                    Center(
+                      child: Text(
+                        'Chưa có đơn hàng nào',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
             return RefreshIndicator(
               onRefresh: () => context.read<OrderCubit>().load(),
-              child: ListView(
+              child: ListView.separated(
                 physics: const AlwaysScrollableScrollPhysics(),
-                children: [
-                  const SizedBox(height: 120),
-                  Center(
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 48,
-                          color: Colors.red.shade300,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          state.errorMessage ?? 'Không tải được đơn hàng',
-                          style: const TextStyle(color: Colors.grey),
-                        ),
-                        TextButton(
-                          onPressed: () => context.read<OrderCubit>().load(),
-                          child: const Text('Thử lại'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+                itemCount: orders.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemBuilder: (_, index) {
+                  final order = orders[index];
+                  return _OrderCard(order: order);
+                },
               ),
             );
-          }
-
-          final orders = state.orders;
-          if (orders.isEmpty) {
-            return RefreshIndicator(
-              onRefresh: () => context.read<OrderCubit>().load(),
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: const [
-                  SizedBox(height: 120),
-                  Center(
-                    child: Text(
-                      'Chưa có đơn hàng nào',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return RefreshIndicator(
-            onRefresh: () => context.read<OrderCubit>().load(),
-            child: ListView.separated(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              itemCount: orders.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (_, index) {
-                final order = orders[index];
-                return _OrderCard(order: order);
-              },
-            ),
-          );
-        },
+          },
+        ),
       ),
     );
   }
@@ -133,6 +130,8 @@ class _OrderCardState extends State<_OrderCard> {
     final date = order.orderDate ?? '-';
     final total = Format.formatCurrency(order.finalAmount);
     final status = _statusLabel(order.status);
+    final orderStatusColor = _orderStatusColor(order.status);
+    final orderStatusTextColor = _orderStatusTextColor(order.status);
     final paymentStatus = _paymentStatusLabel(order);
     final actionButtons = _buildActions(context);
 
@@ -165,8 +164,8 @@ class _OrderCardState extends State<_OrderCard> {
               ),
               _StatusChip(
                 label: status,
-                backgroundColor: Colors.grey.shade100,
-                textColor: Colors.grey.shade700,
+                backgroundColor: orderStatusColor,
+                textColor: orderStatusTextColor,
               ),
             ],
           ),
@@ -260,11 +259,7 @@ class _OrderCardState extends State<_OrderCard> {
           ),
           if (actionButtons.isNotEmpty) ...[
             const Divider(height: 24),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: actionButtons,
-            ),
+            Wrap(spacing: 8, runSpacing: 8, children: actionButtons),
           ],
         ],
       ),
@@ -317,6 +312,36 @@ class _OrderCardState extends State<_OrderCard> {
       return Colors.red.shade50;
     }
     return Colors.blue.shade50;
+  }
+
+  Color _orderStatusColor(String? status) {
+    switch (_normalize(status)) {
+      case 'CHUA_XAC_NHAN':
+        return Colors.orange.shade50;
+      case 'DA_XAC_NHAN':
+        return Colors.blue.shade50;
+      case 'HOAN_THANH':
+        return Colors.green.shade50;
+      case 'DA_HUY':
+        return Colors.red.shade50;
+      default:
+        return Colors.grey.shade100;
+    }
+  }
+
+  Color _orderStatusTextColor(String? status) {
+    switch (_normalize(status)) {
+      case 'CHUA_XAC_NHAN':
+        return Colors.orange.shade700;
+      case 'DA_XAC_NHAN':
+        return Colors.blue.shade700;
+      case 'HOAN_THANH':
+        return Colors.green.shade700;
+      case 'DA_HUY':
+        return Colors.red.shade700;
+      default:
+        return Colors.grey.shade700;
+    }
   }
 
   Color _paymentStatusTextColor(OrderResponse order) {
@@ -437,9 +462,9 @@ class _OrderCardState extends State<_OrderCard> {
   }) async {
     try {
       await context.read<OrderCubit>().updateOrderStatus(
-            orderId: orderId,
-            status: status,
-          );
+        orderId: orderId,
+        status: status,
+      );
       if (successMessage != null) {
         _showSnackBar(context, successMessage);
       }
@@ -486,9 +511,9 @@ class _OrderCardState extends State<_OrderCard> {
   }
 
   void _showSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   String _normalize(String? value) {
