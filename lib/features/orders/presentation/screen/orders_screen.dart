@@ -1,8 +1,9 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_skeleton/core/di/injector.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../../../core/api/app_config.dart';
 import '../../../../core/constants/format.dart';
@@ -101,7 +102,7 @@ class OrdersScreen extends StatelessWidget {
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (_, index) {
                   final order = orders[index];
-                  return _OrderCard(order: order);
+                  return _OrderCard(order: order, isAdmin: state.isAdmin);
                 },
               ),
             );
@@ -114,8 +115,9 @@ class OrdersScreen extends StatelessWidget {
 
 class _OrderCard extends StatefulWidget {
   final OrderResponse order;
+  final bool isAdmin;
 
-  const _OrderCard({required this.order});
+  const _OrderCard({required this.order, required this.isAdmin});
 
   @override
   State<_OrderCard> createState() => _OrderCardState();
@@ -359,14 +361,23 @@ class _OrderCardState extends State<_OrderCard> {
   }
 
   bool _canContinuePayment(OrderResponse order) {
-    if (_isCod(order)) {
+    if (widget.isAdmin) {
+      return false;
+    }
+    final paymentMethod = _normalize(order.paymentMethod);
+    if (_matches(paymentMethod, const ['COD', 'CASH_ON_DELIVERY'])) {
+      return false;
+    }
+    final orderStatus = _normalize(order.status);
+    if (_matches(orderStatus, const ['DA_HUY', 'HOAN_THANH'])) {
       return false;
     }
     final status = _normalize(order.paymentStatus);
     if (_matches(status, const ['DA_THANH_TOAN', 'PAID', 'SUCCESS'])) {
       return false;
     }
-    return order.paymentUrl != null && order.paymentUrl!.trim().isNotEmpty;
+    return status.isEmpty ||
+        _matches(status, const ['CHO_THANH_TOAN', 'PENDING', 'UNPAID']);
   }
 
   List<Widget> _buildActions(BuildContext context) {
@@ -398,28 +409,30 @@ class _OrderCardState extends State<_OrderCard> {
           child: const Text('Hủy'),
         ),
       );
-      actions.add(
-        ElevatedButton(
-          onPressed: () async {
-            final confirmed = await _confirmDialog(
-              context,
-              'Xác nhận đơn hàng?',
-              'Xác nhận đơn hàng này?',
-            );
-            if (!confirmed) return;
-            await _handleUpdateStatus(
-              context,
-              orderId,
-              'DA_XAC_NHAN',
-              successMessage: 'Đã xác nhận đơn hàng',
-            );
-          },
-          child: const Text('Xác nhận'),
-        ),
-      );
+      if (widget.isAdmin) {
+        actions.add(
+          ElevatedButton(
+            onPressed: () async {
+              final confirmed = await _confirmDialog(
+                context,
+                'Xác nhận đơn hàng?',
+                'Xác nhận đơn hàng này?',
+              );
+              if (!confirmed) return;
+              await _handleUpdateStatus(
+                context,
+                orderId,
+                'DA_XAC_NHAN',
+                successMessage: 'Đã xác nhận đơn hàng',
+              );
+            },
+            child: const Text('Xác nhận'),
+          ),
+        );
+      }
     }
 
-    if (orderId != null && status == 'DA_XAC_NHAN') {
+    if (widget.isAdmin && orderId != null && status == 'DA_XAC_NHAN') {
       actions.add(
         ElevatedButton(
           onPressed: () async {
@@ -444,7 +457,7 @@ class _OrderCardState extends State<_OrderCard> {
     if (_canContinuePayment(order)) {
       actions.add(
         OutlinedButton.icon(
-          onPressed: () => _openPaymentUrl(context, order.paymentUrl!),
+          onPressed: () => _handleContinuePayment(context, order),
           icon: const Icon(Icons.payment_outlined, size: 18),
           label: const Text('Tiếp tục thanh toán'),
         ),
@@ -469,20 +482,109 @@ class _OrderCardState extends State<_OrderCard> {
         _showSnackBar(context, successMessage);
       }
     } catch (_) {
-      _showSnackBar(context, 'Không thể cập nhật đơn hàng');
+      _showSnackBar(context, 'KhÃ´ng thá»ƒ cáº­p nháº­t Ä‘Æ¡n hÃ ng');
     }
   }
 
-  Future<void> _openPaymentUrl(BuildContext context, String url) async {
-    final uri = Uri.tryParse(url);
-    if (uri == null) {
-      _showSnackBar(context, 'Liên kết thanh toán không hợp lệ');
+  Future<void> _handleContinuePayment(
+    BuildContext context,
+    OrderResponse order,
+  ) async {
+    final orderId = order.id;
+    if (orderId == null) {
+      _showSnackBar(context, 'Khong tim thay ma don hang');
       return;
     }
-    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!ok) {
-      _showSnackBar(context, 'Không thể mở liên kết thanh toán');
+    try {
+      final dio = getIt<Dio>();
+      final response = await dio.get(
+        '/payment/vn-pay',
+        queryParameters: {'orderId': orderId, 'bankCode': 'NCB'},
+      );
+      final data = response.data;
+      String? paymentUrl;
+      if (data is Map<String, dynamic>) {
+        final payload = data['data'];
+        if (payload is Map<String, dynamic>) {
+          paymentUrl = payload['paymentUrl'] as String?;
+        }
+      }
+      if (paymentUrl == null || paymentUrl.trim().isEmpty) {
+        _showSnackBar(context, 'Khong lay duoc lien ket thanh toan');
+        return;
+      }
+
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => _OrderVnPayWebViewScreen(
+            url: paymentUrl!,
+            onCallback: (callbackUri) =>
+                _handleVnPayCallback(context, orderId, callbackUri),
+          ),
+        ),
+      );
+    } on DioException catch (e) {
+      _showSnackBar(context, e.message ?? 'Khong the tao thanh toan');
+    } catch (_) {
+      _showSnackBar(context, 'Khong the tao thanh toan');
     }
+  }
+
+  Future<void> _handleVnPayCallback(
+    BuildContext context,
+    int orderId,
+    Uri callbackUri,
+  ) async {
+    try {
+      final dio = getIt<Dio>();
+      final response = await dio.get(
+        '/payment/vn-pay-callback',
+        queryParameters: callbackUri.queryParameters,
+      );
+      final data = response.data;
+      String message = 'Thanh toan that bai';
+      if (data is Map<String, dynamic>) {
+        final payload = data['data'];
+        if (payload is Map<String, dynamic>) {
+          message = payload['message'] as String? ?? message;
+        } else if (payload is String) {
+          message = payload;
+        }
+      }
+      _showSnackBar(context, message);
+      final isSuccess = _isVnPaySuccess(callbackUri, data, message);
+      if (isSuccess) {
+        await context.read<OrderCubit>().updatePaymentStatus(
+          orderId: orderId,
+          paymentStatus: 'DA_THANH_TOAN',
+        );
+      }
+    } on DioException catch (e) {
+      _showSnackBar(context, e.message ?? 'Xac nhan thanh toan that bai');
+    } catch (_) {
+      _showSnackBar(context, 'Xac nhan thanh toan that bai');
+    }
+  }
+
+  bool _isPaymentSuccess(String message) {
+    final lower = message.toLowerCase();
+    return lower.contains('thanh cong') || lower.contains('success');
+  }
+
+  bool _isVnPaySuccess(Uri callbackUri, dynamic responseData, String message) {
+    final responseCode =
+        callbackUri.queryParameters['vnp_ResponseCode'] ??
+        callbackUri.queryParameters['vnp_responsecode'];
+    if (responseCode == '00') {
+      return true;
+    }
+    if (responseData is Map<String, dynamic>) {
+      final ok = responseData['success'];
+      if (ok is bool && ok) {
+        return true;
+      }
+    }
+    return _isPaymentSuccess(message);
   }
 
   Future<bool> _confirmDialog(
@@ -571,6 +673,58 @@ class _StatusChip extends StatelessWidget {
           color: textColor,
           fontWeight: FontWeight.w600,
         ),
+      ),
+    );
+  }
+}
+
+class _OrderVnPayWebViewScreen extends StatefulWidget {
+  const _OrderVnPayWebViewScreen({required this.url, required this.onCallback});
+
+  final String url;
+  final Future<void> Function(Uri callbackUri) onCallback;
+
+  @override
+  State<_OrderVnPayWebViewScreen> createState() =>
+      _OrderVnPayWebViewScreenState();
+}
+
+class _OrderVnPayWebViewScreenState extends State<_OrderVnPayWebViewScreen> {
+  late final WebViewController _controller;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageFinished: (_) => setState(() => _isLoading = false),
+          onNavigationRequest: (request) async {
+            final uri = Uri.tryParse(request.url);
+            if (uri != null && uri.path.contains('/payment/vn-pay-callback')) {
+              await widget.onCallback(uri);
+              if (mounted) Navigator.of(context).pop(true);
+              return NavigationDecision.prevent;
+            }
+            return NavigationDecision.navigate;
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse(widget.url));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('VNPay')),
+      body: Stack(
+        children: [
+          WebViewWidget(controller: _controller),
+          if (_isLoading)
+            const Center(child: CircularProgressIndicator(color: Colors.black)),
+        ],
       ),
     );
   }
