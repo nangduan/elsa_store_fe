@@ -27,55 +27,6 @@ class AdminRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [CartEmptyScreen]
-class CartEmptyRoute extends PageRouteInfo<CartEmptyRouteArgs> {
-  CartEmptyRoute({
-    Key? key,
-    bool fromWishlist = true,
-    List<PageRouteInfo>? children,
-  }) : super(
-         CartEmptyRoute.name,
-         args: CartEmptyRouteArgs(key: key, fromWishlist: fromWishlist),
-         initialChildren: children,
-       );
-
-  static const String name = 'CartEmptyRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      final args = data.argsAs<CartEmptyRouteArgs>(
-        orElse: () => const CartEmptyRouteArgs(),
-      );
-      return CartEmptyScreen(key: args.key, fromWishlist: args.fromWishlist);
-    },
-  );
-}
-
-class CartEmptyRouteArgs {
-  const CartEmptyRouteArgs({this.key, this.fromWishlist = true});
-
-  final Key? key;
-
-  final bool fromWishlist;
-
-  @override
-  String toString() {
-    return 'CartEmptyRouteArgs{key: $key, fromWishlist: $fromWishlist}';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! CartEmptyRouteArgs) return false;
-    return key == other.key && fromWishlist == other.fromWishlist;
-  }
-
-  @override
-  int get hashCode => key.hashCode ^ fromWishlist.hashCode;
-}
-
-/// generated route for
 /// [CartScreen]
 class CartRoute extends PageRouteInfo<void> {
   const CartRoute({List<PageRouteInfo>? children})
@@ -87,22 +38,6 @@ class CartRoute extends PageRouteInfo<void> {
     name,
     builder: (data) {
       return const CartScreen();
-    },
-  );
-}
-
-/// generated route for
-/// [CategoryFilterScreen]
-class CategoryFilterRoute extends PageRouteInfo<void> {
-  const CategoryFilterRoute({List<PageRouteInfo>? children})
-    : super(CategoryFilterRoute.name, initialChildren: children);
-
-  static const String name = 'CategoryFilterRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const CategoryFilterScreen();
     },
   );
 }
@@ -124,22 +59,6 @@ class CategoryManagementRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [ChatScreen]
-class ChatRoute extends PageRouteInfo<void> {
-  const ChatRoute({List<PageRouteInfo>? children})
-    : super(ChatRoute.name, initialChildren: children);
-
-  static const String name = 'ChatRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const ChatScreen();
-    },
-  );
-}
-
-/// generated route for
 /// [FlashSaleScreen]
 class FlashSaleRoute extends PageRouteInfo<void> {
   const FlashSaleRoute({List<PageRouteInfo>? children})
@@ -151,38 +70,6 @@ class FlashSaleRoute extends PageRouteInfo<void> {
     name,
     builder: (data) {
       return const FlashSaleScreen();
-    },
-  );
-}
-
-/// generated route for
-/// [FullProfileScreen]
-class FullProfileRoute extends PageRouteInfo<void> {
-  const FullProfileRoute({List<PageRouteInfo>? children})
-    : super(FullProfileRoute.name, initialChildren: children);
-
-  static const String name = 'FullProfileRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const FullProfileScreen();
-    },
-  );
-}
-
-/// generated route for
-/// [HelloCardScreen]
-class HelloCardRoute extends PageRouteInfo<void> {
-  const HelloCardRoute({List<PageRouteInfo>? children})
-    : super(HelloCardRoute.name, initialChildren: children);
-
-  static const String name = 'HelloCardRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const HelloCardScreen();
     },
   );
 }
@@ -215,54 +102,6 @@ class ImageRecognizedRoute extends PageRouteInfo<void> {
     name,
     builder: (data) {
       return const ImageRecognizedScreen();
-    },
-  );
-}
-
-/// generated route for
-/// [ImageSearchResultScreen]
-class ImageSearchResultRoute extends PageRouteInfo<void> {
-  const ImageSearchResultRoute({List<PageRouteInfo>? children})
-    : super(ImageSearchResultRoute.name, initialChildren: children);
-
-  static const String name = 'ImageSearchResultRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const ImageSearchResultScreen();
-    },
-  );
-}
-
-/// generated route for
-/// [ImageSearchScreen]
-class ImageSearchRoute extends PageRouteInfo<void> {
-  const ImageSearchRoute({List<PageRouteInfo>? children})
-    : super(ImageSearchRoute.name, initialChildren: children);
-
-  static const String name = 'ImageSearchRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const ImageSearchScreen();
-    },
-  );
-}
-
-/// generated route for
-/// [LiveScreen]
-class LiveRoute extends PageRouteInfo<void> {
-  const LiveRoute({List<PageRouteInfo>? children})
-    : super(LiveRoute.name, initialChildren: children);
-
-  static const String name = 'LiveRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const LiveScreen();
     },
   );
 }
@@ -332,22 +171,6 @@ class OrdersRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [PasswordCodeScreen]
-class PasswordCodeRoute extends PageRouteInfo<void> {
-  const PasswordCodeRoute({List<PageRouteInfo>? children})
-    : super(PasswordCodeRoute.name, initialChildren: children);
-
-  static const String name = 'PasswordCodeRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const PasswordCodeScreen();
-    },
-  );
-}
-
-/// generated route for
 /// [PasswordRecoveryScreen]
 class PasswordRecoveryRoute extends PageRouteInfo<void> {
   const PasswordRecoveryRoute({List<PageRouteInfo>? children})
@@ -364,22 +187,6 @@ class PasswordRecoveryRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [PasswordScreen]
-class PasswordRoute extends PageRouteInfo<void> {
-  const PasswordRoute({List<PageRouteInfo>? children})
-    : super(PasswordRoute.name, initialChildren: children);
-
-  static const String name = 'PasswordRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const PasswordScreen();
-    },
-  );
-}
-
-/// generated route for
 /// [PaymentScreen]
 class PaymentRoute extends PageRouteInfo<PaymentRouteArgs> {
   PaymentRoute({
@@ -389,8 +196,8 @@ class PaymentRoute extends PageRouteInfo<PaymentRouteArgs> {
     double? amount,
     int? productVariantId,
     List<CartItemResponse>? cartItems,
-    List<PageRouteInfo>? children,
     Future<int> Function()? onPaymentSuccess,
+    List<PageRouteInfo>? children,
   }) : super(
          PaymentRoute.name,
          args: PaymentRouteArgs(
@@ -453,7 +260,7 @@ class PaymentRouteArgs {
 
   @override
   String toString() {
-    return 'PaymentRouteArgs{key: $key, productName: $productName, imageUrl: $imageUrl, amount: $amount, productVariantId: $productVariantId, cartItems: $cartItems}';
+    return 'PaymentRouteArgs{key: $key, productName: $productName, imageUrl: $imageUrl, amount: $amount, productVariantId: $productVariantId, cartItems: $cartItems, onPaymentSuccess: $onPaymentSuccess}';
   }
 
   @override
@@ -666,38 +473,6 @@ class PromotionManagementRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [ReadyCardScreen]
-class ReadyCardRoute extends PageRouteInfo<void> {
-  const ReadyCardRoute({List<PageRouteInfo>? children})
-    : super(ReadyCardRoute.name, initialChildren: children);
-
-  static const String name = 'ReadyCardRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const ReadyCardScreen();
-    },
-  );
-}
-
-/// generated route for
-/// [RecentlyViewedScreen]
-class RecentlyViewedRoute extends PageRouteInfo<void> {
-  const RecentlyViewedRoute({List<PageRouteInfo>? children})
-    : super(RecentlyViewedRoute.name, initialChildren: children);
-
-  static const String name = 'RecentlyViewedRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const RecentlyViewedScreen();
-    },
-  );
-}
-
-/// generated route for
 /// [RecognizingScreen]
 class RecognizingRoute extends PageRouteInfo<void> {
   const RecognizingRoute({List<PageRouteInfo>? children})
@@ -730,38 +505,6 @@ class RegisterRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [ReviewScreen]
-class ReviewRoute extends PageRouteInfo<void> {
-  const ReviewRoute({List<PageRouteInfo>? children})
-    : super(ReviewRoute.name, initialChildren: children);
-
-  static const String name = 'ReviewRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const ReviewScreen();
-    },
-  );
-}
-
-/// generated route for
-/// [SearchResultScreen]
-class SearchResultRoute extends PageRouteInfo<void> {
-  const SearchResultRoute({List<PageRouteInfo>? children})
-    : super(SearchResultRoute.name, initialChildren: children);
-
-  static const String name = 'SearchResultRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const SearchResultScreen();
-    },
-  );
-}
-
-/// generated route for
 /// [SearchScreen]
 class SearchRoute extends PageRouteInfo<void> {
   const SearchRoute({List<PageRouteInfo>? children})
@@ -773,22 +516,6 @@ class SearchRoute extends PageRouteInfo<void> {
     name,
     builder: (data) {
       return const SearchScreen();
-    },
-  );
-}
-
-/// generated route for
-/// [SettingsScreen]
-class SettingsRoute extends PageRouteInfo<void> {
-  const SettingsRoute({List<PageRouteInfo>? children})
-    : super(SettingsRoute.name, initialChildren: children);
-
-  static const String name = 'SettingsRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const SettingsScreen();
     },
   );
 }
@@ -826,22 +553,6 @@ class StartRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [StoryScreen]
-class StoryRoute extends PageRouteInfo<void> {
-  const StoryRoute({List<PageRouteInfo>? children})
-    : super(StoryRoute.name, initialChildren: children);
-
-  static const String name = 'StoryRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const StoryScreen();
-    },
-  );
-}
-
-/// generated route for
 /// [SupplierManagementScreen]
 class SupplierManagementRoute extends PageRouteInfo<void> {
   const SupplierManagementRoute({List<PageRouteInfo>? children})
@@ -855,50 +566,4 @@ class SupplierManagementRoute extends PageRouteInfo<void> {
       return const SupplierManagementScreen();
     },
   );
-}
-
-/// generated route for
-/// [WishlistScreen]
-class WishlistRoute extends PageRouteInfo<WishlistRouteArgs> {
-  WishlistRoute({Key? key, bool isEmpty = false, List<PageRouteInfo>? children})
-    : super(
-        WishlistRoute.name,
-        args: WishlistRouteArgs(key: key, isEmpty: isEmpty),
-        initialChildren: children,
-      );
-
-  static const String name = 'WishlistRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      final args = data.argsAs<WishlistRouteArgs>(
-        orElse: () => const WishlistRouteArgs(),
-      );
-      return WishlistScreen(key: args.key, isEmpty: args.isEmpty);
-    },
-  );
-}
-
-class WishlistRouteArgs {
-  const WishlistRouteArgs({this.key, this.isEmpty = false});
-
-  final Key? key;
-
-  final bool isEmpty;
-
-  @override
-  String toString() {
-    return 'WishlistRouteArgs{key: $key, isEmpty: $isEmpty}';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! WishlistRouteArgs) return false;
-    return key == other.key && isEmpty == other.isEmpty;
-  }
-
-  @override
-  int get hashCode => key.hashCode ^ isEmpty.hashCode;
 }
