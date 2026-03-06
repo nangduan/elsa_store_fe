@@ -33,7 +33,7 @@ class PaymentScreen extends StatefulWidget {
   final double? amount;
   final int? productVariantId;
   final List<CartItemResponse>? cartItems;
-  final Future<int> Function()? onPaymentSuccess;
+  final Future<int> Function(int paymentMethod)? onPaymentSuccess;
 
   @override
   State<PaymentScreen> createState() => _PaymentScreenState();
@@ -58,7 +58,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     final displayName = widget.productName ?? 'Sản phẩm';
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Thanh toán')),
+      appBar: AppBar(title: const Text('Đặt hàng')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -185,7 +185,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
             height: 48,
             child: ElevatedButton(
               onPressed: _isProcessing ? null : _handlePay,
-              child: Text(_isProcessing ? 'Đang xử lý...' : 'Thanh toán'),
+              child: Text(_isProcessing ? 'Đang xử lý...' : 'Đặt hàng'),
             ),
           ),
         ],
@@ -279,7 +279,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   Future<int?> _createOrderId() async {
-    final orderId = await widget.onPaymentSuccess?.call();
+    final paymentMethod = _method == PaymentMethod.cod ? 0 : 1;
+    final orderId = await widget.onPaymentSuccess?.call(paymentMethod);
     if (orderId == null || orderId <= 0) {
       _showSnackBar('Tao don hang that bai');
       return null;

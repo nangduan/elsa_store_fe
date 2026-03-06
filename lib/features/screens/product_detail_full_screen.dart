@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_skeleton/core/constants/format.dart';
 import 'package:flutter_skeleton/features/product/data/models/response/product_variant_response.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:injectable/injectable.dart';
 import '../../core/navigation/app_routes.dart';
 import '../../core/storage/flutter_store_core.dart';
 import '../orders/data/models/request/create_order_item_request.dart';
@@ -532,14 +531,14 @@ class _ProductDetailFullScreenState extends State<ProductDetailFullScreen> {
                       amount: amount,
                       imageUrl: imageUrl,
                       productVariantId: _selectedVariant!.id,
-                      onPaymentSuccess: () async {
+                      onPaymentSuccess: (paymentMethod) async {
                         final orderId = await getIt<CreateOrderUseCase>()
                             .call(userId, [
                               CreateOrderItemRequest(
                                 productVariantId: _selectedVariant!.id ?? 0,
                                 quantity: 1,
                               ),
-                            ])
+                            ], paymentMethod: paymentMethod)
                             .then((value) {
                               if (value == null) {
                                 ScaffoldMessenger.of(context).showSnackBar(

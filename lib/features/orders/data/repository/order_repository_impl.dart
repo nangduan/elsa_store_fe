@@ -53,10 +53,15 @@ class OrderRepositoryImpl implements OrderRepository {
   Future<OrderResponse?> createOrder(
     int userId,
     List<CreateOrderItemRequest> items,
+    int paymentMethod,
   ) async {
     try {
       final apiResp = await apiService.createOrder(
-        CreateOrderRequest(userId: userId, items: items),
+        CreateOrderRequest(
+          userId: userId,
+          items: items,
+          paymentMethod: paymentMethod,
+        ),
       );
       final data = apiResp.data;
       if (data is Map<String, dynamic>) {

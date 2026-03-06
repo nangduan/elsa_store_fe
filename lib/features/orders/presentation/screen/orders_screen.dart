@@ -284,27 +284,27 @@ class _OrderCardState extends State<_OrderCard> {
   }
 
   String _paymentStatusLabel(OrderResponse order) {
-    if (_isCod(order)) {
-      return 'Chưa thanh toán';
+    final status = _normalize(order.paymentStatus);
+    if (_isCod(order) || _matches(status, const ['CHUA_THANH_TOAN'])) {
+      return 'Thanh toan khi nhan hang';
     }
 
-    final status = _normalize(order.paymentStatus);
-    if (status.isEmpty) return 'Chờ thanh toán';
+    if (status.isEmpty) return 'Cho thanh toan';
     if (_matches(status, const ['DA_THANH_TOAN', 'PAID', 'SUCCESS'])) {
-      return 'Đã thanh toán';
+      return 'Da thanh toan';
     }
     if (_matches(status, const ['CHO_THANH_TOAN', 'PENDING', 'UNPAID'])) {
-      return 'Chờ thanh toán';
+      return 'Cho thanh toan';
     }
     if (_matches(status, const ['THAT_BAI', 'FAILED', 'CANCELLED'])) {
-      return 'Thanh toán thất bại';
+      return 'Thanh toan that bai';
     }
-    return 'Không rõ';
+    return 'Khong ro';
   }
 
   Color _paymentStatusColor(OrderResponse order) {
     final status = _normalize(order.paymentStatus);
-    if (_isCod(order)) {
+    if (_isCod(order) || _matches(status, const ['CHUA_THANH_TOAN'])) {
       return Colors.orange.shade50;
     }
     if (_matches(status, const ['DA_THANH_TOAN', 'PAID', 'SUCCESS'])) {
@@ -348,7 +348,7 @@ class _OrderCardState extends State<_OrderCard> {
 
   Color _paymentStatusTextColor(OrderResponse order) {
     final status = _normalize(order.paymentStatus);
-    if (_isCod(order)) {
+    if (_isCod(order) || _matches(status, const ['CHUA_THANH_TOAN'])) {
       return Colors.orange.shade700;
     }
     if (_matches(status, const ['DA_THANH_TOAN', 'PAID', 'SUCCESS'])) {
@@ -624,7 +624,7 @@ class _OrderCardState extends State<_OrderCard> {
 
   bool _isCod(OrderResponse order) {
     final method = _normalize(order.paymentMethod);
-    if (method == 'COD' || method == 'CASH_ON_DELIVERY') {
+    if (method == 'COD' || method == 'CASH_ON_DELIVERY' || method == '0') {
       return true;
     }
     final statusEmpty =

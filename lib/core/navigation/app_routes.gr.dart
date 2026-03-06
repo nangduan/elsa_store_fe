@@ -196,7 +196,7 @@ class PaymentRoute extends PageRouteInfo<PaymentRouteArgs> {
     double? amount,
     int? productVariantId,
     List<CartItemResponse>? cartItems,
-    Future<int> Function()? onPaymentSuccess,
+    Future<int> Function(int paymentMethod)? onPaymentSuccess,
     List<PageRouteInfo>? children,
   }) : super(
          PaymentRoute.name,
@@ -256,7 +256,7 @@ class PaymentRouteArgs {
 
   final List<CartItemResponse>? cartItems;
 
-  final Future<int> Function()? onPaymentSuccess;
+  final Future<int> Function(int paymentMethod)? onPaymentSuccess;
 
   @override
   String toString() {

@@ -300,7 +300,8 @@ class CartScreen extends StatelessWidget {
         imageUrl: item.imageUrl,
         amount: amount,
         cartItems: [item],
-        onPaymentSuccess: () => _createOrderForCartItems(context, [item]),
+        onPaymentSuccess: (paymentMethod) =>
+            _createOrderForCartItems(context, [item], paymentMethod),
       ),
     );
   }
@@ -398,7 +399,8 @@ class CartScreen extends StatelessWidget {
         productName: 'Thanh toan gio hang',
         amount: total,
         cartItems: items,
-        onPaymentSuccess: () => _createOrderForCartItems(context, items),
+        onPaymentSuccess: (paymentMethod) =>
+            _createOrderForCartItems(context, items, paymentMethod),
       ),
     );
   }
@@ -406,6 +408,7 @@ class CartScreen extends StatelessWidget {
   Future<int> _createOrderForCartItems(
     BuildContext context,
     List<CartItemResponse> items,
+    int paymentMethod,
   ) async {
     if (items.isEmpty) {
       _showSnackBar(context, 'Gio hang dang trong', isError: true);
@@ -431,7 +434,11 @@ class CartScreen extends StatelessWidget {
       );
     }
 
-    final order = await getIt<CreateOrderUseCase>().call(userId, orderItems);
+    final order = await getIt<CreateOrderUseCase>().call(
+      userId,
+      orderItems,
+      paymentMethod: paymentMethod,
+    );
     final orderId = order?.id;
     if (orderId == null || orderId <= 0) {
       _showSnackBar(context, 'Tao don hang that bai', isError: true);

@@ -7,6 +7,7 @@ abstract class OrderRepository {
   Future<OrderResponse?> createOrder(
     int userId,
     List<CreateOrderItemRequest> items,
+    int paymentMethod,
   );
   Future<OrderResponse?> updateOrderStatus(int orderId, String status);
   Future<OrderResponse?> updatePaymentStatus(int orderId, String paymentStatus);

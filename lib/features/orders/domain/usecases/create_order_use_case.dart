@@ -10,7 +10,11 @@ class CreateOrderUseCase {
 
   CreateOrderUseCase(this._repository);
 
-  Future<OrderResponse?> call(int userId, List<CreateOrderItemRequest> items) {
-    return _repository.createOrder(userId, items);
+  Future<OrderResponse?> call(
+    int userId,
+    List<CreateOrderItemRequest> items, {
+    int paymentMethod = 0,
+  }) {
+    return _repository.createOrder(userId, items, paymentMethod);
   }
 }
