@@ -101,7 +101,7 @@ class OrdersScreen extends StatelessWidget {
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (_, index) {
                   final order = orders[index];
-                  return _OrderCard(order: order);
+                  return _OrderCard(order: order, isAdmin: state.isAdmin);
                 },
               ),
             );
@@ -114,8 +114,9 @@ class OrdersScreen extends StatelessWidget {
 
 class _OrderCard extends StatefulWidget {
   final OrderResponse order;
+  final bool isAdmin;
 
-  const _OrderCard({required this.order});
+  const _OrderCard({required this.order, required this.isAdmin});
 
   @override
   State<_OrderCard> createState() => _OrderCardState();
@@ -398,25 +399,27 @@ class _OrderCardState extends State<_OrderCard> {
           child: const Text('Hủy'),
         ),
       );
-      actions.add(
-        ElevatedButton(
-          onPressed: () async {
-            final confirmed = await _confirmDialog(
-              context,
-              'Xác nhận đơn hàng?',
-              'Xác nhận đơn hàng này?',
-            );
-            if (!confirmed) return;
-            await _handleUpdateStatus(
-              context,
-              orderId,
-              'DA_XAC_NHAN',
-              successMessage: 'Đã xác nhận đơn hàng',
-            );
-          },
-          child: const Text('Xác nhận'),
-        ),
-      );
+      if (widget.isAdmin) {
+        actions.add(
+          ElevatedButton(
+            onPressed: () async {
+              final confirmed = await _confirmDialog(
+                context,
+                'Xác nhận đơn hàng?',
+                'Xác nhận đơn hàng này?',
+              );
+              if (!confirmed) return;
+              await _handleUpdateStatus(
+                context,
+                orderId,
+                'DA_XAC_NHAN',
+                successMessage: 'Đã xác nhận đơn hàng',
+              );
+            },
+            child: const Text('Xác nhận'),
+          ),
+        );
+      }
     }
 
     if (orderId != null && status == 'DA_XAC_NHAN') {

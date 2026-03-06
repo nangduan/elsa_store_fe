@@ -6,13 +6,27 @@ import 'package:flutter_skeleton/core/navigation/app_routes.dart';
 import 'package:flutter_skeleton/features/auth/domain/repositories/auth_repository.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/api/dio_client.dart';
 import '../../../../core/constants/format.dart';
 import '../../../revenues/domain/entities/revenue_group_by.dart';
 import '../../../revenues/presentation/cubit/revenue_cubit.dart';
 
 @RoutePage()
-class AdminScreen extends StatelessWidget {
+class AdminScreen extends StatefulWidget {
   const AdminScreen({super.key});
+
+  @override
+  State<AdminScreen> createState() => _AdminScreenState();
+}
+
+class _AdminScreenState extends State<AdminScreen> {
+  late final Future<DashboardOverview?> _dashboardFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _dashboardFuture = _loadDashboardOverview();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +80,12 @@ class AdminScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                  _buildStatsGrid(),
+                  FutureBuilder<DashboardOverview?>(
+                    future: _dashboardFuture,
+                    builder: (context, snapshot) {
+                      return _buildStatsGrid(snapshot.data);
+                    },
+                  ),
                   const SizedBox(height: 32),
                   const Text(
                     'Phân tích doanh thu 30 ngày gần nhất',
@@ -131,7 +150,7 @@ class AdminScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatsGrid() {
+  Widget _buildStatsGrid(DashboardOverview? overview) {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -140,15 +159,30 @@ class AdminScreen extends StatelessWidget {
       mainAxisSpacing: 15,
       childAspectRatio: 1.5,
       children: [
-        _statCard('Doanh số hôm nay', '312', Icons.calendar_month, Colors.blue),
+        _statCard(
+          'Doanh số hôm nay',
+          Format.formatCurrency(overview?.todayRevenue),
+          Icons.calendar_month,
+          Colors.blue,
+        ),
         _statCard(
           'Doanh số tháng này',
-          '1,284',
+          Format.formatCurrency(overview?.monthRevenue),
           Icons.view_week,
           Colors.orange,
         ),
-        _statCard('Đang xử lý', '45', Icons.autorenew, Colors.purple),
-        _statCard('Đã hoàn thành', '2,100', Icons.check_circle, Colors.green),
+        _statCard(
+          'Đang xử lý',
+          '${overview?.processingOrders ?? 0}',
+          Icons.autorenew,
+          Colors.purple,
+        ),
+        _statCard(
+          'Đã hoàn thành',
+          '${overview?.completedOrders ?? 0}',
+          Icons.check_circle,
+          Colors.green,
+        ),
       ],
     );
   }
@@ -350,6 +384,22 @@ class AdminScreen extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) => DateFormat('yyyy-MM-dd').format(date);
+
+  Future<DashboardOverview?> _loadDashboardOverview() async {
+    try {
+      final response = await getIt<DioClient>().get('/revenues/dashboard');
+      final body = response.data;
+      if (body is Map<String, dynamic>) {
+        final data = body['data'];
+        if (data is Map<String, dynamic>) {
+          return DashboardOverview.fromJson(data);
+        }
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
 
   Widget _buildNavigationGrid(BuildContext context) {
     return GridView.count(
@@ -581,4 +631,27 @@ class _AxisLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       Text(text, style: const TextStyle(fontSize: 10, color: Colors.grey));
+}
+
+class DashboardOverview {
+  final double? todayRevenue;
+  final double? monthRevenue;
+  final int? processingOrders;
+  final int? completedOrders;
+
+  const DashboardOverview({
+    this.todayRevenue,
+    this.monthRevenue,
+    this.processingOrders,
+    this.completedOrders,
+  });
+
+  factory DashboardOverview.fromJson(Map<String, dynamic> json) {
+    return DashboardOverview(
+      todayRevenue: (json['todayRevenue'] as num?)?.toDouble(),
+      monthRevenue: (json['monthRevenue'] as num?)?.toDouble(),
+      processingOrders: json['processingOrders'] as int?,
+      completedOrders: json['completedOrders'] as int?,
+    );
+  }
 }

@@ -17,12 +17,14 @@ class OrderState {
   final OrderStatus status;
   final List<OrderResponse> orders;
   final OrderResponse? lastOrder;
+  final bool isAdmin;
   final String? errorMessage;
 
   const OrderState({
     this.status = OrderStatus.initial,
     this.orders = const [],
     this.lastOrder,
+    this.isAdmin = false,
     this.errorMessage,
   });
 
@@ -30,12 +32,14 @@ class OrderState {
     OrderStatus? status,
     List<OrderResponse>? orders,
     OrderResponse? lastOrder,
+    bool? isAdmin,
     String? errorMessage,
   }) {
     return OrderState(
       status: status ?? this.status,
       orders: orders ?? this.orders,
       lastOrder: lastOrder ?? this.lastOrder,
+      isAdmin: isAdmin ?? this.isAdmin,
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
@@ -69,10 +73,20 @@ class OrderCubit extends Cubit<OrderState> {
     try {
       final sortedOrders = List<OrderResponse>.from(orders)
         ..sort(_compareOrderDateDesc);
-      emit(state.copyWith(status: OrderStatus.success, orders: sortedOrders));
+      emit(
+        state.copyWith(
+          status: OrderStatus.success,
+          orders: sortedOrders,
+          isAdmin: role.isAdmin,
+        ),
+      );
     } on AppException catch (e) {
       emit(
-        state.copyWith(status: OrderStatus.failure, errorMessage: e.message),
+        state.copyWith(
+          status: OrderStatus.failure,
+          errorMessage: e.message,
+          isAdmin: role.isAdmin,
+        ),
       );
     }
   }
