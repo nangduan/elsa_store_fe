@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_skeleton/features/widgets/text_field_widget.dart';
 
 import '../../../../core/di/injector.dart';
 import '../../../../core/navigation/app_routes.dart';
@@ -27,6 +26,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   bool _isPasswordVisible = false;
 
+  final Color _primaryColor = const Color(0xFFE85022);
+  final Color _inputFillColor = const Color(0xFFF5F5F5);
+
   @override
   void dispose() {
     _usernameController.dispose();
@@ -35,6 +37,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _phoneController.dispose();
     _fullNameController.dispose();
     super.dispose();
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    bool isObscure = false,
+    Widget? suffixIcon,
+  }) {
+    return TextFormField(
+      controller: controller,
+      obscureText: isObscure,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Vui lòng nhập $hint';
+        }
+        return null;
+      },
+      style: const TextStyle(fontSize: 15),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: const TextStyle(color: Colors.black38, fontSize: 15),
+        prefixIcon: Icon(icon, color: Colors.black45, size: 22),
+        suffixIcon: suffixIcon,
+        filled: true,
+        fillColor: _inputFillColor,
+        contentPadding: const EdgeInsets.symmetric(vertical: 18),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
   }
 
   @override
@@ -62,194 +97,235 @@ class _RegisterScreenState extends State<RegisterScreen> {
             }
           },
           builder: (context, state) {
-            return SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 50),
-                      const Text(
-                        'Create\nAccount',
-                        style: TextStyle(
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold,
-                          height: 1.1,
-                          letterSpacing: -1,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Create an account to access all features.',
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-
-                      // Avatar placeholder với phong cách thời trang
-                      Center(
-                        child: Stack(
-                          children: [
-                            CircleAvatar(
-                              radius: 50,
-                              backgroundColor: Colors.grey.shade50,
-                              child: Icon(
-                                Icons.person_outline,
-                                size: 40,
-                                color: Colors.grey.shade300,
+            return Stack(
+              children: [
+                Positioned(
+                  top: -80,
+                  right: -50,
+                  child: Container(
+                    width: 300,
+                    height: 300,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xFFEAF1F8),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 120,
+                  left: -80,
+                  child: Container(
+                    width: 200,
+                    height: 200,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xFFF4F8FC),
+                    ),
+                  ),
+                ),
+                SafeArea(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 10),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: IconButton(
+                              padding: EdgeInsets.zero,
+                              alignment: Alignment.centerLeft,
+                              icon: Icon(
+                                Icons.arrow_back_ios,
+                                color: _primaryColor,
+                                size: 24,
                               ),
-                            ),
-                            Positioned(
-                              bottom: 0,
-                              right: 0,
-                              child: CircleAvatar(
-                                radius: 18,
-                                backgroundColor: Colors.black,
-                                child: const Icon(
-                                  Icons.camera_alt,
-                                  size: 14,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 40),
-
-                      TextFieldWidget(
-                        controller: _usernameController,
-                        hint: 'Username',
-                        icon: Icons.person_outline,
-                      ),
-                      const SizedBox(height: 16),
-
-                      TextFieldWidget(
-                        controller: _fullNameController,
-                        hint: 'Full Name',
-                        icon: Icons.badge_outlined,
-                      ),
-                      const SizedBox(height: 16),
-
-                      TextFieldWidget(
-                        controller: _emailController,
-                        hint: 'Địa chỉ email',
-                        icon: Icons.email_outlined,
-                      ),
-                      const SizedBox(height: 16),
-
-                      TextFieldWidget(
-                        controller: _phoneController,
-                        hint: 'Số điện thoại',
-                        icon: Icons.phone_android_outlined,
-                      ),
-                      const SizedBox(height: 16),
-
-                      TextFieldWidget(
-                        controller: _passwordController,
-                        hint: 'Mật khẩu',
-                        icon: Icons.lock_outline,
-                        isObscure: !_isPasswordVisible,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _isPasswordVisible
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                            color: Colors.grey,
-                            size: 20,
-                          ),
-                          onPressed: () => setState(
-                            () => _isPasswordVisible = !_isPasswordVisible,
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 40),
-
-                      // Nút Register với Loading state đồng nhất với Login
-                      SizedBox(
-                        width: double.infinity,
-                        height: 56,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            elevation: 0,
-                          ),
-                          onPressed: state.status.isLoading
-                              ? null
-                              : () {
-                                  if (_formKey.currentState!.validate()) {
-                                    context.read<RegisterCubit>().register(
-                                      RegisterRequest(
-                                        username: _usernameController.text
-                                            .trim(),
-                                        password: _passwordController.text
-                                            .trim(),
-                                        email: _emailController.text.trim(),
-                                        phone: _phoneController.text.trim(),
-                                        fullName: _fullNameController.text
-                                            .trim(),
-                                      ),
-                                    );
-                                  }
-                                },
-                          child: state.status.isLoading
-                              ? const SizedBox(
-                                  height: 24,
-                                  width: 24,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Text(
-                                  'CREATE ACCOUNT',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 1,
-                                  ),
-                                ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Đã có tài khoản?",
-                              style: TextStyle(color: Colors.grey.shade600),
-                            ),
-                            TextButton(
                               onPressed: () {
-                                context.router.push(LoginRoute());
+                                context.router.back();
                               },
-                              child: const Text(
-                                'Đăng nhập',
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Text(
+                            'Tạo tài khoản',
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: _primaryColor,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Điền thông tin để bắt đầu trải nghiệm',
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 15,
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                          Center(
+                            child: Stack(
+                              children: [
+                                Container(
+                                  width: 100,
+                                  height: 100,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Color(0xFFF5F5F5),
+                                  ),
+                                  child: const Icon(
+                                    Icons.person,
+                                    size: 50,
+                                    color: Colors.black26,
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: _primaryColor,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    child: const Icon(
+                                      Icons.camera_alt,
+                                      size: 16,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                          _buildTextField(
+                            controller: _usernameController,
+                            hint: 'Tên đăng nhập',
+                            icon: Icons.person_outline,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildTextField(
+                            controller: _fullNameController,
+                            hint: 'Họ và tên',
+                            icon: Icons.badge_outlined,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildTextField(
+                            controller: _emailController,
+                            hint: 'Email',
+                            icon: Icons.email_outlined,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildTextField(
+                            controller: _phoneController,
+                            hint: 'Số điện thoại',
+                            icon: Icons.phone_android_outlined,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildTextField(
+                            controller: _passwordController,
+                            hint: 'Mật khẩu',
+                            icon: Icons.lock_outline,
+                            isObscure: !_isPasswordVisible,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isPasswordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: Colors.black45,
+                                size: 22,
+                              ),
+                              onPressed: () => setState(
+                                    () => _isPasswordVisible = !_isPasswordVisible,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 40),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 56,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _primaryColor,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(28),
+                                ),
+                                elevation: 0,
+                              ),
+                              onPressed: state.status.isLoading
+                                  ? null
+                                  : () {
+                                if (_formKey.currentState!.validate()) {
+                                  context.read<RegisterCubit>().register(
+                                    RegisterRequest(
+                                      username: _usernameController.text.trim(),
+                                      password: _passwordController.text.trim(),
+                                      email: _emailController.text.trim(),
+                                      phone: _phoneController.text.trim(),
+                                      fullName: _fullNameController.text.trim(),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: state.status.isLoading
+                                  ? const SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                                  : const Text(
+                                'ĐĂNG KÝ',
                                 style: TextStyle(
-                                  color: Colors.black,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(height: 24),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                "Đã có tài khoản? ",
+                                style: TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  context.router.push(const LoginRoute());
+                                },
+                                child: const Text(
+                                  'Đăng nhập ngay',
+                                  style: TextStyle(
+                                    color: Color(0xFF1964D4),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 30),
+                        ],
                       ),
-
-                      const SizedBox(height: 20),
-                    ],
+                    ),
                   ),
                 ),
-              ),
+              ],
             );
           },
         ),

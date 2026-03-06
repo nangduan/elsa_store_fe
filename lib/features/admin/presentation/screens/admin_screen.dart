@@ -22,6 +22,10 @@ class AdminScreen extends StatefulWidget {
 class _AdminScreenState extends State<AdminScreen> {
   late final Future<DashboardOverview?> _dashboardFuture;
 
+  final Color _primaryBlue = const Color(0xFF1964D4);
+  final Color _primaryOrange = const Color(0xFFE85022);
+  final Color _bgColor = const Color(0xFFFAFAFA);
+
   @override
   void initState() {
     super.initState();
@@ -32,29 +36,27 @@ class _AdminScreenState extends State<AdminScreen> {
   Widget build(BuildContext context) {
     final range = _defaultRange();
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: _bgColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: _bgColor,
         elevation: 0,
         centerTitle: false,
-        title: const Text(
-          'Quản lý cửa hàng',
+        title: Text(
+          'QUẢN LÝ CỬA HÀNG',
           style: TextStyle(
-            color: Colors.black,
+            color: _primaryBlue,
             fontWeight: FontWeight.w900,
-            letterSpacing: 1.5,
+            fontSize: 20,
+            letterSpacing: 0.5,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings_outlined, color: Colors.black),
-            onPressed: () {
-              // TODO: Navigate to Settings
-            },
+            icon: const Icon(Icons.notifications_none, color: Colors.black54),
+            onPressed: () {},
           ),
           IconButton(
-            tooltip: 'Đăng xuất',
-            icon: const Icon(Icons.logout, color: Colors.red),
+            icon: const Icon(Icons.logout, color: Color(0xFFE85022)),
             onPressed: () => _showLogoutDialog(context),
           ),
           const SizedBox(width: 8),
@@ -71,13 +73,13 @@ class _AdminScreenState extends State<AdminScreen> {
         child: BlocBuilder<RevenueCubit, RevenueState>(
           builder: (context, state) {
             return SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Tổng quan',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    'Tổng Quan',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
                   ),
                   const SizedBox(height: 16),
                   FutureBuilder<DashboardOverview?>(
@@ -88,22 +90,17 @@ class _AdminScreenState extends State<AdminScreen> {
                   ),
                   const SizedBox(height: 32),
                   const Text(
-                    'Phân tích doanh thu 30 ngày gần nhất',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    'Phân tích doanh thu (30 ngày)',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
                   ),
                   const SizedBox(height: 16),
                   _buildRevenueChart(context, state, range),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Doanh thu từng tháng',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 32),
                   _buildMonthlyRevenueChart(context),
                   const SizedBox(height: 32),
                   const Text(
-                    'Quản lý',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    'Quản lý cửa hàng',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
                   ),
                   const SizedBox(height: 16),
                   _buildNavigationGrid(context),
@@ -122,23 +119,23 @@ class _AdminScreenState extends State<AdminScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Đăng xuất'),
-        content: const Text('Bạn có chắc chắn muốn đăng xuát?'),
+        content: const Text('Bạn có chắc chắn muốn đăng xuất?'),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Huy', style: TextStyle(color: Colors.grey)),
+            child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
           ),
           TextButton(
             onPressed: () {
               getIt<AuthRepository>()
                   .logout(
-                    onSuccess: () =>
-                        context.router.replaceAll([const LoginRoute()]),
-                  )
+                onSuccess: () =>
+                    context.router.replaceAll([const LoginRoute()]),
+              )
                   .onError((error, stackTrace) {
-                    Navigator.pop(context);
-                  });
+                Navigator.pop(context);
+              });
             },
             child: const Text(
               'Đồng ý',
@@ -155,64 +152,98 @@ class _AdminScreenState extends State<AdminScreen> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: 2,
-      crossAxisSpacing: 15,
-      mainAxisSpacing: 15,
-      childAspectRatio: 1.5,
+      crossAxisSpacing: 16,
+      mainAxisSpacing: 16,
+      childAspectRatio: 1.3,
       children: [
         _statCard(
-          'Doanh số hôm nay',
+          'Hôm nay',
           Format.formatCurrency(overview?.todayRevenue),
-          Icons.calendar_month,
-          Colors.blue,
+          Icons.calendar_today,
+          Colors.white,
+          _primaryBlue,
+          isSolidBlue: true,
         ),
         _statCard(
-          'Doanh số tháng này',
+          'Tháng này',
           Format.formatCurrency(overview?.monthRevenue),
-          Icons.view_week,
-          Colors.orange,
+          Icons.calendar_month,
+          _primaryBlue,
+          Colors.white,
         ),
         _statCard(
           'Đang xử lý',
           '${overview?.processingOrders ?? 0}',
-          Icons.autorenew,
-          Colors.purple,
+          Icons.pending_actions,
+          _primaryOrange,
+          Colors.white,
         ),
         _statCard(
-          'Đã hoàn thành',
+          'Hoàn thành',
           '${overview?.completedOrders ?? 0}',
-          Icons.check_circle,
+          Icons.check_circle_outline,
           Colors.green,
+          Colors.white,
         ),
       ],
     );
   }
 
-  Widget _statCard(String title, String value, IconData icon, Color color) {
+  Widget _statCard(
+      String title,
+      String value,
+      IconData icon,
+      Color iconColor,
+      Color bgColor, {
+        bool isSolidBlue = false,
+      }) {
+    final textColor = isSolidBlue ? Colors.white : Colors.black87;
+    final subtitleColor = isSolidBlue ? Colors.white70 : Colors.black54;
+    final iconBgColor = isSolidBlue ? Colors.white.withOpacity(0.2) : iconColor.withOpacity(0.1);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.1)),
+        color: bgColor,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          if (!isSolidBlue)
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Icon(icon, color: color, size: 20),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: iconBgColor,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: isSolidBlue ? Colors.white : iconColor, size: 20),
+          ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 value,
-                style: const TextStyle(
-                  fontSize: 20,
+                style: TextStyle(
+                  fontSize: 22,
                   fontWeight: FontWeight.bold,
+                  color: textColor,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
+              const SizedBox(height: 4),
               Text(
                 title,
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                style: TextStyle(color: subtitleColor, fontSize: 13),
               ),
             ],
           ),
@@ -222,10 +253,10 @@ class _AdminScreenState extends State<AdminScreen> {
   }
 
   Widget _buildRevenueChart(
-    BuildContext context,
-    RevenueState state,
-    DateTimeRange range,
-  ) {
+      BuildContext context,
+      RevenueState state,
+      DateTimeRange range,
+      ) {
     if (state.status == RevenueStatus.loading && state.timeseries == null) {
       return _buildRevenueContainer(
         child: const Center(child: CircularProgressIndicator()),
@@ -264,28 +295,50 @@ class _AdminScreenState extends State<AdminScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Hiệu suất bán hàng',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEAF1F8),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.bar_chart, color: _primaryBlue, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Hiệu suất',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                ],
               ),
               IconButton(
                 onPressed: () => _reloadRevenue(context, range),
-                icon: const Icon(Icons.refresh, size: 18),
+                icon: const Icon(Icons.refresh, size: 20, color: Colors.black54),
               ),
             ],
           ),
+          const SizedBox(height: 16),
           Row(
             children: [
-              _statChip('Tổng', Format.formatCurrency(summary?.netRevenue)),
-              const SizedBox(width: 8),
-              _statChip('Đơn', (summary?.ordersCount ?? 0).toString()),
+              _statChip(
+                'Doanh thu',
+                Format.formatCurrency(summary?.netRevenue),
+                isBlue: true,
+              ),
+              const SizedBox(width: 12),
+              _statChip(
+                'Đơn hàng',
+                (summary?.ordersCount ?? 0).toString(),
+                isBlue: false,
+              ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           Expanded(
             child: points.isEmpty
                 ? const Center(child: Text('Không có dữ liệu'))
-                : _RevenueBarChart(points: points),
+                : _RevenueBarChart(points: points, barColor: _primaryBlue),
           ),
         ],
       ),
@@ -304,24 +357,40 @@ class _AdminScreenState extends State<AdminScreen> {
         ),
       child: BlocBuilder<RevenueCubit, RevenueState>(
         builder: (context, state) {
-          return _buildRevenueContainer(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Biểu đồ theo tháng',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Doanh thu từng tháng',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+              ),
+              const SizedBox(height: 16),
+              _buildRevenueContainer(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_today, color: _primaryOrange, size: 20),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Biểu đồ năm nay',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    Expanded(
+                      child: state.status == RevenueStatus.loading
+                          ? const Center(child: CircularProgressIndicator())
+                          : (state.timeseries?.points.isEmpty ?? true)
+                          ? const Center(child: Text('Không có dữ liệu'))
+                          : _RevenueBarChart(points: state.timeseries!.points, barColor: _primaryOrange),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: state.status == RevenueStatus.loading
-                      ? const Center(child: CircularProgressIndicator())
-                      : (state.timeseries?.points.isEmpty ?? true)
-                      ? const Center(child: Text('Không có dữ liệu'))
-                      : _RevenueBarChart(points: state.timeseries!.points),
-                ),
-              ],
-            ),
+              ),
+            ],
           );
         },
       ),
@@ -330,29 +399,46 @@ class _AdminScreenState extends State<AdminScreen> {
 
   Widget _buildRevenueContainer({required Widget child}) {
     return Container(
-      height: 280,
+      height: 320,
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade100),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: child,
     );
   }
 
-  Widget _statChip(String label, String value) {
+  Widget _statChip(String label, String value, {required bool isBlue}) {
+    final bgColor = isBlue ? const Color(0xFFEAF1F8) : const Color(0xFFFCEAE8);
+    final textColor = isBlue ? _primaryBlue : _primaryOrange;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: bgColor,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade200),
       ),
-      child: Text(
-        '$label: $value',
-        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '$label: ',
+            style: const TextStyle(fontSize: 12, color: Colors.black54),
+          ),
+          Text(
+            value,
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: textColor),
+          ),
+        ],
       ),
     );
   }
@@ -406,57 +492,61 @@ class _AdminScreenState extends State<AdminScreen> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: 2,
-      crossAxisSpacing: 15,
-      mainAxisSpacing: 15,
+      crossAxisSpacing: 16,
+      mainAxisSpacing: 16,
+      childAspectRatio: 1.1,
       children: [
         _navItem(
           context,
           'Nhà cung cấp',
           Icons.local_shipping_outlined,
-          () => context.router.push(const SupplierManagementRoute()),
+          _primaryBlue,
+          const Color(0xFFEAF1F8),
+              () => context.router.push(const SupplierManagementRoute()),
         ),
         _navItem(
           context,
           'Danh mục',
           Icons.category_outlined,
-          () => context.router.push(const CategoryManagementRoute()),
+          _primaryBlue,
+          const Color(0xFFEAF1F8),
+              () => context.router.push(const CategoryManagementRoute()),
         ),
         _navItem(
           context,
           'Sản phẩm',
           Icons.inventory_2_outlined,
-          () => context.router.push(const ProductManagementRoute()),
+          _primaryBlue,
+          const Color(0xFFEAF1F8),
+              () => context.router.push(const ProductManagementRoute()),
         ),
         _navItem(
           context,
           'Khuyến mãi',
-          Icons.confirmation_number_outlined,
-          () => context.router.push(const PromotionManagementRoute()),
-        ),
-        _navItem(
-          context,
-          'Đơn hàng',
-          Icons.receipt_long_outlined,
-          () => context.router.push(const OrdersRoute()),
+          Icons.local_offer_outlined,
+          _primaryOrange,
+          const Color(0xFFFCEAE8),
+              () => context.router.push(const PromotionManagementRoute()),
         ),
       ],
     );
   }
 
   Widget _navItem(
-    BuildContext context,
-    String title,
-    IconData icon,
-    VoidCallback onTap,
-  ) {
+      BuildContext context,
+      String title,
+      IconData icon,
+      Color iconColor,
+      Color iconBgColor,
+      VoidCallback onTap,
+      ) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(24),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.grey.shade200),
+          borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.02),
@@ -468,15 +558,18 @@ class _AdminScreenState extends State<AdminScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircleAvatar(
-              backgroundColor: Colors.black,
-              radius: 24,
-              child: Icon(icon, color: Colors.white, size: 24),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: iconBgColor,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: iconColor, size: 28),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Text(
               title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87),
             ),
           ],
         ),
@@ -487,8 +580,9 @@ class _AdminScreenState extends State<AdminScreen> {
 
 class _RevenueBarChart extends StatelessWidget {
   final List<dynamic> points;
+  final Color barColor;
 
-  const _RevenueBarChart({required this.points});
+  const _RevenueBarChart({required this.points, required this.barColor});
 
   @override
   Widget build(BuildContext context) {
@@ -502,8 +596,8 @@ class _RevenueBarChart extends StatelessWidget {
     final maxValue = values.isEmpty
         ? 0.0
         : values.reduce((a, b) => a > b ? a : b);
-    const double barWidth = 20.0;
-    const double barGap = 12.0;
+    const double barWidth = 24.0;
+    const double barGap = 16.0;
     const double labelHeight = 30.0;
 
     return LayoutBuilder(
@@ -515,11 +609,11 @@ class _RevenueBarChart extends StatelessWidget {
 
         return Row(
           children: [
-            // Y-Axis
             SizedBox(
               width: 40,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _AxisLabel(_formatAxisValue(maxValue)),
                   _AxisLabel(_formatAxisValue(maxValue / 2)),
@@ -528,7 +622,6 @@ class _RevenueBarChart extends StatelessWidget {
                 ],
               ),
             ),
-            // Chart Content
             Expanded(
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -536,7 +629,6 @@ class _RevenueBarChart extends StatelessWidget {
                   width: scrollWidth,
                   child: Column(
                     children: [
-                      // Bars
                       SizedBox(
                         height: chartHeight,
                         child: Stack(
@@ -545,7 +637,7 @@ class _RevenueBarChart extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: List.generate(
                                 3,
-                                (_) => Container(
+                                    (_) => Container(
                                   height: 1,
                                   color: Colors.grey.shade100,
                                 ),
@@ -557,16 +649,13 @@ class _RevenueBarChart extends StatelessWidget {
                                 children: List.generate(values.length, (index) {
                                   final barHeight = maxValue == 0
                                       ? 0.0
-                                      : (values[index] / maxValue) *
-                                            chartHeight;
+                                      : (values[index] / maxValue) * chartHeight;
                                   return Container(
                                     width: barWidth,
                                     height: barHeight.clamp(4.0, chartHeight),
-                                    margin: const EdgeInsets.only(
-                                      right: barGap,
-                                    ),
+                                    margin: const EdgeInsets.only(right: barGap),
                                     decoration: BoxDecoration(
-                                      color: Colors.black,
+                                      color: barColor,
                                       borderRadius: const BorderRadius.vertical(
                                         top: Radius.circular(4),
                                       ),
@@ -578,7 +667,6 @@ class _RevenueBarChart extends StatelessWidget {
                           ],
                         ),
                       ),
-                      // X-Axis Labels
                       SizedBox(
                         height: labelHeight,
                         child: Row(
@@ -590,8 +678,8 @@ class _RevenueBarChart extends StatelessWidget {
                                 child: Text(
                                   _shortDate(labels[index]),
                                   style: const TextStyle(
-                                    fontSize: 9,
-                                    color: Colors.grey,
+                                    fontSize: 10,
+                                    color: Colors.black45,
                                   ),
                                 ),
                               ),
@@ -619,8 +707,8 @@ class _RevenueBarChart extends StatelessWidget {
   String _shortDate(String raw) {
     if (raw.contains('T')) raw = raw.split('T').first;
     final parts = raw.split('-');
-    if (parts.length >= 3) return '${parts[2]}/${parts[1]}'; // dd/MM
-    if (parts.length == 2) return parts[1]; // MM
+    if (parts.length >= 3) return '${parts[2]}/${parts[1]}';
+    if (parts.length == 2) return parts[1];
     return raw;
   }
 }
@@ -630,7 +718,7 @@ class _AxisLabel extends StatelessWidget {
   const _AxisLabel(this.text);
   @override
   Widget build(BuildContext context) =>
-      Text(text, style: const TextStyle(fontSize: 10, color: Colors.grey));
+      Text(text, style: const TextStyle(fontSize: 10, color: Colors.black26));
 }
 
 class DashboardOverview {

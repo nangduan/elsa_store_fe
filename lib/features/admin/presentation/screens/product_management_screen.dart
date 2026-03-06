@@ -19,29 +19,40 @@ import '../cubit/product_cubit.dart';
 class ProductManagementScreen extends StatelessWidget {
   const ProductManagementScreen({super.key});
 
+  final Color _primaryOrange = const Color(0xFFE85022);
+  final Color _inputFillColor = const Color(0xFFF5F5F5);
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
           create: (_) =>
-              ProductCubit(getIt(), getIt(), getIt(), getIt())..load(),
+          ProductCubit(getIt(), getIt(), getIt(), getIt())..load(),
         ),
         BlocProvider(
           create: (_) =>
-              CategoryCubit(getIt(), getIt(), getIt(), getIt())..load(),
+          CategoryCubit(getIt(), getIt(), getIt(), getIt())..load(),
         ),
       ],
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F9FA),
+        backgroundColor: _primaryOrange, // Nền cam theo thiết kế
         body: BlocConsumer<ProductCubit, ProductState>(
           listener: (context, state) {
             if (state.status.isFailure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.errorMessage ?? 'Thao tác thất bại'),
-                  backgroundColor: Colors.redAccent,
+                  backgroundColor: Colors.white,
+                  action: SnackBarAction(
+                    label: 'Đóng',
+                    textColor: _primaryOrange,
+                    onPressed: () {},
+                  ),
                   behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               );
             }
@@ -58,7 +69,7 @@ class ProductManagementScreen extends StatelessWidget {
                 if (state.status.isLoading)
                   const SliverFillRemaining(
                     child: Center(
-                      child: CircularProgressIndicator(color: Colors.black),
+                      child: CircularProgressIndicator(color: Colors.white),
                     ),
                   )
                 else if (state.products.isEmpty)
@@ -71,7 +82,7 @@ class ProductManagementScreen extends StatelessWidget {
                     ),
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate(
-                        (context, index) =>
+                            (context, index) =>
                             _buildProductCard(context, state.products[index]),
                         childCount: state.products.length,
                       ),
@@ -87,11 +98,11 @@ class ProductManagementScreen extends StatelessWidget {
 
   Widget _buildAppBar(BuildContext context) {
     return SliverAppBar(
-      expandedHeight: 120.0,
+      expandedHeight: 70.0, // Rút gọn chiều cao theo thiết kế
       floating: true,
       pinned: true,
       elevation: 0,
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.white, // AppBar trắng
       leading: IconButton(
         icon: const Icon(
           Icons.arrow_back_ios_new,
@@ -100,27 +111,33 @@ class ProductManagementScreen extends StatelessWidget {
         ),
         onPressed: () => context.router.pop(),
       ),
-      flexibleSpace: const FlexibleSpaceBar(
-        titlePadding: EdgeInsetsDirectional.only(start: 56, bottom: 16),
-        title: Text(
-          'SẢN PHẨM',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.w800,
-            fontSize: 16,
-            letterSpacing: 1.5,
-          ),
+      title: const Text(
+        'SẢN PHẨM',
+        style: TextStyle(
+          color: Colors.black,
+          fontWeight: FontWeight.w900,
+          fontSize: 18,
+          letterSpacing: 1.0,
         ),
       ),
+      centerTitle: false,
       actions: [
         Padding(
-          padding: const EdgeInsets.only(right: 16),
-          child: IconButton(
-            onPressed: () {
+          padding: const EdgeInsets.only(right: 20),
+          child: InkWell(
+            onTap: () {
               final categories = context.read<CategoryCubit>().state.categories;
               _showProductDialog(context, categories: categories);
             },
-            icon: const Icon(Icons.add_circle, color: Colors.black, size: 32),
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: const BoxDecoration(
+                color: Colors.black,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.add, color: Colors.white, size: 22),
+            ),
           ),
         ),
       ],
@@ -129,23 +146,20 @@ class ProductManagementScreen extends StatelessWidget {
 
   Widget _buildSearchBar(BuildContext context) {
     return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+      child: Container(
+        color: _primaryOrange,
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
         child: TextField(
           decoration: InputDecoration(
             hintText: 'Tìm kiếm hàng tồn...',
-            hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-            prefixIcon: const Icon(Icons.search_rounded, color: Colors.black54),
+            hintStyle: const TextStyle(color: Colors.black38, fontSize: 15),
+            prefixIcon: const Icon(Icons.search_rounded, color: Colors.black45),
             filled: true,
-            fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(vertical: 0),
+            fillColor: Colors.white, // Input trắng
+            contentPadding: const EdgeInsets.symmetric(vertical: 14),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(30), // Bo tròn hoàn toàn
               borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: Colors.grey.shade100),
             ),
           ),
         ),
@@ -155,15 +169,15 @@ class ProductManagementScreen extends StatelessWidget {
 
   Widget _buildProductCard(BuildContext context, ProductResponse item) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -185,17 +199,18 @@ class ProductManagementScreen extends StatelessWidget {
                 );
               }
             },
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header card (Danh mục + Actions)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
+                          horizontal: 12,
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
@@ -208,6 +223,7 @@ class ProductManagementScreen extends StatelessWidget {
                             color: Colors.white,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
                           ),
                         ),
                       ),
@@ -215,8 +231,9 @@ class ProductManagementScreen extends StatelessWidget {
                         children: [
                           _buildCircleAction(
                             Icons.edit_outlined,
-                            Colors.blueGrey,
-                            () {
+                            const Color(0xFF6B7280),
+                            const Color(0xFFF3F4F6),
+                                () {
                               final categories = context
                                   .read<CategoryCubit>()
                                   .state
@@ -228,67 +245,84 @@ class ProductManagementScreen extends StatelessWidget {
                               );
                             },
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 10),
                           _buildCircleAction(
                             Icons.delete_outline_rounded,
-                            Colors.redAccent,
-                            () => _confirmDelete(context, item),
+                            const Color(0xFFEF4444),
+                            const Color(0xFFFEE2E2),
+                                () => _confirmDelete(context, item),
                           ),
                         ],
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  _buildProductImage(item.imageUrl),
-                  const SizedBox(height: 12),
-                  Text(
-                    item.name ?? '-',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 18,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    item.description ?? 'Chưa có mô tả',
-                    style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    child: Divider(height: 1, thickness: 0.5),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                ),
+
+                // Image
+                _buildProductImage(item.imageUrl),
+
+                // Info
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Text(
+                        item.name ?? '-',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 18,
+                          color: Colors.black87,
+                          height: 1.3,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        item.description ?? 'Sở hữu ngay siêu phẩm chính hãng tại cửa hàng. Uy tín, tận tâm và luôn đảm bảo 100% chất lượng.',
+                        style: const TextStyle(color: Colors.black45, fontSize: 13, height: 1.4),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Divider(height: 1, thickness: 0.5, color: Colors.black12),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text(
-                            'Giá gốc',
-                            style: TextStyle(
-                              color: Colors.grey.shade400,
-                              fontSize: 11,
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Giá gốc',
+                                style: TextStyle(
+                                  color: Colors.black38,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                Format.formatCurrency(item.basePrice),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 20,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
                           ),
-                          Text(
-                            Format.formatCurrency(item.basePrice),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
+                          const Icon(
+                            Icons.arrow_forward_rounded,
+                            color: Colors.black26,
                           ),
                         ],
                       ),
-                      const Icon(
-                        Icons.arrow_forward_rounded,
-                        color: Colors.black26,
-                      ),
                     ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -296,16 +330,16 @@ class ProductManagementScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCircleAction(IconData icon, Color color, VoidCallback onTap) {
+  Widget _buildCircleAction(IconData icon, Color iconColor, Color bgColor, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: bgColor,
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, size: 18, color: color),
+        child: Icon(icon, size: 18, color: iconColor),
       ),
     );
   }
@@ -314,47 +348,38 @@ class ProductManagementScreen extends StatelessWidget {
     final resolved = _resolveImageUrl(imageUrl);
     if (resolved == null) {
       return Container(
-        height: 140,
+        height: 180,
         width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(16),
-        ),
+        color: Colors.white,
         child: const Center(
           child: Icon(
             Icons.image_not_supported_outlined,
-            color: Colors.grey,
-            size: 36,
+            color: Colors.black12,
+            size: 48,
           ),
         ),
       );
     }
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: Image.network(
-        resolved,
-        height: 140,
-        width: double.infinity,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) {
-          return Container(
-            height: 140,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(16),
+    return Image.network(
+      resolved,
+      height: 180,
+      width: double.infinity,
+      fit: BoxFit.contain, // Phù hợp với hiển thị giày trong ảnh thiết kế
+      errorBuilder: (_, __, ___) {
+        return Container(
+          height: 180,
+          width: double.infinity,
+          color: Colors.white,
+          child: const Center(
+            child: Icon(
+              Icons.image_not_supported_outlined,
+              color: Colors.black12,
+              size: 48,
             ),
-            child: const Center(
-              child: Icon(
-                Icons.image_not_supported_outlined,
-                color: Colors.grey,
-                size: 36,
-              ),
-            ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -372,21 +397,22 @@ class ProductManagementScreen extends StatelessWidget {
   }
 
   Widget _buildEmptyState() {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             Icons.inventory_2_outlined,
             size: 80,
-            color: Colors.grey.shade200,
+            color: Colors.white70,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Text(
             'Kho hàng trống',
             style: TextStyle(
-              color: Colors.grey.shade400,
-              fontWeight: FontWeight.w500,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
             ),
           ),
         ],
@@ -395,10 +421,10 @@ class ProductManagementScreen extends StatelessWidget {
   }
 
   void _showProductDialog(
-    BuildContext context, {
-    required List<CategoryResponse> categories,
-    ProductResponse? item,
-  }) {
+      BuildContext context, {
+        required List<CategoryResponse> categories,
+        ProductResponse? item,
+      }) {
     final productCubit = context.read<ProductCubit>();
     final nameController = TextEditingController(text: item?.name ?? '');
     final descriptionController = TextEditingController(
@@ -442,10 +468,16 @@ class ProductManagementScreen extends StatelessWidget {
               children: [
                 Text(
                   item == null ? 'Sản phẩm mới' : 'Chỉnh sửa sản phẩm',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w900,
+                    color: _primaryOrange,
                   ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Điền thông tin chi tiết cho sản phẩm',
+                  style: TextStyle(color: Colors.black54, fontSize: 14),
                 ),
                 const SizedBox(height: 24),
                 _buildModernField(
@@ -467,6 +499,8 @@ class ProductManagementScreen extends StatelessWidget {
                 ),
                 DropdownButtonFormField<int>(
                   value: selectedCategoryId,
+                  icon: const Icon(Icons.expand_more_rounded, color: Colors.black45),
+                  style: const TextStyle(fontSize: 15, color: Colors.black87),
                   decoration: _fieldDecoration(
                     'Danh mục',
                     Icons.category_outlined,
@@ -474,44 +508,59 @@ class ProductManagementScreen extends StatelessWidget {
                   items: selectableCategories
                       .map(
                         (c) => DropdownMenuItem(
-                          value: c.id,
-                          child: Text(c.name ?? '-'),
-                        ),
-                      )
+                      value: c.id,
+                      child: Text(c.name ?? '-'),
+                    ),
+                  )
                       .toList(),
                   onChanged: (val) => selectedCategoryId = val,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 if (selectedImagePath != null)
                   _buildSelectedImagePreview(selectedImagePath!)
                 else if (item?.imageUrl != null && item!.imageUrl!.isNotEmpty)
-                  _buildProductImage(item.imageUrl),
-                const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  onPressed: () async {
-                    final result = await FilePicker.platform.pickFiles(
-                      type: FileType.image,
-                    );
-                    final pickedPath = result?.files.single.path;
-                    if (pickedPath == null || pickedPath.isEmpty) {
-                      return;
-                    }
-                    setModalState(() => selectedImagePath = pickedPath);
-                  },
-                  icon: const Icon(Icons.photo_library_outlined),
-                  label: Text(
-                    selectedImagePath == null ? 'Chon anh' : 'Doi anh',
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: _buildProductImage(item.imageUrl),
+                  ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: _primaryOrange,
+                      side: BorderSide(color: _primaryOrange.withOpacity(0.5)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    onPressed: () async {
+                      final result = await FilePicker.platform.pickFiles(
+                        type: FileType.image,
+                      );
+                      final pickedPath = result?.files.single.path;
+                      if (pickedPath == null || pickedPath.isEmpty) {
+                        return;
+                      }
+                      setModalState(() => selectedImagePath = pickedPath);
+                    },
+                    icon: const Icon(Icons.photo_library_outlined),
+                    label: Text(
+                      selectedImagePath == null ? 'Chọn ảnh sản phẩm' : 'Thay đổi ảnh',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 32),
                 SizedBox(
                   width: double.infinity,
-                  height: 60,
+                  height: 56,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
+                      backgroundColor: _primaryOrange,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(28),
                       ),
                       elevation: 0,
                     ),
@@ -523,8 +572,13 @@ class ProductManagementScreen extends StatelessWidget {
                           selectedCategoryId != null) {
                         if (item == null && selectedImagePath == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Vui long chon anh san pham'),
+                            SnackBar(
+                              content: const Text('Vui lòng chọn ảnh sản phẩm'),
+                              backgroundColor: Colors.redAccent,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                           );
                           return;
@@ -546,10 +600,11 @@ class ProductManagementScreen extends StatelessWidget {
                       }
                     },
                     child: const Text(
-                      'LƯU SẢN PHẨM',
+                      'LƯU THÔNG TIN',
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
+                        fontSize: 16,
                       ),
                     ),
                   ),
@@ -576,13 +631,13 @@ class ProductManagementScreen extends StatelessWidget {
             height: 140,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: _inputFillColor,
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Center(
               child: Icon(
                 Icons.image_not_supported_outlined,
-                color: Colors.grey,
+                color: Colors.black26,
                 size: 36,
               ),
             ),
@@ -593,18 +648,19 @@ class ProductManagementScreen extends StatelessWidget {
   }
 
   Widget _buildModernField(
-    TextEditingController controller,
-    String label,
-    IconData icon, {
-    TextInputType? keyboardType,
-    int maxLines = 1,
-  }) {
+      TextEditingController controller,
+      String label,
+      IconData icon, {
+        TextInputType? keyboardType,
+        int maxLines = 1,
+      }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.only(bottom: 16),
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
         maxLines: maxLines,
+        style: const TextStyle(fontSize: 15, color: Colors.black87),
         decoration: _fieldDecoration(label, icon),
       ),
     );
@@ -613,9 +669,11 @@ class ProductManagementScreen extends StatelessWidget {
   InputDecoration _fieldDecoration(String label, IconData icon) {
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon, size: 20),
+      labelStyle: const TextStyle(color: Colors.black54, fontSize: 14),
+      prefixIcon: Icon(icon, size: 22, color: Colors.black45),
       filled: true,
-      fillColor: Colors.grey.shade50,
+      fillColor: _inputFillColor,
+      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide.none,
@@ -624,9 +682,9 @@ class ProductManagementScreen extends StatelessWidget {
   }
 
   int? _matchCategoryId(
-    List<CategoryResponse> categories,
-    String? categoryName,
-  ) {
+      List<CategoryResponse> categories,
+      String? categoryName,
+      ) {
     if (categoryName == null) return null;
     try {
       return categories.firstWhere((c) => c.name == categoryName).id;
@@ -639,20 +697,40 @@ class ProductManagementScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text('Xác nhận xóa'),
-        content: Text('Xóa "${item.name}" khỏi danh mục?'),
+        title: Text(
+          'Xác nhận xóa',
+          style: TextStyle(color: _primaryOrange, fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'Bạn có chắc chắn muốn xóa "${item.name}" khỏi kho hàng? Thao tác này không thể hoàn tác.',
+          style: const TextStyle(color: Colors.black87),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Hủy'),
+            child: const Text(
+              'Hủy',
+              style: TextStyle(color: Colors.black54, fontWeight: FontWeight.w600),
+            ),
           ),
-          TextButton(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFEE2E2),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
             onPressed: () {
               context.read<ProductCubit>().remove(item.id!);
               Navigator.pop(ctx);
             },
-            child: const Text('Xóa', style: TextStyle(color: Colors.red)),
+            child: const Text(
+              'Xóa',
+              style: TextStyle(color: Color(0xFFEF4444), fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),

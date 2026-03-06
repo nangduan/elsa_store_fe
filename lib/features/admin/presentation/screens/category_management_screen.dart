@@ -10,25 +10,41 @@ import '../cubit/category_cubit.dart';
 class CategoryManagementScreen extends StatelessWidget {
   const CategoryManagementScreen({super.key});
 
+  final Color _primaryBlue = const Color(0xFF1964D4);
+  final Color _primaryOrange = const Color(0xFFE85022);
+  final Color _bgColor = const Color(0xFFFAFAFA);
+  final Color _inputFillColor = const Color(0xFFF5F5F5);
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => CategoryCubit(getIt(), getIt(), getIt(), getIt())..load(),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F9FA), // Màu nền đồng bộ
+        backgroundColor: _bgColor,
         body: BlocConsumer<CategoryCubit, CategoryState>(
           listener: (context, state) {
-            // TODO: Add listener logic if needed
+            if (state.status.isFailure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.errorMessage ?? 'Thao tác thất bại'),
+                  backgroundColor: Colors.redAccent,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              );
+            }
           },
           builder: (context, state) {
             return CustomScrollView(
               slivers: [
                 _buildAppBar(context, state.categories),
-                _buildSearchBar(), // Giữ search bar cho đồng bộ
+                _buildSearchBar(),
                 if (state.status.isLoading)
-                  const SliverFillRemaining(
+                  SliverFillRemaining(
                     child: Center(
-                      child: CircularProgressIndicator(color: Colors.black),
+                      child: CircularProgressIndicator(color: _primaryBlue),
                     ),
                   )
                 else if (state.categories.isEmpty)
@@ -41,7 +57,7 @@ class CategoryManagementScreen extends StatelessWidget {
                     ),
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate(
-                        (context, index) => _buildCategoryCard(
+                            (context, index) => _buildCategoryCard(
                           context,
                           state.categories[index],
                           state.categories,
@@ -64,24 +80,24 @@ class CategoryManagementScreen extends StatelessWidget {
       floating: true,
       pinned: true,
       elevation: 0,
-      backgroundColor: Colors.white,
+      backgroundColor: _bgColor,
       leading: IconButton(
-        icon: const Icon(
+        icon: Icon(
           Icons.arrow_back_ios_new,
-          color: Colors.black,
+          color: _primaryBlue,
           size: 20,
         ),
         onPressed: () => context.router.pop(),
       ),
-      flexibleSpace: const FlexibleSpaceBar(
-        titlePadding: EdgeInsetsDirectional.only(start: 56, bottom: 16),
+      flexibleSpace: FlexibleSpaceBar(
+        titlePadding: const EdgeInsetsDirectional.only(start: 56, bottom: 16),
         title: Text(
           'DANH MỤC',
           style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.w800,
-            fontSize: 16,
-            letterSpacing: 1.5,
+            color: _primaryBlue,
+            fontWeight: FontWeight.w900,
+            fontSize: 18,
+            letterSpacing: 0.5,
           ),
         ),
       ),
@@ -91,7 +107,7 @@ class CategoryManagementScreen extends StatelessWidget {
           child: IconButton(
             onPressed: () =>
                 _showCategoryDialog(context, categories: categories),
-            icon: const Icon(Icons.add_circle, color: Colors.black, size: 32),
+            icon: Icon(Icons.add_circle, color: _primaryOrange, size: 32),
           ),
         ),
       ],
@@ -101,22 +117,26 @@ class CategoryManagementScreen extends StatelessWidget {
   Widget _buildSearchBar() {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
         child: TextField(
           decoration: InputDecoration(
             hintText: 'Tìm kiếm danh mục...',
-            hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-            prefixIcon: const Icon(Icons.search_rounded, color: Colors.black54),
+            hintStyle: const TextStyle(color: Colors.black38, fontSize: 15),
+            prefixIcon: const Icon(Icons.search_rounded, color: Colors.black45),
             filled: true,
             fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(vertical: 0),
+            contentPadding: const EdgeInsets.symmetric(vertical: 16),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide.none,
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: Colors.grey.shade100),
+              borderSide: BorderSide(color: Colors.grey.shade200),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: _primaryBlue.withOpacity(0.5)),
             ),
           ),
         ),
@@ -125,22 +145,22 @@ class CategoryManagementScreen extends StatelessWidget {
   }
 
   Widget _buildCategoryCard(
-    BuildContext context,
-    CategoryResponse item,
-    List<CategoryResponse> allCategories,
-  ) {
+      BuildContext context,
+      CategoryResponse item,
+      List<CategoryResponse> allCategories,
+      ) {
     final isSubCategory = item.parentId != null;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -149,17 +169,17 @@ class CategoryManagementScreen extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: isSubCategory ? Colors.grey.shade100 : Colors.black,
-                borderRadius: BorderRadius.circular(16),
+                color: isSubCategory ? Colors.grey.shade50 : const Color(0xFFEAF1F8),
+                shape: BoxShape.circle,
               ),
               child: Icon(
                 isSubCategory
                     ? Icons.subdirectory_arrow_right_rounded
                     : Icons.category_rounded,
-                color: isSubCategory ? Colors.black87 : Colors.white,
-                size: 22,
+                color: isSubCategory ? Colors.black45 : _primaryBlue,
+                size: 24,
               ),
             ),
             const SizedBox(width: 16),
@@ -172,49 +192,55 @@ class CategoryManagementScreen extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: isSubCategory
                           ? FontWeight.w600
-                          : FontWeight.w900,
+                          : FontWeight.bold,
                       fontSize: 16,
                       color: Colors.black87,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   if (isSubCategory)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
+                        horizontal: 10,
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(6),
+                        color: const Color(0xFFEAF1F8),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        'Danh mục gốc: ${item.parentName ?? 'Không rõ'}',
-                        style: const TextStyle(
-                          color: Colors.blue,
-                          fontSize: 11,
+                        'Thuộc: ${item.parentName ?? 'Không rõ'}',
+                        style: TextStyle(
+                          color: _primaryBlue,
+                          fontSize: 12,
                           fontWeight: FontWeight.bold,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     )
                   else
                     Text(
                       'Danh mục gốc',
                       style: TextStyle(
-                        color: Colors.grey.shade400,
-                        fontSize: 12,
+                        color: Colors.black38,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                 ],
               ),
             ),
+            const SizedBox(width: 8),
             Row(
               children: [
                 _buildCircleAction(
                   Icons.edit_outlined,
-                  Colors.blueGrey,
-                  () => _showCategoryDialog(
+                  _primaryBlue,
+                  const Color(0xFFEAF1F8),
+                      () => _showCategoryDialog(
                     context,
                     categories: allCategories,
                     item: item,
@@ -223,8 +249,9 @@ class CategoryManagementScreen extends StatelessWidget {
                 const SizedBox(width: 8),
                 _buildCircleAction(
                   Icons.delete_outline_rounded,
-                  Colors.redAccent,
-                  () => _confirmDelete(context, item),
+                  _primaryOrange,
+                  const Color(0xFFFCEAE8),
+                      () => _confirmDelete(context, item),
                 ),
               ],
             ),
@@ -234,17 +261,18 @@ class CategoryManagementScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCircleAction(IconData icon, Color color, VoidCallback onTap) {
+  Widget _buildCircleAction(
+      IconData icon, Color iconColor, Color bgColor, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: bgColor,
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, size: 18, color: color),
+        child: Icon(icon, size: 18, color: iconColor),
       ),
     );
   }
@@ -254,13 +282,25 @@ class CategoryManagementScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.category_outlined, size: 80, color: Colors.grey.shade200),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: const BoxDecoration(
+              color: Color(0xFFEAF1F8),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.category_outlined,
+              size: 64,
+              color: _primaryBlue.withOpacity(0.5),
+            ),
+          ),
           const SizedBox(height: 16),
-          Text(
-            'Không tìm thấy danh mục',
+          const Text(
+            'Chưa có danh mục nào',
             style: TextStyle(
-              color: Colors.grey.shade400,
-              fontWeight: FontWeight.w500,
+              color: Colors.black54,
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
             ),
           ),
         ],
@@ -269,10 +309,10 @@ class CategoryManagementScreen extends StatelessWidget {
   }
 
   void _showCategoryDialog(
-    BuildContext context, {
-    required List<CategoryResponse> categories,
-    CategoryResponse? item,
-  }) {
+      BuildContext context, {
+        required List<CategoryResponse> categories,
+        CategoryResponse? item,
+      }) {
     final categoryCubit = context.read<CategoryCubit>();
     final nameController = TextEditingController(text: item?.name ?? '');
     int? parentId = item?.parentId;
@@ -298,15 +338,22 @@ class CategoryManagementScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                item == null ? 'Danh mục mới' : 'Chỉnh sửa danh mục',
-                style: const TextStyle(
+                item == null ? 'Thêm danh mục mới' : 'Cập nhật danh mục',
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w900,
+                  color: _primaryBlue,
                 ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Điền thông tin chi tiết cho danh mục sản phẩm',
+                style: TextStyle(color: Colors.black54, fontSize: 14),
               ),
               const SizedBox(height: 24),
               TextField(
                 controller: nameController,
+                style: const TextStyle(fontSize: 15, color: Colors.black87),
                 decoration: _inputDecoration(
                   'Tên danh mục',
                   Icons.drive_file_rename_outline,
@@ -315,6 +362,8 @@ class CategoryManagementScreen extends StatelessWidget {
               const SizedBox(height: 20),
               DropdownButtonFormField<int?>(
                 value: parentId,
+                icon: const Icon(Icons.expand_more_rounded, color: Colors.black45),
+                style: const TextStyle(fontSize: 15, color: Colors.black87),
                 decoration: _inputDecoration(
                   'Danh mục cha (Tùy chọn)',
                   Icons.account_tree_outlined,
@@ -328,22 +377,22 @@ class CategoryManagementScreen extends StatelessWidget {
                       .where((c) => c.parentId == null && c.id != item?.id)
                       .map(
                         (c) => DropdownMenuItem<int?>(
-                          value: c.id,
-                          child: Text(c.name ?? '-'),
-                        ),
-                      ),
+                      value: c.id,
+                      child: Text(c.name ?? '-'),
+                    ),
+                  ),
                 ],
                 onChanged: (val) => setState(() => parentId = val),
               ),
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
-                height: 60,
+                height: 56,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
+                    backgroundColor: _primaryBlue,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(28),
                     ),
                     elevation: 0,
                   ),
@@ -360,10 +409,12 @@ class CategoryManagementScreen extends StatelessWidget {
                     Navigator.pop(dialogContext);
                   },
                   child: const Text(
-                    'LƯU DANH MỤC',
+                    'LƯU THÔNG TIN',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      letterSpacing: 0.5,
                     ),
                   ),
                 ),
@@ -379,9 +430,11 @@ class CategoryManagementScreen extends StatelessWidget {
   InputDecoration _inputDecoration(String label, IconData icon) {
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon, size: 20),
+      labelStyle: const TextStyle(color: Colors.black54, fontSize: 14),
+      prefixIcon: Icon(icon, size: 22, color: Colors.black45),
       filled: true,
-      fillColor: Colors.grey.shade50,
+      fillColor: _inputFillColor,
+      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide.none,
@@ -393,20 +446,40 @@ class CategoryManagementScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text('Xác nhận xóa'),
-        content: Text('Xóa "${item.name}"?'),
+        title: Text(
+          'Xác nhận xóa',
+          style: TextStyle(color: _primaryOrange, fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'Bạn có chắc chắn muốn xóa danh mục "${item.name}"? Thao tác này không thể hoàn tác.',
+          style: const TextStyle(color: Colors.black87),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Hủy'),
+            child: const Text(
+              'Hủy',
+              style: TextStyle(color: Colors.black54, fontWeight: FontWeight.w600),
+            ),
           ),
-          TextButton(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFCEAE8),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
             onPressed: () {
               context.read<CategoryCubit>().remove(item.id!);
               Navigator.pop(ctx);
             },
-            child: const Text('Xóa', style: TextStyle(color: Colors.red)),
+            child: Text(
+              'Xóa',
+              style: TextStyle(color: _primaryOrange, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),

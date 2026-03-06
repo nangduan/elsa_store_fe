@@ -17,31 +17,52 @@ import '../cubit/cart_cubit.dart';
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
 
+  final Color _primaryBlue = const Color(0xFF1964D4);
+  final Color _primaryOrange = const Color(0xFFE85022);
+  final Color _bgColor = const Color(0xFFFAFAFA);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: _bgColor,
       appBar: AppBar(
-        title: const Text(
-          'Giỏ hàng',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        title: Text(
+          'GIỎ HÀNG',
+          style: TextStyle(
+            color: _primaryBlue,
+            fontWeight: FontWeight.w900,
+            fontSize: 18,
+            letterSpacing: 0.5,
+          ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: _bgColor,
         elevation: 0,
-        foregroundColor: Colors.black,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            color: _primaryBlue,
+            size: 20,
+          ),
+          onPressed: () {
+            if (context.router.canPop()) {
+              context.router.pop();
+            }
+          },
+        ),
       ),
       body: BlocBuilder<CartCubit, CartState>(
         builder: (context, state) {
           if (state.status == CartStatus.loading) {
-            return const Center(
-              child: CircularProgressIndicator(color: Colors.black),
+            return Center(
+              child: CircularProgressIndicator(color: _primaryBlue),
             );
           }
 
           if (state.status == CartStatus.failure) {
             Future<void> onRetry() => context.read<CartCubit>().load();
             return RefreshIndicator(
+              color: _primaryBlue,
               onRefresh: onRetry,
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -57,11 +78,12 @@ class CartScreen extends StatelessWidget {
 
           if (items.isEmpty) {
             return RefreshIndicator(
+              color: _primaryBlue,
               onRefresh: () => context.read<CartCubit>().load(),
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: [
-                  const SizedBox(height: 80),
+                  const SizedBox(height: 120),
                   _buildEmptyState(context),
                 ],
               ),
@@ -72,11 +94,12 @@ class CartScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: RefreshIndicator(
+                  color: _primaryBlue,
                   onRefresh: () => context.read<CartCubit>().load(),
                   child: ListView.separated(
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
+                      horizontal: 20,
                       vertical: 16,
                     ),
                     itemCount: items.length,
@@ -107,7 +130,7 @@ class CartScreen extends StatelessWidget {
                         },
                         onDelete: () {
                           if (item.id != null) {
-                            context.read<CartCubit>().deleteItem(item.id!);
+                            _confirmDelete(context, item);
                           }
                         },
                         onCheckout: () => _checkoutItem(context, item),
@@ -127,13 +150,25 @@ class CartScreen extends StatelessWidget {
   Widget _buildErrorState(String? message, Future<void> Function() onRetry) {
     return Column(
       children: [
-        Icon(Icons.error_outline, size: 48, color: Colors.red.shade300),
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: const BoxDecoration(
+            color: Color(0xFFFCEAE8),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(Icons.error_outline, size: 48, color: _primaryOrange),
+        ),
         const SizedBox(height: 16),
         Text(
           message ?? 'Không tải được giỏ hàng',
-          style: const TextStyle(color: Colors.grey),
+          style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.w500),
         ),
-        TextButton(onPressed: () => onRetry(), child: const Text('Thử lại')),
+        const SizedBox(height: 16),
+        TextButton(
+          style: TextButton.styleFrom(foregroundColor: _primaryBlue),
+          onPressed: () => onRetry(),
+          child: const Text('Thử lại', style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
       ],
     );
   }
@@ -142,71 +177,117 @@ class CartScreen extends StatelessWidget {
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade100,
+          padding: const EdgeInsets.all(24),
+          decoration: const BoxDecoration(
+            color: Color(0xFFEAF1F8),
             shape: BoxShape.circle,
           ),
           child: Icon(
             Icons.shopping_cart_outlined,
             size: 64,
-            color: Colors.grey.shade400,
+            color: _primaryBlue.withOpacity(0.5),
           ),
         ),
         const SizedBox(height: 24),
         const Text(
-          'Giỏ hàng của bạn đang trống',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          'Giỏ hàng đang trống',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w900,
+            color: Colors.black87,
+          ),
         ),
         const SizedBox(height: 8),
         const Text(
           'Hãy thêm vài món đồ sành điệu vào nhé!',
-          style: TextStyle(color: Colors.grey),
+          style: TextStyle(color: Colors.black54),
         ),
         const SizedBox(height: 32),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.black,
+            backgroundColor: _primaryBlue,
             foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+            elevation: 0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(28),
             ),
           ),
-          onPressed: () {},
-          child: const Text('Tiếp tục mua sắm'),
+          onPressed: () {
+            // Có thể navigate về trang chủ hoặc trang sản phẩm tùy ý
+            context.router.maybePop();
+          },
+          child: const Text(
+            'TIẾP TỤC MUA SẮM',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
         ),
       ],
     );
   }
 
   void _confirmDelete(BuildContext context, CartItemResponse item) {
-    if (item.id == null) return;
-    context.read<CartCubit>().deleteItem(item.id!);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Text(
+          'Xóa sản phẩm',
+          style: TextStyle(color: _primaryOrange, fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?',
+          style: TextStyle(color: Colors.black87),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text(
+              'Hủy',
+              style: TextStyle(color: Colors.black54, fontWeight: FontWeight.w600),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFCEAE8),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () {
+              context.read<CartCubit>().deleteItem(item.id!);
+              Navigator.pop(ctx);
+            },
+            child: Text(
+              'Xóa',
+              style: TextStyle(color: _primaryOrange, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _checkoutItem(
-    BuildContext context,
-    CartItemResponse item,
-  ) async {
+      BuildContext context,
+      CartItemResponse item,
+      ) async {
     final variantId = item.productVariantId;
     final amount =
         item.lineTotal ??
-        (item.unitPrice != null && item.quantity != null
-            ? item.unitPrice! * item.quantity!
-            : null);
+            (item.unitPrice != null && item.quantity != null
+                ? item.unitPrice! * item.quantity!
+                : null);
     if (variantId == null || amount == null || amount <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('D? li?u s?n ph?m kh?ng h?p l?')),
-      );
+      _showSnackBar(context, 'Dữ liệu sản phẩm không hợp lệ', isError: true);
       return;
     }
 
     final userId = await FlutterStoreCore.readUserId();
     if (userId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Thi?u th?ng tin ng??i d?ng')),
-      );
+      _showSnackBar(context, 'Thiếu thông tin người dùng', isError: true);
       return;
     }
 
@@ -221,36 +302,34 @@ class CartScreen extends StatelessWidget {
       await _openPaymentAndRefresh(
         context,
         PaymentRoute(
-          productName: item.productName ?? 'S?n ph?m',
+          productName: item.productName ?? 'Sản phẩm',
           imageUrl: item.imageUrl,
           amount: amount,
           cartItems: [item],
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('T?o ??n h?ng th?t b?i')),
-      );
+      _showSnackBar(context, 'Tạo đơn hàng thất bại', isError: true);
     }
   }
 
   Widget _buildBottomCheckout(
-    BuildContext context,
-    double? total,
-    List<CartItemResponse> items,
-  ) {
+      BuildContext context,
+      double? total,
+      List<CartItemResponse> items,
+      ) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(0.04),
             offset: const Offset(0, -4),
-            blurRadius: 16,
+            blurRadius: 20,
           ),
         ],
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
       ),
       child: SafeArea(
         child: Column(
@@ -259,40 +338,44 @@ class CartScreen extends StatelessWidget {
             Row(
               children: [
                 const Text(
-                  'Tổng cộng:',
-                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                  'Tổng thanh toán:',
+                  style: TextStyle(
+                    color: Colors.black54,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const Spacer(),
                 Text(
                   Format.formatCurrency(total),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w900,
-                    fontSize: 20,
-                    color: Colors.black,
+                    fontSize: 22,
+                    color: _primaryOrange,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
-              height: 50,
+              height: 56,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
+                  backgroundColor: _primaryBlue,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(28),
                   ),
                 ),
                 onPressed: () => _checkoutAll(context, items),
                 child: const Text(
-                  'THANH TOÁN',
+                  'THANH TOÁN TẤT CẢ',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
-                    letterSpacing: 1,
+                    letterSpacing: 0.5,
                   ),
                 ),
               ),
@@ -304,18 +387,16 @@ class CartScreen extends StatelessWidget {
   }
 
   Future<void> _checkoutAll(
-    BuildContext context,
-    List<CartItemResponse> items,
-  ) async {
+      BuildContext context,
+      List<CartItemResponse> items,
+      ) async {
     final total = items.fold<double>(
       0,
-      (sum, item) => sum + (item.lineTotal ?? 0),
+          (sum, item) => sum + (item.lineTotal ?? 0),
     );
 
     if (total <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Gio hang dang trong')),
-      );
+      _showSnackBar(context, 'Giỏ hàng đang trống');
       return;
     }
 
@@ -328,9 +409,7 @@ class CartScreen extends StatelessWidget {
 
     final userId = await FlutterStoreCore.readUserId();
     if (userId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Thi?u th?ng tin ng??i d?ng')),
-      );
+      _showSnackBar(context, 'Thiếu thông tin người dùng', isError: true);
       return;
     }
 
@@ -339,22 +418,20 @@ class CartScreen extends StatelessWidget {
       await _openPaymentAndRefresh(
         context,
         PaymentRoute(
-          productName: 'Thanh to?n gi? h?ng',
+          productName: 'Thanh toán giỏ hàng',
           amount: total,
           cartItems: items,
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('T?o ??n h?ng th?t b?i')),
-      );
+      _showSnackBar(context, 'Tạo đơn hàng thất bại', isError: true);
     }
   }
 
   Future<void> _openPaymentAndRefresh(
-    BuildContext context,
-    PageRouteInfo route,
-  ) async {
+      BuildContext context,
+      PageRouteInfo route,
+      ) async {
     await context.router.push(route);
     if (!context.mounted) return;
     context.read<CartCubit>().load();
@@ -362,6 +439,19 @@ class CartScreen extends StatelessWidget {
       final orderCubit = BlocProvider.of<OrderCubit>(context);
       orderCubit.load();
     } catch (_) {}
+  }
+
+  void _showSnackBar(BuildContext context, String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.redAccent : Colors.green,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
   }
 }
 
@@ -382,57 +472,58 @@ class _CartItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Color primaryBlue = const Color(0xFF1964D4);
+    final Color primaryOrange = const Color(0xFFE85022);
+
     final imageUrl = _resolveImageUrl(item.imageUrl);
     final sizeText = (item.size ?? '').isEmpty ? '-' : item.size!;
     final colorText = (item.color ?? '').isEmpty ? '-' : item.color!;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
             offset: const Offset(0, 4),
-            blurRadius: 12,
+            blurRadius: 10,
           ),
         ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              height: 90,
-              width: 90,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey,
-                    offset: const Offset(0, 4),
-                    blurRadius: 12,
-                  ),
-                ],
-              ),
+          // Image
+          Container(
+            height: 90,
+            width: 90,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5F5F5),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
               child: imageUrl == null
                   ? const Icon(
-                      Icons.image_not_supported_outlined,
-                      color: Colors.grey,
-                    )
+                Icons.inventory_2_outlined,
+                color: Colors.black26,
+                size: 32,
+              )
                   : Image.network(
-                      imageUrl,
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) => const Icon(
-                        Icons.broken_image_outlined,
-                        color: Colors.grey,
-                      ),
-                    ),
+                imageUrl,
+                fit: BoxFit.fitWidth,
+                errorBuilder: (_, __, ___) => const Icon(
+                  Icons.broken_image_outlined,
+                  color: Colors.black26,
+                  size: 32,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 16),
+          // Info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -453,73 +544,87 @@ class _CartItemCard extends StatelessWidget {
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
+                              color: Colors.black87,
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Kích cỡ: $sizeText | Màu: $colorText',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEAF1F8),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              '$colorText - Size $sizeText',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: primaryBlue,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
+                    const SizedBox(width: 8),
                     InkWell(
                       onTap: onDelete,
-                      child: const Icon(
-                        Icons.delete_outline_rounded,
-                        size: 18,
-                        color: Colors.redAccent,
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFFCEAE8),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.delete_outline_rounded,
+                          size: 18,
+                          color: primaryOrange,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                Column(
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          Format.formatCurrency(item.unitPrice),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16,
-                            color: Colors.black,
-                          ),
-                        ),
-                        _QuantityStepper(
-                          value: item.quantity ?? 0,
-                          onDecrease: onDecrease,
-                          onIncrease: onIncrease,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: SizedBox(
-                        height: 32,
-                        child: OutlinedButton(
-                          onPressed: onCheckout,
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.black,
-                            side: BorderSide(color: Colors.grey.shade300),
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text(
-                            'Đặt hàng',
-                            style: TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                        ),
+                    Text(
+                      Format.formatCurrency(item.unitPrice),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16,
+                        color: Colors.black,
                       ),
                     ),
+                    _QuantityStepper(
+                      value: item.quantity ?? 0,
+                      onDecrease: onDecrease,
+                      onIncrease: onIncrease,
+                    ),
                   ],
+                ),
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: SizedBox(
+                    height: 36,
+                    child: OutlinedButton(
+                      onPressed: onCheckout,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: primaryBlue,
+                        side: BorderSide(color: primaryBlue.withOpacity(0.5)),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'Thanh toán riêng',
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -531,9 +636,16 @@ class _CartItemCard extends StatelessWidget {
 
   String? _resolveImageUrl(String? path) {
     if (path == null || path.isEmpty) return null;
-    if (path.startsWith('http')) return path;
-    final normalizedBaseUrl = AppConfig().baseURL;
-    return "$normalizedBaseUrl$path";
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+
+    final cleanPath = path.startsWith('/') ? path.substring(1) : path;
+    final cleanBase = AppConfig().baseURL.endsWith('/')
+        ? AppConfig().baseURL
+        : '${AppConfig().baseURL}/';
+
+    return "$cleanBase$cleanPath";
   }
 }
 
@@ -552,9 +664,8 @@ class _QuantityStepper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade200),
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
@@ -576,7 +687,7 @@ class _QuantityStepper extends StatelessWidget {
   Widget _buildButton(IconData icon, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(12),
       child: Padding(
         padding: const EdgeInsets.all(6.0),
         child: Icon(icon, size: 16, color: Colors.black87),
