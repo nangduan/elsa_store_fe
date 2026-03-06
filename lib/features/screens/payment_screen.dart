@@ -229,7 +229,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         bankCode: "NCB",
       );
       if (!mounted || paymentUrl == null) return;
-      await Navigator.of(context).push(
+      final paymentResult = await Navigator.of(context).push<bool>(
         MaterialPageRoute(
           builder: (_) => VnPayWebViewScreen(
             url: paymentUrl,
@@ -237,6 +237,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
           ),
         ),
       );
+      if (!mounted) return;
+      if (paymentResult != true) {
+        await _removeCartItemsIfNeeded();
+        _showSnackBar('Da huy thanh toan VNPay');
+        _exitAfterPayment();
+      }
     } on DioException catch (e) {
       _showSnackBar(e.message ?? 'Khong the tao thanh toan');
     } catch (_) {
