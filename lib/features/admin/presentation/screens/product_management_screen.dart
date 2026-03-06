@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_skeleton/core/constants/format.dart';
@@ -414,113 +417,177 @@ class ProductManagementScreen extends StatelessWidget {
       selectableCategories,
       item?.categoryName,
     );
+    String? selectedImagePath;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (dialogContext) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-        ),
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(dialogContext).viewInsets.bottom,
-          left: 24,
-          right: 24,
-          top: 32,
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                item == null ? 'Sản phẩm mới' : 'Chỉnh sửa sản phẩm',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 24),
-              _buildModernField(
-                nameController,
-                'Tên sản phẩm',
-                Icons.drive_file_rename_outline,
-              ),
-              _buildModernField(
-                descriptionController,
-                'Mô tả',
-                Icons.description_outlined,
-                maxLines: 3,
-              ),
-              _buildModernField(
-                basePriceController,
-                'Giá gốc',
-                Icons.payments_outlined,
-                keyboardType: TextInputType.number,
-              ),
-              DropdownButtonFormField<int>(
-                value: selectedCategoryId,
-                decoration: _fieldDecoration(
-                  'Danh mục',
-                  Icons.category_outlined,
-                ),
-                items: selectableCategories
-                    .map(
-                      (c) => DropdownMenuItem(
-                        value: c.id,
-                        child: Text(c.name ?? '-'),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (val) => selectedCategoryId = val,
-              ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                height: 60,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    elevation: 0,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setModalState) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(dialogContext).viewInsets.bottom,
+            left: 24,
+            right: 24,
+            top: 32,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item == null ? 'Sản phẩm mới' : 'Chỉnh sửa sản phẩm',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
                   ),
-                  onPressed: () {
-                    final name = nameController.text.trim();
-                    final price = double.tryParse(basePriceController.text);
-                    if (name.isNotEmpty &&
-                        price != null &&
-                        selectedCategoryId != null) {
-                      final req = ProductRequest(
-                        name: name,
-                        description: descriptionController.text,
-                        basePrice: price,
-                        categoryId: selectedCategoryId!,
-                      );
-                      if (item?.id != null) {
-                        productCubit.update(item!.id!, req);
-                      } else {
-                        productCubit.create(req);
-                      }
-                      Navigator.pop(dialogContext);
+                ),
+                const SizedBox(height: 24),
+                _buildModernField(
+                  nameController,
+                  'Tên sản phẩm',
+                  Icons.drive_file_rename_outline,
+                ),
+                _buildModernField(
+                  descriptionController,
+                  'Mô tả',
+                  Icons.description_outlined,
+                  maxLines: 3,
+                ),
+                _buildModernField(
+                  basePriceController,
+                  'Giá gốc',
+                  Icons.payments_outlined,
+                  keyboardType: TextInputType.number,
+                ),
+                DropdownButtonFormField<int>(
+                  value: selectedCategoryId,
+                  decoration: _fieldDecoration(
+                    'Danh mục',
+                    Icons.category_outlined,
+                  ),
+                  items: selectableCategories
+                      .map(
+                        (c) => DropdownMenuItem(
+                          value: c.id,
+                          child: Text(c.name ?? '-'),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (val) => selectedCategoryId = val,
+                ),
+                const SizedBox(height: 12),
+                if (selectedImagePath != null)
+                  _buildSelectedImagePreview(selectedImagePath!)
+                else if (item?.imageUrl != null && item!.imageUrl!.isNotEmpty)
+                  _buildProductImage(item.imageUrl),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    final result = await FilePicker.platform.pickFiles(
+                      type: FileType.image,
+                    );
+                    final pickedPath = result?.files.single.path;
+                    if (pickedPath == null || pickedPath.isEmpty) {
+                      return;
                     }
+                    setModalState(() => selectedImagePath = pickedPath);
                   },
-                  child: const Text(
-                    'LƯU SẢN PHẨM',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                  icon: const Icon(Icons.photo_library_outlined),
+                  label: Text(
+                    selectedImagePath == null ? 'Chon anh' : 'Doi anh',
+                  ),
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  height: 60,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      elevation: 0,
+                    ),
+                    onPressed: () {
+                      final name = nameController.text.trim();
+                      final price = double.tryParse(basePriceController.text);
+                      if (name.isNotEmpty &&
+                          price != null &&
+                          selectedCategoryId != null) {
+                        if (item == null && selectedImagePath == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Vui long chon anh san pham'),
+                            ),
+                          );
+                          return;
+                        }
+
+                        final req = ProductRequest(
+                          name: name,
+                          description: descriptionController.text,
+                          basePrice: price,
+                          categoryId: selectedCategoryId!,
+                          imagePath: selectedImagePath,
+                        );
+                        if (item?.id != null) {
+                          productCubit.update(item!.id!, req);
+                        } else {
+                          productCubit.create(req);
+                        }
+                        Navigator.pop(dialogContext);
+                      }
+                    },
+                    child: const Text(
+                      'LƯU SẢN PHẨM',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 40),
-            ],
+                const SizedBox(height: 40),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSelectedImagePreview(String imagePath) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Image.file(
+        File(imagePath),
+        height: 140,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) {
+          return Container(
+            height: 140,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Center(
+              child: Icon(
+                Icons.image_not_supported_outlined,
+                color: Colors.grey,
+                size: 36,
+              ),
+            ),
+          );
+        },
       ),
     );
   }

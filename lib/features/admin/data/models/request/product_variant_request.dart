@@ -5,6 +5,7 @@ class ProductVariantRequest {
   final String sku;
   final double price;
   final int status;
+  final String? imagePath;
 
   ProductVariantRequest({
     required this.productId,
@@ -13,14 +14,15 @@ class ProductVariantRequest {
     required this.sku,
     required this.price,
     required this.status,
+    this.imagePath,
   });
 
   Map<String, dynamic> toJson() => {
-        'productId': productId,
-        'color': color,
-        'size': size,
-        'sku': sku,
-        'price': price,
-        'status': status,
-      };
+    'productId': productId,
+    'color': color,
+    'size': size,
+    'sku': sku,
+    'price': price,
+    'status': status,
+  };
 }

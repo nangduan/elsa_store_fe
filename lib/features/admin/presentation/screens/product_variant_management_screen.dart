@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/api/app_config.dart';
 import '../../../../core/constants/format.dart';
 import '../../../../core/di/injector.dart';
 import '../../data/models/request/product_variant_request.dart';
@@ -345,87 +349,173 @@ class ProductVariantManagementScreen extends StatelessWidget {
     final statusController = TextEditingController(
       text: item?.status?.toString() ?? '1',
     );
+    String? selectedImagePath;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(ctx).viewInsets.bottom,
-          left: 24,
-          right: 24,
-          top: 32,
-        ),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Chi tiết biến thể',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 24),
-              _buildField(skuController, 'Mã SKU'),
-              Row(
-                children: [
-                  Expanded(child: _buildField(colorController, 'Màu sắc')),
-                  const SizedBox(width: 12),
-                  Expanded(child: _buildField(sizeController, 'Kích cỡ')),
-                ],
-              ),
-              _buildField(
-                priceController,
-                'Giá',
-                keyboardType: TextInputType.number,
-              ),
-              _buildField(
-                statusController,
-                'Trạng thái (1 Hoạt động/0 Không hoạt động)',
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  onPressed: () {
-                    final req = ProductVariantRequest(
-                      productId: productId,
-                      color: colorController.text,
-                      size: sizeController.text,
-                      sku: skuController.text,
-                      price: double.tryParse(priceController.text) ?? 0,
-                      status: int.tryParse(statusController.text) ?? 1,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModalState) => Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(ctx).viewInsets.bottom,
+            left: 24,
+            right: 24,
+            top: 32,
+          ),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Chi tiết biến thể',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 24),
+                _buildField(skuController, 'Mã SKU'),
+                Row(
+                  children: [
+                    Expanded(child: _buildField(colorController, 'Màu sắc')),
+                    const SizedBox(width: 12),
+                    Expanded(child: _buildField(sizeController, 'Kích cỡ')),
+                  ],
+                ),
+                _buildField(
+                  priceController,
+                  'Giá',
+                  keyboardType: TextInputType.number,
+                ),
+                _buildField(
+                  statusController,
+                  'Trạng thái (1 Hoạt động/0 Không hoạt động)',
+                  keyboardType: TextInputType.number,
+                ),
+                if (selectedImagePath != null)
+                  _buildVariantLocalImagePreview(selectedImagePath!)
+                else if (item?.imageUrl != null && item!.imageUrl!.isNotEmpty)
+                  _buildVariantNetworkImagePreview(item.imageUrl),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    final result = await FilePicker.platform.pickFiles(
+                      type: FileType.image,
                     );
-                    if (item?.id != null)
-                      variantCubit.update(item!.id!, req);
-                    else
-                      variantCubit.create(req);
-                    Navigator.pop(ctx);
+                    final pickedPath = result?.files.single.path;
+                    if (pickedPath == null || pickedPath.isEmpty) {
+                      return;
+                    }
+                    setModalState(() => selectedImagePath = pickedPath);
                   },
-                  child: const Text(
-                    'LƯU BIẾN THỂ',
-                    style: TextStyle(color: Colors.white),
+                  icon: const Icon(Icons.photo_library_outlined),
+                  label: Text(
+                    selectedImagePath == null ? 'Chon anh' : 'Doi anh',
                   ),
                 ),
-              ),
-              const SizedBox(height: 32),
-            ],
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    onPressed: () {
+                      if (item == null && selectedImagePath == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Vui long chon anh bien the'),
+                          ),
+                        );
+                        return;
+                      }
+
+                      final req = ProductVariantRequest(
+                        productId: productId,
+                        color: colorController.text,
+                        size: sizeController.text,
+                        sku: skuController.text,
+                        price: double.tryParse(priceController.text) ?? 0,
+                        status: int.tryParse(statusController.text) ?? 1,
+                        imagePath: selectedImagePath,
+                      );
+                      if (item?.id != null) {
+                        variantCubit.update(item!.id!, req);
+                      } else {
+                        variantCubit.create(req);
+                      }
+                      Navigator.pop(ctx);
+                    },
+                    child: const Text(
+                      'LƯU BIẾN THỂ',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildVariantLocalImagePreview(String imagePath) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Image.file(
+        File(imagePath),
+        height: 120,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Container(
+          height: 120,
+          color: Colors.grey.shade100,
+          alignment: Alignment.center,
+          child: const Icon(Icons.broken_image_outlined, color: Colors.grey),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVariantNetworkImagePreview(String? imageUrl) {
+    final resolved = _resolveImageUrl(imageUrl);
+    if (resolved == null) {
+      return const SizedBox.shrink();
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Image.network(
+        resolved,
+        height: 120,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Container(
+          height: 120,
+          color: Colors.grey.shade100,
+          alignment: Alignment.center,
+          child: const Icon(Icons.broken_image_outlined, color: Colors.grey),
+        ),
+      ),
+    );
+  }
+
+  String? _resolveImageUrl(String? path) {
+    if (path == null || path.isEmpty) {
+      return null;
+    }
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    return '${AppConfig().baseURL}$path';
   }
 
   Widget _buildField(
