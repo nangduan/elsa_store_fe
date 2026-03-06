@@ -39,11 +39,7 @@ class CartScreen extends StatelessWidget {
         backgroundColor: _bgColor,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios_new,
-            color: _primaryBlue,
-            size: 20,
-          ),
+          icon: Icon(Icons.arrow_back_ios_new, color: _primaryBlue, size: 20),
           onPressed: () {
             if (context.router.canPop()) {
               context.router.pop();
@@ -161,13 +157,19 @@ class CartScreen extends StatelessWidget {
         const SizedBox(height: 16),
         Text(
           message ?? 'Không tải được giỏ hàng',
-          style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.w500),
+          style: const TextStyle(
+            color: Colors.black54,
+            fontWeight: FontWeight.w500,
+          ),
         ),
         const SizedBox(height: 16),
         TextButton(
           style: TextButton.styleFrom(foregroundColor: _primaryBlue),
           onPressed: () => onRetry(),
-          child: const Text('Thử lại', style: TextStyle(fontWeight: FontWeight.bold)),
+          child: const Text(
+            'Thử lại',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
         ),
       ],
     );
@@ -245,7 +247,10 @@ class CartScreen extends StatelessWidget {
             onPressed: () => Navigator.pop(ctx),
             child: const Text(
               'Hủy',
-              style: TextStyle(color: Colors.black54, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: Colors.black54,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           ElevatedButton(
@@ -262,7 +267,10 @@ class CartScreen extends StatelessWidget {
             },
             child: Text(
               'Xóa',
-              style: TextStyle(color: _primaryOrange, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: _primaryOrange,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -271,53 +279,37 @@ class CartScreen extends StatelessWidget {
   }
 
   Future<void> _checkoutItem(
-      BuildContext context,
-      CartItemResponse item,
-      ) async {
+    BuildContext context,
+    CartItemResponse item,
+  ) async {
     final variantId = item.productVariantId;
     final amount =
         item.lineTotal ??
-            (item.unitPrice != null && item.quantity != null
-                ? item.unitPrice! * item.quantity!
-                : null);
+        (item.unitPrice != null && item.quantity != null
+            ? item.unitPrice! * item.quantity!
+            : null);
     if (variantId == null || amount == null || amount <= 0) {
-      _showSnackBar(context, 'Dữ liệu sản phẩm không hợp lệ', isError: true);
+      _showSnackBar(context, 'Du lieu san pham khong hop le', isError: true);
       return;
     }
 
-    final userId = await FlutterStoreCore.readUserId();
-    if (userId == null) {
-      _showSnackBar(context, 'Thiếu thông tin người dùng', isError: true);
-      return;
-    }
-
-    final order = await getIt<CreateOrderUseCase>().call(userId, [
-      CreateOrderItemRequest(
-        productVariantId: variantId,
-        quantity: item.quantity ?? 1,
+    await _openPaymentAndRefresh(
+      context,
+      PaymentRoute(
+        productName: item.productName ?? 'San pham',
+        imageUrl: item.imageUrl,
+        amount: amount,
+        cartItems: [item],
+        onPaymentSuccess: () => _createOrderForCartItems(context, [item]),
       ),
-    ]);
-
-    if (order != null) {
-      await _openPaymentAndRefresh(
-        context,
-        PaymentRoute(
-          productName: item.productName ?? 'Sản phẩm',
-          imageUrl: item.imageUrl,
-          amount: amount,
-          cartItems: [item],
-        ),
-      );
-    } else {
-      _showSnackBar(context, 'Tạo đơn hàng thất bại', isError: true);
-    }
+    );
   }
 
   Widget _buildBottomCheckout(
-      BuildContext context,
-      double? total,
-      List<CartItemResponse> items,
-      ) {
+    BuildContext context,
+    double? total,
+    List<CartItemResponse> items,
+  ) {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
       decoration: BoxDecoration(
@@ -387,51 +379,71 @@ class CartScreen extends StatelessWidget {
   }
 
   Future<void> _checkoutAll(
-      BuildContext context,
-      List<CartItemResponse> items,
-      ) async {
+    BuildContext context,
+    List<CartItemResponse> items,
+  ) async {
     final total = items.fold<double>(
       0,
-          (sum, item) => sum + (item.lineTotal ?? 0),
+      (sum, item) => sum + (item.lineTotal ?? 0),
     );
 
     if (total <= 0) {
-      _showSnackBar(context, 'Giỏ hàng đang trống');
+      _showSnackBar(context, 'Gio hang dang trong');
       return;
     }
 
-    List<CreateOrderItemRequest> orderItems = items.map((item) {
-      return CreateOrderItemRequest(
-        productVariantId: item.productVariantId!,
-        quantity: item.quantity!,
-      );
-    }).toList();
+    await _openPaymentAndRefresh(
+      context,
+      PaymentRoute(
+        productName: 'Thanh toan gio hang',
+        amount: total,
+        cartItems: items,
+        onPaymentSuccess: () => _createOrderForCartItems(context, items),
+      ),
+    );
+  }
+
+  Future<int> _createOrderForCartItems(
+    BuildContext context,
+    List<CartItemResponse> items,
+  ) async {
+    if (items.isEmpty) {
+      _showSnackBar(context, 'Gio hang dang trong', isError: true);
+      return 0;
+    }
 
     final userId = await FlutterStoreCore.readUserId();
     if (userId == null) {
-      _showSnackBar(context, 'Thiếu thông tin người dùng', isError: true);
-      return;
+      _showSnackBar(context, 'Thieu thong tin nguoi dung', isError: true);
+      return 0;
+    }
+
+    final orderItems = <CreateOrderItemRequest>[];
+    for (final item in items) {
+      final variantId = item.productVariantId;
+      final quantity = item.quantity ?? 1;
+      if (variantId == null || quantity <= 0) {
+        _showSnackBar(context, 'Du lieu san pham khong hop le', isError: true);
+        return 0;
+      }
+      orderItems.add(
+        CreateOrderItemRequest(productVariantId: variantId, quantity: quantity),
+      );
     }
 
     final order = await getIt<CreateOrderUseCase>().call(userId, orderItems);
-    if (order != null) {
-      await _openPaymentAndRefresh(
-        context,
-        PaymentRoute(
-          productName: 'Thanh toán giỏ hàng',
-          amount: total,
-          cartItems: items,
-        ),
-      );
-    } else {
-      _showSnackBar(context, 'Tạo đơn hàng thất bại', isError: true);
+    final orderId = order?.id;
+    if (orderId == null || orderId <= 0) {
+      _showSnackBar(context, 'Tao don hang that bai', isError: true);
+      return 0;
     }
+    return orderId;
   }
 
   Future<void> _openPaymentAndRefresh(
-      BuildContext context,
-      PageRouteInfo route,
-      ) async {
+    BuildContext context,
+    PageRouteInfo route,
+  ) async {
     await context.router.push(route);
     if (!context.mounted) return;
     context.read<CartCubit>().load();
@@ -441,15 +453,17 @@ class CartScreen extends StatelessWidget {
     } catch (_) {}
   }
 
-  void _showSnackBar(BuildContext context, String message, {bool isError = false}) {
+  void _showSnackBar(
+    BuildContext context,
+    String message, {
+    bool isError = false,
+  }) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: isError ? Colors.redAccent : Colors.green,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -507,19 +521,19 @@ class _CartItemCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               child: imageUrl == null
                   ? const Icon(
-                Icons.inventory_2_outlined,
-                color: Colors.black26,
-                size: 32,
-              )
+                      Icons.inventory_2_outlined,
+                      color: Colors.black26,
+                      size: 32,
+                    )
                   : Image.network(
-                imageUrl,
-                fit: BoxFit.fitWidth,
-                errorBuilder: (_, __, ___) => const Icon(
-                  Icons.broken_image_outlined,
-                  color: Colors.black26,
-                  size: 32,
-                ),
-              ),
+                      imageUrl,
+                      fit: BoxFit.fitWidth,
+                      errorBuilder: (_, __, ___) => const Icon(
+                        Icons.broken_image_outlined,
+                        color: Colors.black26,
+                        size: 32,
+                      ),
+                    ),
             ),
           ),
           const SizedBox(width: 16),
@@ -549,7 +563,10 @@ class _CartItemCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 6),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFEAF1F8),
                               borderRadius: BorderRadius.circular(6),
@@ -621,7 +638,10 @@ class _CartItemCard extends StatelessWidget {
                       ),
                       child: const Text(
                         'Thanh toán riêng',
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   ),

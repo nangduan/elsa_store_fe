@@ -2,10 +2,12 @@ import 'package:auto_route/auto_route.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_skeleton/core/navigation/app_routes.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../core/api/app_config.dart';
+import '../../core/constants/constant.dart';
 import '../../core/constants/format.dart';
 import '../../core/di/injector.dart';
 import '../../core/storage/flutter_store_core.dart';
@@ -195,19 +197,27 @@ class _PaymentScreenState extends State<PaymentScreen> {
     final amount =
         widget.amount ?? _calculateCartTotal(widget.cartItems ?? const []);
     if (amount <= 0) {
-      _showSnackBar('Số tiền không hợp lý');
+      _showSnackBar('So tien khong hop ly');
       return;
     }
 
     if (_method == PaymentMethod.cod) {
-      setState(() {
-        _statusMessage = 'Đặt hàng thành công (thanh toán khi nhận hàng)';
-      });
-      final orderId = await widget.onPaymentSuccess?.call();
-      await _removeCartItemsIfNeeded();
-      if (mounted) {
-        _showSnackBar('Đặt hàng thành công');
-        _exitAfterPayment();
+      setState(() => _isProcessing = true);
+      try {
+        final orderId = await _createOrderId();
+        if (orderId == null) return;
+        setState(() {
+          _statusMessage = 'Dat hang thanh cong (thanh toan khi nhan hang)';
+        });
+        await _removeCartItemsIfNeeded();
+        if (mounted) {
+          _showSnackBar('Dat hang thanh cong');
+          _exitAfterPayment();
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isProcessing = false);
+        }
       }
       return;
     }
@@ -228,9 +238,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
         ),
       );
     } on DioException catch (e) {
-      _showSnackBar(e.message ?? 'Không thể tạo thanh toán');
+      _showSnackBar(e.message ?? 'Khong the tao thanh toan');
     } catch (_) {
-      _showSnackBar('Không thể tạo thanh toán');
+      _showSnackBar('Khong the tao thanh toan');
     } finally {
       if (mounted) {
         setState(() => _isProcessing = false);
@@ -242,12 +252,20 @@ class _PaymentScreenState extends State<PaymentScreen> {
     required double amount,
     required String bankCode,
   }) async {
-    final orderId = await widget.onPaymentSuccess?.call();
+    final orderId = await _createOrderId();
+    if (orderId == null) return null;
+    final token = await _readAccessToken();
 
     final dio = getIt<Dio>();
     final response = await dio.get(
       '/payment/vn-pay',
       queryParameters: {'orderId': orderId, 'bankCode': bankCode},
+      options: Options(
+        headers: {
+          if (token != null && token.isNotEmpty)
+            'Authorization': 'Bearer $token',
+        },
+      ),
     );
     final data = response.data;
     if (data is Map<String, dynamic>) {
@@ -256,8 +274,17 @@ class _PaymentScreenState extends State<PaymentScreen> {
         return payload['paymentUrl'] as String?;
       }
     }
-    _showSnackBar('Thanh toán thất bại');
+    _showSnackBar('Thanh toan that bai');
     return null;
+  }
+
+  Future<int?> _createOrderId() async {
+    final orderId = await widget.onPaymentSuccess?.call();
+    if (orderId == null || orderId <= 0) {
+      _showSnackBar('Tao don hang that bai');
+      return null;
+    }
+    return orderId;
   }
 
   Future<void> _handleVnPayCallback(Uri callbackUri) async {
@@ -280,7 +307,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
       }
       setState(() => _statusMessage = message);
       _showSnackBar(message);
-      if (_isPaymentSuccess(message)) {
+      final isSuccess = _isVnPaySuccess(callbackUri, data, message);
+      if (isSuccess) {
         await _removeCartItemsIfNeeded();
       }
     } on DioException catch (e) {
@@ -297,7 +325,28 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   bool _isPaymentSuccess(String message) {
     final lower = message.toLowerCase();
-    return lower.contains('thành công') || lower.contains('success');
+    return lower.contains('thanh cong') || lower.contains('success');
+  }
+
+  bool _isVnPaySuccess(Uri callbackUri, dynamic responseData, String message) {
+    final responseCode =
+        callbackUri.queryParameters['vnp_ResponseCode'] ??
+        callbackUri.queryParameters['vnp_responsecode'];
+    if (responseCode == '00') {
+      return true;
+    }
+    if (responseData is Map<String, dynamic>) {
+      final ok = responseData['success'];
+      if (ok is bool && ok) {
+        return true;
+      }
+    }
+    return _isPaymentSuccess(message);
+  }
+
+  Future<String?> _readAccessToken() async {
+    final storage = getIt<FlutterSecureStorage>();
+    return storage.read(key: Constants.accessToken);
   }
 
   Future<void> _removeCartItemsIfNeeded() async {
