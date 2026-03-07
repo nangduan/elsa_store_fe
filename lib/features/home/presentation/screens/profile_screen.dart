@@ -227,7 +227,10 @@ class ProfileScreen extends StatelessWidget {
                     const SizedBox(height: 32),
                     Container(
                       margin: const EdgeInsets.symmetric(horizontal: 20),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(24),
@@ -282,12 +285,12 @@ class ProfileScreen extends StatelessWidget {
                               onPressed: user == null
                                   ? null
                                   : () => _showEditProfileSheet(
-                                context,
-                                fullName: fullName,
-                                username: username,
-                                email: email,
-                                phone: phone,
-                              ),
+                                      context,
+                                      fullName: fullName,
+                                      username: username,
+                                      email: email,
+                                      phone: phone,
+                                    ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: _primaryBlue,
                                 foregroundColor: Colors.white,
@@ -316,7 +319,9 @@ class ProfileScreen extends StatelessWidget {
                                   : () => _showChangePasswordSheet(context),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: _primaryBlue,
-                                side: BorderSide(color: _primaryBlue.withOpacity(0.3)),
+                                side: BorderSide(
+                                  color: _primaryBlue.withOpacity(0.3),
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(28),
                                 ),
@@ -439,12 +444,12 @@ class ProfileScreen extends StatelessWidget {
   }
 
   void _showEditProfileSheet(
-      BuildContext context, {
-        required String fullName,
-        required String username,
-        required String email,
-        required String phone,
-      }) {
+    BuildContext context, {
+    required String fullName,
+    required String username,
+    required String email,
+    required String phone,
+  }) {
     final fullNameController = TextEditingController(text: fullName);
     final usernameController = TextEditingController(text: username);
     final emailController = TextEditingController(text: email);
@@ -523,35 +528,37 @@ class ProfileScreen extends StatelessWidget {
                         onPressed: isSubmitting
                             ? null
                             : () async {
-                          final name = fullNameController.text.trim();
-                          final email = emailController.text.trim();
-                          final phone = phoneController.text.trim();
-                          if (name.isEmpty ||
-                              email.isEmpty ||
-                              phone.isEmpty) {
-                            ScaffoldMessenger.of(sheetContext).showSnackBar(
-                              SnackBar(
-                                content: const Text(
-                                  'Vui lòng điền đầy đủ thông tin',
-                                ),
-                                backgroundColor: Colors.redAccent,
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            );
-                            return;
-                          }
-                          final ok = await cubit.updateProfile(
-                            email: email,
-                            phone: phone,
-                            fullName: name,
-                          );
-                          if (ok && sheetContext.mounted) {
-                            Navigator.pop(sheetContext);
-                          }
-                        },
+                                final name = fullNameController.text.trim();
+                                final email = emailController.text.trim();
+                                final phone = phoneController.text.trim();
+                                if (name.isEmpty ||
+                                    email.isEmpty ||
+                                    phone.isEmpty) {
+                                  ScaffoldMessenger.of(
+                                    sheetContext,
+                                  ).showSnackBar(
+                                    SnackBar(
+                                      content: const Text(
+                                        'Vui lòng điền đầy đủ thông tin',
+                                      ),
+                                      backgroundColor: Colors.redAccent,
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                final ok = await cubit.updateProfile(
+                                  email: email,
+                                  phone: phone,
+                                  fullName: name,
+                                );
+                                if (ok && sheetContext.mounted) {
+                                  Navigator.pop(sheetContext);
+                                }
+                              },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _primaryBlue,
                           foregroundColor: Colors.white,
@@ -562,21 +569,21 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         child: isSubmitting
                             ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
                             : const Text(
-                          'LƯU THAY ĐỔI',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
+                                'LƯU THAY ĐỔI',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
                       ),
                     );
                   },
@@ -632,7 +639,7 @@ class ProfileScreen extends StatelessWidget {
               const SizedBox(height: 24),
               _buildModernField(
                 oldPasswordController,
-                'Mật khẩu cũ',
+                'Mật khẩu hiện tại',
                 Icons.lock_outline,
                 obscureText: true,
               ),
@@ -662,50 +669,58 @@ class ProfileScreen extends StatelessWidget {
                         onPressed: isSubmitting
                             ? null
                             : () async {
-                          final oldPass = oldPasswordController.text.trim();
-                          final newPass = newPasswordController.text.trim();
-                          final confirmPass = confirmPasswordController.text.trim();
-                          if (oldPass.isEmpty ||
-                              newPass.isEmpty ||
-                              confirmPass.isEmpty) {
-                            ScaffoldMessenger.of(sheetContext).showSnackBar(
-                              SnackBar(
-                                content: const Text(
-                                  'Vui lòng điền đầy đủ thông tin',
-                                ),
-                                backgroundColor: Colors.redAccent,
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            );
-                            return;
-                          }
-                          if (newPass != confirmPass) {
-                            ScaffoldMessenger.of(sheetContext).showSnackBar(
-                              SnackBar(
-                                content: const Text(
-                                  'Mật khẩu xác nhận không khớp',
-                                ),
-                                backgroundColor: Colors.redAccent,
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            );
-                            return;
-                          }
-                          final ok = await cubit.changePassword(
-                            oldPassword: oldPass,
-                            newPassword: newPass,
-                            confirmPassword: confirmPass,
-                          );
-                          if (ok && sheetContext.mounted) {
-                            Navigator.pop(sheetContext);
-                          }
-                        },
+                                final oldPass = oldPasswordController.text
+                                    .trim();
+                                final newPass = newPasswordController.text
+                                    .trim();
+                                final confirmPass = confirmPasswordController
+                                    .text
+                                    .trim();
+                                if (oldPass.isEmpty ||
+                                    newPass.isEmpty ||
+                                    confirmPass.isEmpty) {
+                                  ScaffoldMessenger.of(
+                                    sheetContext,
+                                  ).showSnackBar(
+                                    SnackBar(
+                                      content: const Text(
+                                        'Vui lòng điền đầy đủ thông tin',
+                                      ),
+                                      backgroundColor: Colors.redAccent,
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                if (newPass != confirmPass) {
+                                  ScaffoldMessenger.of(
+                                    sheetContext,
+                                  ).showSnackBar(
+                                    SnackBar(
+                                      content: const Text(
+                                        'Mật khẩu xác nhận không khớp',
+                                      ),
+                                      backgroundColor: Colors.redAccent,
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                final ok = await cubit.changePassword(
+                                  oldPassword: oldPass,
+                                  newPassword: newPass,
+                                  confirmPassword: confirmPass,
+                                );
+                                if (ok && sheetContext.mounted) {
+                                  Navigator.pop(sheetContext);
+                                }
+                              },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _primaryBlue,
                           foregroundColor: Colors.white,
@@ -716,21 +731,21 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         child: isSubmitting
                             ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
                             : const Text(
-                          'CẬP NHẬT MẬT KHẨU',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
+                                'CẬP NHẬT MẬT KHẨU',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
                       ),
                     );
                   },
@@ -744,13 +759,13 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildModernField(
-      TextEditingController controller,
-      String label,
-      IconData icon, {
-        TextInputType? keyboardType,
-        bool obscureText = false,
-        bool enabled = true,
-      }) {
+    TextEditingController controller,
+    String label,
+    IconData icon, {
+    TextInputType? keyboardType,
+    bool obscureText = false,
+    bool enabled = true,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextField(
@@ -768,7 +783,10 @@ class ProfileScreen extends StatelessWidget {
           prefixIcon: Icon(icon, size: 22, color: Colors.black45),
           filled: true,
           fillColor: enabled ? _inputFillColor : Colors.grey.shade200,
-          contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 18,
+            horizontal: 16,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide.none,
@@ -797,7 +815,10 @@ class ProfileScreen extends StatelessWidget {
             onPressed: () => Navigator.pop(context),
             child: const Text(
               'Hủy',
-              style: TextStyle(color: Colors.black54, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: Colors.black54,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           ElevatedButton(
@@ -817,7 +838,10 @@ class ProfileScreen extends StatelessWidget {
             },
             child: Text(
               'Đăng xuất',
-              style: TextStyle(color: _primaryOrange, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: _primaryOrange,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
