@@ -24,7 +24,7 @@ class HomeScreen extends StatelessWidget {
           centerTitle: false,
           automaticallyImplyLeading: false, // Bỏ nút Back
           title: const Text(
-            'CỬA HÀNG THỜI TRANG',
+            'ELSA STORE',
             style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.w900,
