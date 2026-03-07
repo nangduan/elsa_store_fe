@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injector.dart';
 import '../../../../core/navigation/app_routes.dart';
+import '../../domain/usecases/login_use_case.dart';
 import '../../data/models/request/register_request.dart';
 import '../../domain/usecases/register_use_case.dart';
 import '../cubit/register/register_cubit.dart';
@@ -75,7 +76,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => RegisterCubit(getIt<RegisterUseCase>()),
+      create: (_) => RegisterCubit(
+        getIt<RegisterUseCase>(),
+        getIt<LoginUseCase>(),
+      ),
       child: Scaffold(
         backgroundColor: Colors.white,
         body: BlocConsumer<RegisterCubit, RegisterState>(

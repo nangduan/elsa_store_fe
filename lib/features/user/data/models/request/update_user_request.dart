@@ -4,9 +4,8 @@ class UpdateUserRequest {
   final String? phone;
   final String? fullName;
   final bool? enabled;
+  final String? password;
   final String? oldPassword;
-  final String? newPassword;
-  final String? confirmPassword;
 
   UpdateUserRequest({
     this.username,
@@ -14,9 +13,8 @@ class UpdateUserRequest {
     this.phone,
     this.fullName,
     this.enabled,
+    this.password,
     this.oldPassword,
-    this.newPassword,
-    this.confirmPassword,
   });
 
   Map<String, dynamic> toJson() {
@@ -26,9 +24,8 @@ class UpdateUserRequest {
       'phone': phone,
       'fullName': fullName,
       'enabled': enabled,
+      'password': password,
       'oldPassword': oldPassword,
-      'newPassword': newPassword,
-      'confirmPassword': confirmPassword,
     };
     data.removeWhere((key, value) => value == null);
     return data;
