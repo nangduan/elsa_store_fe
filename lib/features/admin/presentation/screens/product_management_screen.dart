@@ -16,11 +16,39 @@ import '../cubit/category_cubit.dart';
 import '../cubit/product_cubit.dart';
 
 @RoutePage()
-class ProductManagementScreen extends StatelessWidget {
+class ProductManagementScreen extends StatefulWidget {
   const ProductManagementScreen({super.key});
+
+  @override
+  State<ProductManagementScreen> createState() =>
+      _ProductManagementScreenState();
+}
+
+class _ProductManagementScreenState extends State<ProductManagementScreen> {
 
   final Color _primaryOrange = const Color(0xFFE85022);
   final Color _inputFillColor = const Color(0xFFF5F5F5);
+  final TextEditingController _searchController = TextEditingController();
+  String _searchKeyword = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      _searchKeyword = _searchController.text.trim().toLowerCase();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +86,7 @@ class ProductManagementScreen extends StatelessWidget {
             }
           },
           builder: (context, state) {
+            final filteredProducts = _filterProducts(state.products);
             return CustomScrollView(
               slivers: [
                 BlocBuilder<CategoryCubit, CategoryState>(
@@ -72,8 +101,10 @@ class ProductManagementScreen extends StatelessWidget {
                       child: CircularProgressIndicator(color: Colors.white),
                     ),
                   )
-                else if (state.products.isEmpty)
-                  SliverFillRemaining(child: _buildEmptyState())
+                else if (filteredProducts.isEmpty)
+                  SliverFillRemaining(
+                    child: _buildEmptyState(isSearching: _searchKeyword.isNotEmpty),
+                  )
                 else
                   SliverPadding(
                     padding: const EdgeInsets.symmetric(
@@ -83,8 +114,8 @@ class ProductManagementScreen extends StatelessWidget {
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate(
                             (context, index) =>
-                            _buildProductCard(context, state.products[index]),
-                        childCount: state.products.length,
+                            _buildProductCard(context, filteredProducts[index]),
+                        childCount: filteredProducts.length,
                       ),
                     ),
                   ),
@@ -150,10 +181,17 @@ class ProductManagementScreen extends StatelessWidget {
         color: _primaryOrange,
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
         child: TextField(
+          controller: _searchController,
           decoration: InputDecoration(
             hintText: 'Tìm kiếm hàng tồn...',
             hintStyle: const TextStyle(color: Colors.black38, fontSize: 15),
             prefixIcon: const Icon(Icons.search_rounded, color: Colors.black45),
+            suffixIcon: _searchKeyword.isEmpty
+                ? null
+                : IconButton(
+                    onPressed: _searchController.clear,
+                    icon: const Icon(Icons.close_rounded, color: Colors.black45),
+                  ),
             filled: true,
             fillColor: Colors.white, // Input trắng
             contentPadding: const EdgeInsets.symmetric(vertical: 14),
@@ -165,6 +203,22 @@ class ProductManagementScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  List<ProductResponse> _filterProducts(List<ProductResponse> products) {
+    if (_searchKeyword.isEmpty) {
+      return products;
+    }
+
+    return products.where((item) {
+      final name = item.name?.toLowerCase() ?? '';
+      final description = item.description?.toLowerCase() ?? '';
+      final category = item.categoryName?.toLowerCase() ?? '';
+
+      return name.contains(_searchKeyword) ||
+          description.contains(_searchKeyword) ||
+          category.contains(_searchKeyword);
+    }).toList();
   }
 
   Widget _buildProductCard(BuildContext context, ProductResponse item) {
@@ -396,20 +450,20 @@ class ProductManagementScreen extends StatelessWidget {
     return baseUrl;
   }
 
-  Widget _buildEmptyState() {
-    return const Center(
+  Widget _buildEmptyState({bool isSearching = false}) {
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.inventory_2_outlined,
+            isSearching ? Icons.search_off_rounded : Icons.inventory_2_outlined,
             size: 80,
             color: Colors.white70,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
-            'Kho hàng trống',
-            style: TextStyle(
+            isSearching ? 'Không tìm thấy sản phẩm' : 'Kho hàng trống',
+            style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
               fontSize: 16,
