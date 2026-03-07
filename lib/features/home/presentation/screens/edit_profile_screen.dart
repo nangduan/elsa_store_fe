@@ -46,7 +46,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       backgroundColor: _bgColor,
       appBar: AppBar(
         title: Text(
-          'Chinh sua thong tin',
+          'Chỉnh sửa thông tin',
           style: TextStyle(
             color: _primaryBlue,
             fontWeight: FontWeight.w900,
@@ -65,10 +65,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       body: BlocBuilder<UserCubit, UserState>(
         builder: (context, state) {
           final cubit = context.read<UserCubit>();
-          final isSubmitting = state.actionStatus == UserActionStatus.submitting;
+          final isSubmitting =
+              state.actionStatus == UserActionStatus.submitting;
           final user = state.user;
           if (user == null) {
-            return const Center(child: Text('Khong tim thay thong tin nguoi dung'));
+            return const Center(
+              child: Text('Không tìm thấy thông tin người dùng'),
+            );
           }
 
           return SingleChildScrollView(
@@ -90,7 +93,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Cap nhat thong tin ca nhan',
+                    'Cập nhật thông tin cá nhân',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w900,
@@ -100,13 +103,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   const SizedBox(height: 16),
                   _buildField(
                     controller: _usernameController,
-                    label: 'Ten dang nhap',
+                    label: 'Tên đăng nhập',
                     icon: Icons.account_circle_outlined,
                     enabled: false,
                   ),
                   _buildField(
                     controller: _fullNameController,
-                    label: 'Ho va ten',
+                    label: 'Họ và tên',
                     icon: Icons.badge_outlined,
                   ),
                   _buildField(
@@ -117,7 +120,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   _buildField(
                     controller: _phoneController,
-                    label: 'So dien thoai',
+                    label: 'Số điện thoại',
                     icon: Icons.phone_android_outlined,
                     keyboardType: TextInputType.phone,
                   ),
@@ -132,10 +135,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               final name = _fullNameController.text.trim();
                               final email = _emailController.text.trim();
                               final phone = _phoneController.text.trim();
-                              if (name.isEmpty || email.isEmpty || phone.isEmpty) {
+                              if (name.isEmpty ||
+                                  email.isEmpty ||
+                                  phone.isEmpty) {
                                 _showSnackBar(
                                   context,
-                                  'Vui long dien day du thong tin',
+                                  'Vui lòng điền đầy đủ thông tin',
                                 );
                                 return;
                               }
@@ -148,9 +153,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 context,
                                 ok
                                     ? (cubit.state.actionMessage ??
-                                        'Cap nhat thanh cong')
+                                          'Cập nhật thành công')
                                     : (cubit.state.actionMessage ??
-                                        'Cap nhat that bai'),
+                                          'Cập nhật thất bại'),
                                 isError: !ok,
                               );
                             },
@@ -172,7 +177,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               ),
                             )
                           : const Text(
-                              'LUU THAY DOI',
+                              'LƯU THAY ĐỔI',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 0.5,
@@ -227,7 +232,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  void _showSnackBar(BuildContext context, String message, {bool isError = true}) {
+  void _showSnackBar(
+    BuildContext context,
+    String message, {
+    bool isError = true,
+  }) {
     final messenger = ScaffoldMessenger.of(context);
     messenger
       ..hideCurrentSnackBar()
@@ -236,7 +245,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           content: Text(message),
           backgroundColor: isError ? Colors.redAccent : Colors.green,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
   }

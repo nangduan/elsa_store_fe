@@ -34,7 +34,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       backgroundColor: _bgColor,
       appBar: AppBar(
         title: Text(
-          'Doi mat khau',
+          'Đổi mật khẩu',
           style: TextStyle(
             color: _primaryBlue,
             fontWeight: FontWeight.w900,
@@ -53,10 +53,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       body: BlocBuilder<UserCubit, UserState>(
         builder: (context, state) {
           final cubit = context.read<UserCubit>();
-          final isSubmitting = state.actionStatus == UserActionStatus.submitting;
+          final isSubmitting =
+              state.actionStatus == UserActionStatus.submitting;
           final user = state.user;
           if (user == null) {
-            return const Center(child: Text('Khong tim thay thong tin nguoi dung'));
+            return const Center(
+              child: Text('Không tìm thấy thông tin người dùng'),
+            );
           }
 
           return SingleChildScrollView(
@@ -78,7 +81,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Cap nhat mat khau moi',
+                    'Đổi mật khẩu mới',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w900,
@@ -88,19 +91,19 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   const SizedBox(height: 16),
                   _buildField(
                     controller: _oldPasswordController,
-                    label: 'Mat khau hien tai',
+                    label: 'Mật khẩu hiện tại',
                     icon: Icons.lock_outline,
                     obscureText: true,
                   ),
                   _buildField(
                     controller: _newPasswordController,
-                    label: 'Mat khau moi',
+                    label: 'Mật khẩu mới',
                     icon: Icons.lock_reset_outlined,
                     obscureText: true,
                   ),
                   _buildField(
                     controller: _confirmPasswordController,
-                    label: 'Xac nhan mat khau moi',
+                    label: 'Xác nhận mật khẩu mới',
                     icon: Icons.check_circle_outline,
                     obscureText: true,
                   ),
@@ -112,23 +115,26 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       onPressed: isSubmitting
                           ? null
                           : () async {
-                              final oldPass = _oldPasswordController.text.trim();
-                              final newPass = _newPasswordController.text.trim();
-                              final confirmPass =
-                                  _confirmPasswordController.text.trim();
+                              final oldPass = _oldPasswordController.text
+                                  .trim();
+                              final newPass = _newPasswordController.text
+                                  .trim();
+                              final confirmPass = _confirmPasswordController
+                                  .text
+                                  .trim();
                               if (oldPass.isEmpty ||
                                   newPass.isEmpty ||
                                   confirmPass.isEmpty) {
                                 _showSnackBar(
                                   context,
-                                  'Vui long dien day du thong tin',
+                                  'Vui lòng điền đầy đủ thông tin',
                                 );
                                 return;
                               }
                               if (newPass != confirmPass) {
                                 _showSnackBar(
                                   context,
-                                  'Mat khau xac nhan khong khop',
+                                  'Mật khẩu xác nhận không khớp',
                                 );
                                 return;
                               }
@@ -141,9 +147,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 context,
                                 ok
                                     ? (cubit.state.actionMessage ??
-                                        'Doi mat khau thanh cong')
+                                          'Đổi mật khẩu thành công')
                                     : (cubit.state.actionMessage ??
-                                        'Doi mat khau that bai'),
+                                          'Đổi mật khẩu thất bại'),
                                 isError: !ok,
                               );
                               if (ok) {
@@ -170,7 +176,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                               ),
                             )
                           : const Text(
-                              'CAP NHAT MAT KHAU',
+                              'ĐỔI MẬT KHẨU',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 0.5,
@@ -218,7 +224,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     );
   }
 
-  void _showSnackBar(BuildContext context, String message, {bool isError = true}) {
+  void _showSnackBar(
+    BuildContext context,
+    String message, {
+    bool isError = true,
+  }) {
     final messenger = ScaffoldMessenger.of(context);
     messenger
       ..hideCurrentSnackBar()
@@ -227,7 +237,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           content: Text(message),
           backgroundColor: isError ? Colors.redAccent : Colors.green,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
   }
