@@ -148,9 +148,8 @@ class UserCubit extends Cubit<UserState> {
           phone: user.phone,
           fullName: user.fullName,
           enabled: user.enabled ?? true,
+          password: newPassword,
           oldPassword: oldPassword,
-          newPassword: newPassword,
-          confirmPassword: confirmPassword,
         ),
       );
       if (updated == null) {
