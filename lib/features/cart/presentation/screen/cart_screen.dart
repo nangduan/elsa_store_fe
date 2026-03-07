@@ -38,14 +38,14 @@ class CartScreen extends StatelessWidget {
         centerTitle: true,
         backgroundColor: _bgColor,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: _primaryBlue, size: 20),
-          onPressed: () {
-            if (context.router.canPop()) {
-              context.router.pop();
-            }
-          },
-        ),
+        // leading: IconButton(
+        //   icon: Icon(Icons.arrow_back_ios_new, color: _primaryBlue, size: 20),
+        //   onPressed: () {
+        //     if (context.router.canPop()) {
+        //       context.router.pop();
+        //     }
+        //   },
+        // ),
       ),
       body: BlocBuilder<CartCubit, CartState>(
         builder: (context, state) {
@@ -205,25 +205,25 @@ class CartScreen extends StatelessWidget {
           style: TextStyle(color: Colors.black54),
         ),
         const SizedBox(height: 32),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _primaryBlue,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(28),
-            ),
-          ),
-          onPressed: () {
-            // Có thể navigate về trang chủ hoặc trang sản phẩm tùy ý
-            context.router.maybePop();
-          },
-          child: const Text(
-            'TIẾP TỤC MUA SẮM',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
+        // ElevatedButton(
+        //   style: ElevatedButton.styleFrom(
+        //     backgroundColor: _primaryBlue,
+        //     foregroundColor: Colors.white,
+        //     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+        //     elevation: 0,
+        //     shape: RoundedRectangleBorder(
+        //       borderRadius: BorderRadius.circular(28),
+        //     ),
+        //   ),
+        //   onPressed: () {
+        //     // Có thể navigate về trang chủ hoặc trang sản phẩm tùy ý
+        //     context.router.maybePop();
+        //   },
+        //   child: const Text(
+        //     'TIẾP TỤC MUA SẮM',
+        //     style: TextStyle(fontWeight: FontWeight.bold),
+        //   ),
+        // ),
       ],
     );
   }

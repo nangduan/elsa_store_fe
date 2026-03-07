@@ -20,7 +20,9 @@ class AdminScreen extends StatefulWidget {
 }
 
 class _AdminScreenState extends State<AdminScreen> {
-  late final Future<DashboardOverview?> _dashboardFuture;
+  late Future<DashboardOverview?> _dashboardFuture;
+  late final RevenueCubit _dailyRevenueCubit;
+  late final RevenueCubit _monthlyRevenueCubit;
 
   final Color _primaryBlue = const Color(0xFF1964D4);
   final Color _primaryOrange = const Color(0xFFE85022);
@@ -29,12 +31,44 @@ class _AdminScreenState extends State<AdminScreen> {
   @override
   void initState() {
     super.initState();
-    _dashboardFuture = _loadDashboardOverview();
+    // Khởi tạo các Cubit ở đây để có thể tái sử dụng và gọi hàm reload
+    _dailyRevenueCubit = getIt<RevenueCubit>();
+    _monthlyRevenueCubit = getIt<RevenueCubit>();
+    _refreshData();
+  }
+
+  @override
+  void dispose() {
+    _dailyRevenueCubit.close();
+    _monthlyRevenueCubit.close();
+    super.dispose();
+  }
+
+  // Hàm này sẽ gánh trách nhiệm tải lại toàn bộ dữ liệu trên màn hình
+  void _refreshData() {
+    setState(() {
+      _dashboardFuture = _loadDashboardOverview();
+    });
+
+    final range = _defaultRange();
+    _dailyRevenueCubit.loadAll(
+      from: _formatDate(range.start),
+      to: _formatDate(range.end),
+      groupBy: RevenueGroupBy.day,
+      statuses: const [0, 1],
+    );
+
+    final yearRange = _yearRange();
+    _monthlyRevenueCubit.loadTimeseries(
+      from: _formatDate(yearRange.start),
+      to: _formatDate(yearRange.end),
+      groupBy: RevenueGroupBy.month,
+      statuses: const [0, 1],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final range = _defaultRange();
     return Scaffold(
       backgroundColor: _bgColor,
       appBar: AppBar(
@@ -62,53 +96,54 @@ class _AdminScreenState extends State<AdminScreen> {
           const SizedBox(width: 8),
         ],
       ),
-      body: BlocProvider(
-        create: (_) => getIt<RevenueCubit>()
-          ..loadAll(
-            from: _formatDate(range.start),
-            to: _formatDate(range.end),
-            groupBy: RevenueGroupBy.day,
-            statuses: const [0, 1],
+      body: RefreshIndicator(
+        color: _primaryBlue,
+        onRefresh: () async {
+          _refreshData();
+        },
+        child: BlocProvider.value(
+          value: _dailyRevenueCubit, // Dùng value provider
+          child: BlocBuilder<RevenueCubit, RevenueState>(
+            builder: (context, state) {
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Tổng Quan',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                    ),
+                    const SizedBox(height: 16),
+                    FutureBuilder<DashboardOverview?>(
+                      future: _dashboardFuture,
+                      builder: (context, snapshot) {
+                        return _buildStatsGrid(snapshot.data);
+                      },
+                    ),
+                    const SizedBox(height: 32),
+                    const Text(
+                      'Phân tích doanh thu (30 ngày)',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRevenueChart(context, state),
+                    const SizedBox(height: 32),
+                    _buildMonthlyRevenueChart(context),
+                    const SizedBox(height: 32),
+                    const Text(
+                      'Quản lý cửa hàng',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildNavigationGrid(context),
+                    const SizedBox(height: 40),
+                  ],
+                ),
+              );
+            },
           ),
-        child: BlocBuilder<RevenueCubit, RevenueState>(
-          builder: (context, state) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Tổng Quan',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
-                  ),
-                  const SizedBox(height: 16),
-                  FutureBuilder<DashboardOverview?>(
-                    future: _dashboardFuture,
-                    builder: (context, snapshot) {
-                      return _buildStatsGrid(snapshot.data);
-                    },
-                  ),
-                  const SizedBox(height: 32),
-                  const Text(
-                    'Phân tích doanh thu (30 ngày)',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildRevenueChart(context, state, range),
-                  const SizedBox(height: 32),
-                  _buildMonthlyRevenueChart(context),
-                  const SizedBox(height: 32),
-                  const Text(
-                    'Quản lý cửa hàng',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildNavigationGrid(context),
-                  const SizedBox(height: 40),
-                ],
-              ),
-            );
-          },
         ),
       ),
     );
@@ -252,14 +287,10 @@ class _AdminScreenState extends State<AdminScreen> {
     );
   }
 
-  Widget _buildRevenueChart(
-      BuildContext context,
-      RevenueState state,
-      DateTimeRange range,
-      ) {
+  Widget _buildRevenueChart(BuildContext context, RevenueState state) {
     if (state.status == RevenueStatus.loading && state.timeseries == null) {
       return _buildRevenueContainer(
-        child: const Center(child: CircularProgressIndicator()),
+        child: Center(child: CircularProgressIndicator(color: _primaryBlue)),
       );
     }
 
@@ -276,7 +307,7 @@ class _AdminScreenState extends State<AdminScreen> {
                 style: const TextStyle(color: Colors.grey),
               ),
               TextButton(
-                onPressed: () => _reloadRevenue(context, range),
+                onPressed: _refreshData,
                 child: const Text('Thử lại'),
               ),
             ],
@@ -313,7 +344,7 @@ class _AdminScreenState extends State<AdminScreen> {
                 ],
               ),
               IconButton(
-                onPressed: () => _reloadRevenue(context, range),
+                onPressed: _refreshData,
                 icon: const Icon(Icons.refresh, size: 20, color: Colors.black54),
               ),
             ],
@@ -346,15 +377,8 @@ class _AdminScreenState extends State<AdminScreen> {
   }
 
   Widget _buildMonthlyRevenueChart(BuildContext context) {
-    final range = _yearRange();
-    return BlocProvider(
-      create: (_) => getIt<RevenueCubit>()
-        ..loadTimeseries(
-          from: _formatDate(range.start),
-          to: _formatDate(range.end),
-          groupBy: RevenueGroupBy.month,
-          statuses: const [0, 1],
-        ),
+    return BlocProvider.value(
+      value: _monthlyRevenueCubit, // Dùng lại biến tạo ở initState
       child: BlocBuilder<RevenueCubit, RevenueState>(
         builder: (context, state) {
           return Column(
@@ -382,7 +406,7 @@ class _AdminScreenState extends State<AdminScreen> {
                     const SizedBox(height: 24),
                     Expanded(
                       child: state.status == RevenueStatus.loading
-                          ? const Center(child: CircularProgressIndicator())
+                          ? Center(child: CircularProgressIndicator(color: _primaryOrange))
                           : (state.timeseries?.points.isEmpty ?? true)
                           ? const Center(child: Text('Không có dữ liệu'))
                           : _RevenueBarChart(points: state.timeseries!.points, barColor: _primaryOrange),
@@ -443,15 +467,6 @@ class _AdminScreenState extends State<AdminScreen> {
     );
   }
 
-  void _reloadRevenue(BuildContext context, DateTimeRange range) {
-    context.read<RevenueCubit>().loadAll(
-      from: _formatDate(range.start),
-      to: _formatDate(range.end),
-      groupBy: RevenueGroupBy.day,
-      statuses: const [0, 1],
-    );
-  }
-
   DateTimeRange _yearRange() {
     final now = DateTime.now();
     return DateTimeRange(
@@ -502,7 +517,10 @@ class _AdminScreenState extends State<AdminScreen> {
           Icons.local_shipping_outlined,
           _primaryBlue,
           const Color(0xFFEAF1F8),
-              () => context.router.push(const SupplierManagementRoute()),
+              () async {
+            await context.router.push(const SupplierManagementRoute());
+            _refreshData(); // Refresh khi back lại
+          },
         ),
         _navItem(
           context,
@@ -510,7 +528,10 @@ class _AdminScreenState extends State<AdminScreen> {
           Icons.category_outlined,
           _primaryBlue,
           const Color(0xFFEAF1F8),
-              () => context.router.push(const CategoryManagementRoute()),
+              () async {
+            await context.router.push(const CategoryManagementRoute());
+            _refreshData();
+          },
         ),
         _navItem(
           context,
@@ -518,7 +539,10 @@ class _AdminScreenState extends State<AdminScreen> {
           Icons.inventory_2_outlined,
           _primaryBlue,
           const Color(0xFFEAF1F8),
-              () => context.router.push(const ProductManagementRoute()),
+              () async {
+            await context.router.push(const ProductManagementRoute());
+            _refreshData();
+          },
         ),
         _navItem(
           context,
@@ -526,7 +550,21 @@ class _AdminScreenState extends State<AdminScreen> {
           Icons.local_offer_outlined,
           _primaryOrange,
           const Color(0xFFFCEAE8),
-              () => context.router.push(const PromotionManagementRoute()),
+              () async {
+            await context.router.push(const PromotionManagementRoute());
+            _refreshData();
+          },
+        ),
+        _navItem(
+          context,
+          'Đơn hàng',
+          Icons.receipt_long_outlined,
+          _primaryOrange,
+          const Color(0xFFFCEAE8),
+              () async {
+            await context.router.push(const OrdersRoute());
+            _refreshData();
+          },
         ),
       ],
     );

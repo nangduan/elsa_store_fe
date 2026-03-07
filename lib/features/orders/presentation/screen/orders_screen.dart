@@ -301,20 +301,20 @@ class _OrderCardState extends State<_OrderCard> {
   String _paymentStatusLabel(OrderResponse order) {
     final status = _normalize(order.paymentStatus);
     if (_isCod(order) || _matches(status, const ['CHUA_THANH_TOAN'])) {
-      return 'Thanh toan khi nhan hang';
+      return 'Thanh toán khi nhận hàng';
     }
 
-    if (status.isEmpty) return 'Cho thanh toan';
+    if (status.isEmpty) return 'Chờ thanh toán';
     if (_matches(status, const ['DA_THANH_TOAN', 'PAID', 'SUCCESS'])) {
-      return 'Da thanh toan';
+      return 'Đã thanh toán';
     }
     if (_matches(status, const ['CHO_THANH_TOAN', 'PENDING', 'UNPAID'])) {
-      return 'Cho thanh toan';
+      return 'Chờ thanh toán';
     }
     if (_matches(status, const ['THAT_BAI', 'FAILED', 'CANCELLED'])) {
-      return 'Thanh toan that bai';
+      return 'Thanh toán thất bại';
     }
-    return 'Khong ro';
+    return 'Không rõ';
   }
 
   Color _paymentStatusColor(OrderResponse order) {
@@ -497,7 +497,7 @@ class _OrderCardState extends State<_OrderCard> {
         _showSnackBar(context, successMessage);
       }
     } catch (_) {
-      _showSnackBar(context, 'KhÃ´ng thá»ƒ cáº­p nháº­t Ä‘Æ¡n hÃ ng');
+      _showSnackBar(context, 'Không thể cập nhật đơn hàng');
     }
   }
 
@@ -507,7 +507,7 @@ class _OrderCardState extends State<_OrderCard> {
   ) async {
     final orderId = order.id;
     if (orderId == null) {
-      _showSnackBar(context, 'Khong tim thay ma don hang');
+      _showSnackBar(context, 'Không tìm thấy mã đơn hàng');
       return;
     }
     try {
@@ -525,7 +525,7 @@ class _OrderCardState extends State<_OrderCard> {
         }
       }
       if (paymentUrl == null || paymentUrl.trim().isEmpty) {
-        _showSnackBar(context, 'Khong lay duoc lien ket thanh toan');
+        _showSnackBar(context, 'Không lấy được liên kết thanh toán');
         return;
       }
 
@@ -539,9 +539,9 @@ class _OrderCardState extends State<_OrderCard> {
         ),
       );
     } on DioException catch (e) {
-      _showSnackBar(context, e.message ?? 'Khong the tao thanh toan');
+      _showSnackBar(context, e.message ?? 'Không thể tạo thanh toán');
     } catch (_) {
-      _showSnackBar(context, 'Khong the tao thanh toan');
+      _showSnackBar(context, 'Không thể tạo thanh toán');
     }
   }
 
@@ -557,7 +557,7 @@ class _OrderCardState extends State<_OrderCard> {
         queryParameters: callbackUri.queryParameters,
       );
       final data = response.data;
-      String message = 'Thanh toan that bai';
+      String message = 'Thanh toán thất bại';
       if (data is Map<String, dynamic>) {
         final payload = data['data'];
         if (payload is Map<String, dynamic>) {
@@ -575,9 +575,9 @@ class _OrderCardState extends State<_OrderCard> {
         );
       }
     } on DioException catch (e) {
-      _showSnackBar(context, e.message ?? 'Xac nhan thanh toan that bai');
+      _showSnackBar(context, e.message ?? 'Xác nhận thanh toán thất bại');
     } catch (_) {
-      _showSnackBar(context, 'Xac nhan thanh toan that bai');
+      _showSnackBar(context, 'Xác nhận thanh toán thất bại');
     }
   }
 
